@@ -13,7 +13,10 @@ export default defineConfig({
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) =>
-					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+					filename.split(/[/\\]/).includes('node_modules') ? undefined : true,
+				// mdsvex 0.12 が生成する <script context="module"> の非推奨警告のみ抑制
+				warningFilter: (warning) =>
+					!(warning.code === 'script_context_deprecated' && warning.filename?.endsWith('.md'))
 			},
 			adapter: adapter(),
 			preprocess: [mdsvex({ extensions: ['.svx', '.md'] })],

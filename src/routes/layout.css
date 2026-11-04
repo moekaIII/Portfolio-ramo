@@ -162,3 +162,87 @@ html.lenis body {
 .lenis [data-lenis-prevent] {
 	overscroll-behavior: contain;
 }
+
+/* ---------------------------------------------------------------
+ * Long-form article (mdsvex). 日本語本文: 17px / 行間 1.9
+ * ------------------------------------------------------------- */
+.prose-site {
+	font-size: 1.0625rem;
+	line-height: 1.9;
+	color: var(--fg-muted);
+	max-width: 40em;
+
+	& > :first-child {
+		margin-top: 0;
+	}
+	& h2 {
+		margin-top: 3.5em;
+		margin-bottom: 1em;
+		font-size: var(--text-h3);
+		line-height: var(--text-h3--line-height);
+		color: var(--fg);
+		font-weight: 600;
+		letter-spacing: -0.01em;
+	}
+	& h3 {
+		margin-top: 2.5em;
+		margin-bottom: 0.75em;
+		font-size: 1.125rem;
+		color: var(--fg);
+		font-weight: 600;
+	}
+	& p,
+	& ul,
+	& ol {
+		margin-block: 1.25em;
+	}
+	& ul,
+	& ol {
+		padding-left: 1.25em;
+	}
+	& ul {
+		list-style: none;
+		padding-left: 0;
+		& > li {
+			position: relative;
+			padding-left: 1.5em;
+		}
+		& > li::before {
+			content: '';
+			position: absolute;
+			left: 0.25em;
+			top: 0.9em;
+			width: 0.5em;
+			height: 1px;
+			background: var(--accent-text);
+		}
+	}
+	& ol {
+		list-style: decimal-leading-zero;
+		& > li::marker {
+			color: var(--accent-text);
+			font-variant-numeric: tabular-nums;
+			font-size: 0.875em;
+		}
+	}
+	& li + li {
+		margin-top: 0.75em;
+	}
+	& strong {
+		color: var(--fg);
+		font-weight: 600;
+	}
+	& a {
+		color: var(--fg);
+		text-decoration: underline;
+		text-decoration-color: var(--accent-text);
+		text-underline-offset: 0.25em;
+	}
+	& code {
+		font-family: var(--font-mono);
+		font-size: 0.875em;
+		background: var(--surface-2);
+		padding: 0.15em 0.4em;
+		border-radius: var(--radius-sm);
+	}
+}
