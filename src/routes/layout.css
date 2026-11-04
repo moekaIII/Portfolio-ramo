@@ -1,2 +1,164 @@
 @import 'tailwindcss';
+@import '../lib/styles/tokens.css';
 @plugin '@tailwindcss/typography';
+
+/* Theme variant follows [data-theme] on <html> (set before paint in app.html) */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
+
+@layer base {
+	html {
+		background-color: var(--bg);
+		color: var(--fg);
+		font-family: var(--font-sans);
+		font-size: 100%;
+		-webkit-text-size-adjust: 100%;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		scroll-padding-top: calc(var(--header-h) + 1rem);
+	}
+
+	body {
+		min-height: 100dvh;
+		background-color: var(--bg);
+		font-size: var(--text-body);
+		line-height: var(--text-body--line-height);
+		/* 和文の禁則と約物の詰めを整える */
+		line-break: strict;
+		overflow-wrap: anywhere;
+		word-break: normal;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-weight: 600;
+		text-wrap: balance;
+		/* 見出しは日本語を自然な位置で改行 */
+		word-break: auto-phrase;
+	}
+
+	p {
+		text-wrap: pretty;
+	}
+
+	::selection {
+		background-color: var(--accent);
+		color: var(--on-accent);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--focus);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	a,
+	button,
+	[role='button'],
+	summary {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	img,
+	svg,
+	video,
+	canvas {
+		display: block;
+		max-width: 100%;
+	}
+}
+
+@layer components {
+	/* 12-column site grid */
+	.grid-12 {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		column-gap: var(--grid-gap);
+	}
+	@media (min-width: 48rem) {
+		.grid-12 {
+			grid-template-columns: repeat(12, minmax(0, 1fr));
+		}
+	}
+
+	.eyebrow {
+		font-size: var(--text-eyebrow);
+		line-height: var(--text-eyebrow--line-height);
+		letter-spacing: var(--text-eyebrow--letter-spacing);
+		text-transform: uppercase;
+		font-weight: 500;
+		color: var(--fg-muted);
+	}
+
+	.hairline {
+		border-color: var(--line);
+	}
+}
+
+@utility tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------
+ * View Transitions（ページ遷移）
+ * 控えめなクロスフェード + わずかな縦移動。共有要素は個別名で morph。
+ * ------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+	::view-transition-old(root) {
+		animation: vt-out 200ms var(--ease-in-out) both;
+	}
+	::view-transition-new(root) {
+		animation: vt-in 420ms var(--ease-out) both;
+	}
+	::view-transition-group(*) {
+		animation-duration: 480ms;
+		animation-timing-function: var(--ease-out);
+	}
+}
+
+/* ヘッダーは遷移中も固定表示 */
+.site-header {
+	view-transition-name: site-header;
+}
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+	animation: none;
+}
+
+@keyframes vt-out {
+	to {
+		opacity: 0;
+	}
+}
+@keyframes vt-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Lenis recommended base styles */
+html.lenis,
+html.lenis body {
+	height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+	overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+	overscroll-behavior: contain;
+}
