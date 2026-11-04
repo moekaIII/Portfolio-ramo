@@ -21,26 +21,36 @@
 		webgl = supportsWebGL();
 		if (!webgl) return;
 
-		// ページの読み込みと初回描画を優先し、アイドル時に three.js を遅延ロード
+		// ページの読み込みと初回描画を優先する。three.js の読み込みと初期化は、
+		// 最初の操作（マウス移動・スクロール・タップ・キー入力）か、読み込み完了の 3.5 秒後の早い方で始める。
+		// それまでは整列済みの静的表示（DeskFallback）が見えている
 		let cancelled = false;
+		let started = false;
 		const load = async () => {
-			if (cancelled || prefersReducedMotion.current) return;
+			if (cancelled || started || prefersReducedMotion.current) return;
+			started = true;
 			// ラベルの文字幅を正しく測るため、欧文フォント（preload 済み）の読み込みを待つ
 			await document.fonts.load('600 32px "Inter Variable"').catch(() => {});
 			const m = await import('./DeskCanvas.svelte');
 			if (!cancelled) DeskCanvas = m.default;
 		};
-		const hasIdle = typeof requestIdleCallback === 'function';
-		const schedule = () =>
-			hasIdle ? requestIdleCallback(load, { timeout: 2500 }) : window.setTimeout(load, 1200);
-		let handle: number;
-		if (document.readyState === 'complete') handle = schedule();
-		else window.addEventListener('load', () => (handle = schedule()), { once: true });
+		const triggers = ['pointermove', 'pointerdown', 'keydown', 'scroll', 'touchstart'] as const;
+		const onFirstInput = () => {
+			for (const t of triggers) window.removeEventListener(t, onFirstInput);
+			load();
+		};
+		for (const t of triggers) window.addEventListener(t, onFirstInput, { passive: true });
+
+		let timer: number | undefined;
+		const startTimer = () => (timer = window.setTimeout(load, 3500));
+		if (document.readyState === 'complete') startTimer();
+		else window.addEventListener('load', startTimer, { once: true });
 
 		return () => {
 			cancelled = true;
-			if (hasIdle) cancelIdleCallback(handle);
-			else window.clearTimeout(handle);
+			for (const t of triggers) window.removeEventListener(t, onFirstInput);
+			window.removeEventListener('load', startTimer);
+			window.clearTimeout(timer);
 		};
 	});
 
@@ -75,7 +85,7 @@
 	</div>
 
 	{#if live}
-		<div class="flex items-center justify-center gap-3 pt-2">
+		<div class="flex justify-center pt-2">
 			<button
 				type="button"
 				onclick={toggle}
@@ -87,7 +97,6 @@
 					<LayoutGrid size={16} aria-hidden="true" />スキルを整列する
 				{/if}
 			</button>
-			<p class="hidden text-xs text-fg-muted sm:block">机の上は触れます</p>
 		</div>
 	{/if}
 </div>

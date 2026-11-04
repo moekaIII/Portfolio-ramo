@@ -142,8 +142,11 @@
 	const ndc = new Vector2();
 	const hit = new Vector3();
 
-	/** 画面上で 1 ワールド単位が何 px か（テクスチャの解像度を表示サイズに合わせるため） */
-	let quality = $state<TextureQuality>({ pxPerUnit: 256, anisotropy: 4 });
+	/**
+	 * 画面上で 1 ワールド単位が何 px か（テクスチャの解像度を表示サイズに合わせるため）。
+	 * 表示サイズが確定するまでは null（仮の解像度で作って作り直す無駄を避ける）
+	 */
+	let quality = $state<TextureQuality | null>(null);
 
 	function updateBounds(width: number, height: number) {
 		const aspect = width / Math.max(height, 1);
@@ -159,7 +162,7 @@
 
 		const ppu = (height * renderer.getPixelRatio()) / visH;
 		// 表示サイズが大きく変わったときだけ作り直す（リサイズ中の再生成を抑える）
-		if (Math.abs(ppu - quality.pxPerUnit) / quality.pxPerUnit > 0.15) {
+		if (!quality || Math.abs(ppu - quality.pxPerUnit) / quality.pxPerUnit > 0.15) {
 			quality = {
 				pxPerUnit: Math.ceil(ppu * 1.25),
 				anisotropy: Math.min(8, renderer.capabilities.getMaxAnisotropy())
@@ -192,6 +195,7 @@
 	$effect(() => {
 		const dark = theme.current === 'dark';
 		const q = quality;
+		if (!q) return;
 		blockMaterial.color = toColor(cssVarToRgb(dark ? '--surface-2' : '--surface'));
 		accentMaterial.color = toColor(cssVarToRgb('--accent'));
 		const fg = toCss(cssVarToRgb('--fg'));

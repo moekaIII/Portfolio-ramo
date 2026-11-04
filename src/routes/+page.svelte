@@ -5,6 +5,7 @@
 	import Section from '#lib/components/sections/Section.svelte';
 	import Strengths from '#lib/components/sections/Strengths.svelte';
 	import ContactLinks from '#lib/components/sections/ContactLinks.svelte';
+	import Glance from '#lib/components/profile/Glance.svelte';
 	import SkillMatrix from '#lib/components/profile/SkillMatrix.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
 	import WorkCard from '#lib/components/works/WorkCard.svelte';
@@ -32,7 +33,10 @@
 	lead="設計・デザイン・実装・品質の領域を、ひとつのプロジェクトの中で行き来できることが強みです。"
 	tone="surface"
 >
-	<SkillMatrix groups={skills} />
+	<Glance />
+	<div class="mt-14">
+		<SkillMatrix groups={skills} />
+	</div>
 </Section>
 
 <Section
