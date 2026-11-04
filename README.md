@@ -108,7 +108,7 @@ results:
 
 ## 品質（ローカルの preview で計測）
 
-- **Lighthouse（モバイル）**: Performance 98、Accessibility / Best Practices / SEO 100
+- **Lighthouse（モバイル）**: Performance 95〜98（3D の初期化が計測時間内に重なると TBT が増えて下がる）、Accessibility / Best Practices / SEO 100
 - **axe-core（WCAG 2.2 AA + best-practice）**: ダーク / ライト × デスクトップ / モバイル、3D 表示時・静的表示時のいずれも違反 0 件
 
 本番のホスティング環境では数値が変わることがあります。
