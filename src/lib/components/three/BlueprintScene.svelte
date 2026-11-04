@@ -90,35 +90,49 @@
 	 * フリージア: 弓なりにしなる茎の片側に、ラッパ形の花が並ぶ。先端に向かって小さく、最後はつぼみになる。
 	 * スキル名は花びらに小さく、花の色に近いトーンでさりげなく印字する（1 輪に 2 つまで）。
 	 */
-	const TEPAL_LENGTH = 1.05;
+	const TEPAL_LENGTH = 0.78;
 	const TEPAL_WIDTH = 0.66;
-	const TUBE_LENGTH = 0.75;
+	const TUBE_LENGTH = 1.05;
+	const RIM = 0.26;
 
-	const tepalOptions = { length: TEPAL_LENGTH, width: TEPAL_WIDTH, curl: 0.42, cup: 0.34 };
+	// 花びら: 先の丸い倒卵形。先端がわずかに外へ反り返る
+	const tepalOptions = {
+		length: TEPAL_LENGTH,
+		width: TEPAL_WIDTH,
+		curl: 0.3,
+		cup: 0.3,
+		tip: 'round' as const
+	};
 	const tepalGeometry = track(
-		createPetalGeometry({
-			...tepalOptions,
-			segmentsX: high ? 8 : 5,
-			segmentsY: high ? 16 : 10
-		})
+		createPetalGeometry({ ...tepalOptions, segmentsX: high ? 8 : 5, segmentsY: high ? 14 : 8 })
 	);
 	const tepalWire = track(
 		new WireframeGeometry(
-			track(createPetalGeometry({ ...tepalOptions, segmentsX: 3, segmentsY: 6 }))
+			track(createPetalGeometry({ ...tepalOptions, segmentsX: 3, segmentsY: 5 }))
 		)
 	);
-	// 花の筒（ラッパの付け根）: 付け根は細く、口に向かって広がる
-	const tubeProfile = Array.from({ length: 10 }, (_, i) => {
-		const t = i / 9;
-		return new Vector2(0.05 + 0.2 * Math.pow(t, 1.6), t * TUBE_LENGTH);
+	// 花の筒（漏斗形）: 付け根は細く、口で大きく広がる
+	const tubeProfile = Array.from({ length: 14 }, (_, i) => {
+		const t = i / 13;
+		return new Vector2(0.045 + (RIM - 0.045) * Math.pow(t, 2.2), t * TUBE_LENGTH);
 	});
 	const tubeGeometry = track(new LatheGeometry(tubeProfile, high ? 20 : 12));
 	const tubeWire = track(new WireframeGeometry(track(new LatheGeometry(tubeProfile, 8))));
+	// 苞: 花の付け根を包む、緑の小さな尖った葉
+	const bractOptions = { length: 0.55, width: 0.2, curl: 0.05, cup: 0.4 };
+	const bractGeometry = track(createPetalGeometry({ ...bractOptions, segmentsY: 8 }));
+	const bractWire = track(
+		new WireframeGeometry(
+			track(createPetalGeometry({ ...bractOptions, segmentsX: 2, segmentsY: 4 }))
+		)
+	);
 
 	const lineMuted = clip(new LineBasicMaterial({ transparent: true, opacity: 0.5 }), wirePlane);
 	const lineAccent = clip(new LineBasicMaterial({ transparent: true, opacity: 0.85 }), wirePlane);
 
-	type Tone = 0 | 1 | 2;
+	/** 0: フロントエンド / 1: デザイン / 2: UX・品質 / 3: つぼみ（緑がかった色） */
+	type Tone = 0 | 1 | 2 | 3;
+	const TONES: Tone[] = [0, 1, 2, 3];
 	const petalMaterial = () =>
 		clip(
 			new MeshPhysicalMaterial({
@@ -132,11 +146,15 @@
 			solidPlane
 		);
 	/** 文字のない花びら・筒は、色の種類ごとに材質を共有する */
-	const plainPetal: Record<Tone, MeshPhysicalMaterial> = {
-		0: petalMaterial(),
-		1: petalMaterial(),
-		2: petalMaterial()
-	};
+	const plainPetal = Object.fromEntries(TONES.map((t) => [t, petalMaterial()])) as Record<
+		Tone,
+		MeshPhysicalMaterial
+	>;
+	/** 筒は喉の奥が濃くなる専用のテクスチャ */
+	const tubeMaterial = Object.fromEntries(TONES.map((t) => [t, petalMaterial()])) as Record<
+		Tone,
+		MeshPhysicalMaterial
+	>;
 
 	type Labeled = { material: MeshPhysicalMaterial; text: string; tone: Tone };
 	const labeled: Labeled[] = [];
@@ -157,44 +175,49 @@
 		for (let i = 0; i < list.length; i += 2)
 			assignments.push({ texts: list.slice(i, i + 2), tone: g });
 	}
-	// 先端のつぼみ（文字なし）
-	const BUDS = 3;
+	// 穂の先端のつぼみ（文字なし）
+	const BUDS = 4;
 
 	const plant = new Group();
+	// 茎: まっすぐ立ち上がり、先端近くで急にほぼ水平へ折れる（フリージアの穂の特徴）
 	const stemCurve = new CatmullRomCurve3([
-		new Vector3(-3.4, -3.6, 0.3),
-		new Vector3(-2.9, -1.4, 0.2),
-		new Vector3(-1.9, 0.6, 0.1),
-		new Vector3(-0.4, 1.7, 0),
-		new Vector3(1.4, 2.0, -0.1),
-		new Vector3(2.9, 1.6, -0.15),
-		new Vector3(3.9, 0.8, -0.2)
+		new Vector3(-3.2, -3.8, 0.2),
+		new Vector3(-3.15, -1.6, 0.15),
+		new Vector3(-3.05, 0.2, 0.1),
+		new Vector3(-2.8, 1.0, 0.05),
+		new Vector3(-2.3, 1.35, 0),
+		new Vector3(-1.3, 1.45, 0),
+		new Vector3(0.3, 1.38, -0.05),
+		new Vector3(1.9, 1.18, -0.1),
+		new Vector3(3.4, 0.9, -0.15)
 	]);
-	const stemGeometry = track(new TubeGeometry(stemCurve, 96, 0.07, high ? 10 : 6, false));
+	const stemGeometry = track(new TubeGeometry(stemCurve, 120, 0.065, high ? 10 : 6, false));
 	const stemWire = track(
-		new WireframeGeometry(track(new TubeGeometry(stemCurve, 24, 0.07, 5, false)))
+		new WireframeGeometry(track(new TubeGeometry(stemCurve, 28, 0.065, 5, false)))
 	);
 	const stemMaterial = clip(
-		new MeshPhysicalMaterial({ roughness: 0.45, clearcoat: high ? 0.4 : 0 }),
+		new MeshPhysicalMaterial({ roughness: 0.45, clearcoat: high ? 0.4 : 0, side: DoubleSide }),
 		solidPlane
 	);
 	plant.add(new Mesh(stemGeometry, stemMaterial), new LineSegments(stemWire, lineMuted));
 
-	// 葉: 細長い剣状の葉を根元から 2 枚
-	const leafOptions = { length: 4.2, width: 0.34, curl: 0.12, cup: 0.2 };
-	const leafGeometry = track(createPetalGeometry({ ...leafOptions, segmentsY: 20 }));
+	// 葉: 細長い剣状の葉を根元から 3 枚
+	const leafOptions = { length: 4.4, width: 0.3, curl: 0.16, cup: 0.25 };
+	const leafGeometry = track(createPetalGeometry({ ...leafOptions, segmentsY: 24 }));
 	const leafWire = track(
 		new WireframeGeometry(
-			track(createPetalGeometry({ ...leafOptions, segmentsX: 2, segmentsY: 8 }))
+			track(createPetalGeometry({ ...leafOptions, segmentsX: 2, segmentsY: 9 }))
 		)
 	);
-	for (const [rz, ry] of [
-		[0.42, 0.5],
-		[-0.18, -0.6]
+	for (const [rz, ry, s] of [
+		[0.36, 0.6, 1],
+		[-0.12, -0.5, 1.12],
+		[0.12, 2.4, 0.85]
 	]) {
 		const leaf = new Mesh(leafGeometry, stemMaterial);
 		leaf.position.copy(stemCurve.getPoint(0));
-		leaf.rotation.set(-0.1, ry, rz);
+		leaf.rotation.set(-0.08, ry, rz);
+		leaf.scale.setScalar(s);
 		leaf.add(new LineSegments(leafWire, lineMuted));
 		plant.add(leaf);
 	}
@@ -203,44 +226,66 @@
 	const total = assignments.length + BUDS;
 	const Y = new Vector3(0, 1, 0);
 	for (let i = 0; i < total; i++) {
-		const t = 0.3 + (i / (total - 1)) * 0.68;
+		// 曲がった先（水平部分）の上側に、1 列に詰めて並ぶ
+		const t = 0.47 + (i / (total - 1)) * 0.52;
 		const p = stemCurve.getPoint(t);
 		const tangent = stemCurve.getTangent(t);
 		const a = assignments[i];
 		const budness = a ? 0 : (i - assignments.length + 1) / BUDS;
-		const tone: Tone = a ? a.tone : 1;
-		const s = MathUtils.lerp(1.08, 0.62, i / (total - 1)) * (1 - budness * 0.35);
+		const tone: Tone = a ? a.tone : 3;
+		const s = MathUtils.lerp(1.12, 0.78, i / (total - 1)) * (1 - budness * 0.3);
 
 		const group = new Group();
 		group.position.copy(p);
-		// 花は茎の片側（上・手前）を向き、茎の進む方向へ少し傾く
-		const dirV = new Vector3(0, 0.75, 0.62).addScaledVector(tangent, 0.35).normalize();
+		// 花は上を向き、やや手前と穂の先の方へ傾く。つぼみほど穂の進む方向へ寝る
+		const dirV = new Vector3(0, 1, 0.55).addScaledVector(tangent, 0.25 + budness * 1.3).normalize();
 		group.quaternion.setFromUnitVectors(Y, dirV);
-		group.rotateY(i * 0.7);
+		// 文字の入る花びらが手前上を向くよう、軸まわりの向きをそろえる（少しだけ揺らぎを付ける）
+		group.rotateY(0.25 + (i % 2 ? 0.35 : -0.35));
 		group.scale.setScalar(s);
 
-		const tube = new Mesh(tubeGeometry, plainPetal[tone]);
+		// 苞（2 枚）
+		for (const side of [0, Math.PI]) {
+			const bract = new Mesh(bractGeometry, stemMaterial);
+			bract.rotation.set(0.28, side + 0.4, 0);
+			bract.position.y = -0.08;
+			bract.add(new LineSegments(bractWire, lineMuted));
+			group.add(bract);
+		}
+
+		const tubeScaleY = 1 - budness * 0.15;
+		const tube = new Mesh(tubeGeometry, tubeMaterial[tone]);
+		tube.scale.set(1 - budness * 0.45, tubeScaleY, 1 - budness * 0.45);
 		tube.add(new LineSegments(tubeWire, tone === 0 ? lineAccent : lineMuted));
 		group.add(tube);
 
 		const tepals: Blossom['tepals'] = [];
 		for (let k = 0; k < 6; k++) {
+			const inner = k % 2 === 1;
 			const holder = new Group();
-			holder.position.y = TUBE_LENGTH * 0.92;
-			holder.rotation.y = (k / 6) * Math.PI * 2 + (k % 2 ? 0.12 : 0);
-			const text = k === 0 ? a?.texts[0] : k === 3 ? a?.texts[1] : undefined;
+			holder.position.y = TUBE_LENGTH * tubeScaleY * 0.97;
+			holder.rotation.y = (k / 6) * Math.PI * 2;
+			// 花びらは筒の口の縁から生える
+			const pivot = new Group();
+			pivot.position.z = RIM * (1 - budness * 0.8) * (inner ? 0.85 : 1);
+			holder.add(pivot);
+			const text = k === 0 ? a?.texts[0] : k === 2 ? a?.texts[1] : undefined;
 			let material = plainPetal[tone];
 			if (text) {
 				material = petalMaterial();
 				labeled.push({ material, text, tone });
 			}
 			const mesh = new Mesh(tepalGeometry, material);
-			const inner = k % 2 === 1;
-			const open = (inner ? 0.95 : 1.15) * (1 - budness * 0.85);
+			// 外側の 3 枚は大きく開き、内側の 3 枚はやや立つ。つぼみは閉じて細長くなる
+			const open = (inner ? 0.72 : 0.95) * (1 - budness) + budness * 0.04;
 			mesh.rotation.x = open;
-			mesh.scale.setScalar(inner ? 0.9 : 1);
+			mesh.scale.set(
+				(inner ? 0.9 : 1) * (1 - budness * 0.45),
+				(inner ? 0.94 : 1) * (1 + budness * 0.35),
+				1
+			);
 			mesh.add(new LineSegments(tepalWire, tone === 0 ? lineAccent : lineMuted));
-			holder.add(mesh);
+			pivot.add(mesh);
 			group.add(holder);
 			tepals.push({ mesh, open });
 		}
@@ -401,11 +446,20 @@
 		const accent = cssVarToRgb('--accent');
 		const graphite = cssVarToRgb(dark ? '--fg-muted' : '--line-strong');
 		const pearl: RGB = [0.96, 0.95, 0.93];
+		// 茎・苞・つぼみの緑（アクセントを灰色に寄せた、落ち着いた緑）
+		const mix = (a: RGB, b: RGB, k: number): RGB => [
+			a[0] + (b[0] - a[0]) * k,
+			a[1] + (b[1] - a[1]) * k,
+			a[2] + (b[2] - a[2]) * k
+		];
+		const stemGreen = mix(cssVarToRgb('--fg-muted'), [0.42, 0.55, 0.22], 0.75);
+		const budGreen = mix(pearl, [0.7, 0.8, 0.45], 0.55);
 		// 文字は花びらと同系色で、少しだけ濃く（さりげなく読める程度）
 		const palettes: Record<Tone, { tip: RGB; ink: string }> = {
 			0: { tip: accent, ink: toCss(shade(accent, 0.42), 0.75) },
 			1: { tip: pearl, ink: toCss(shade(pearl, 0.45), 0.7) },
-			2: { tip: graphite, ink: toCss(shade(graphite, 0.45), 0.8) }
+			2: { tip: graphite, ink: toCss(shade(graphite, 0.45), 0.8) },
+			3: { tip: budGreen, ink: toCss(budGreen) }
 		};
 		const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 		const set = (m: MeshPhysicalMaterial, tone: Tone, text: string | null) => {
@@ -415,9 +469,23 @@
 			m.needsUpdate = true;
 			old?.dispose();
 		};
-		for (const tone of [0, 1, 2] as Tone[]) set(plainPetal[tone], tone, null);
+		for (const tone of TONES) {
+			set(plainPetal[tone], tone, null);
+			// 筒: 付け根は緑、喉の奥は花の色を濃くする
+			const pal = palettes[tone];
+			const old = tubeMaterial[tone].map;
+			tubeMaterial[tone].map = petalTexture(
+				toCss(stemGreen),
+				toCss(shade(pal.tip, 0.85)),
+				pal.ink,
+				null,
+				anisotropy
+			);
+			tubeMaterial[tone].needsUpdate = true;
+			old?.dispose();
+		}
 		for (const l of labeled) set(l.material, l.tone, l.text);
-		stemMaterial.color = toColor(cssVarToRgb(dark ? '--surface-2' : '--line-strong'));
+		stemMaterial.color = toColor(shade(stemGreen, dark ? 0.8 : 1));
 		const muted = toColor(cssVarToRgb('--fg-muted'));
 		const accentText = toColor(cssVarToRgb('--accent-text'));
 		lineMuted.color = muted;
@@ -562,7 +630,11 @@
 		stop();
 		for (const g of geometries) g.dispose();
 		accentLight.dispose();
-		const petalMaterials = [...Object.values(plainPetal), ...labeled.map((l) => l.material)];
+		const petalMaterials = [
+			...Object.values(plainPetal),
+			...Object.values(tubeMaterial),
+			...labeled.map((l) => l.material)
+		];
 		for (const m of petalMaterials) m.map?.dispose();
 		for (const m of tagMaterials) m.map?.dispose();
 		const materials: Material[] = [

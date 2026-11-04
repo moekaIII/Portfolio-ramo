@@ -12,10 +12,12 @@ export function createPetalGeometry(options: {
 	curl: number;
 	/** 幅方向のくぼみ（中央が -Z に沈む量。幅に対する比） */
 	cup: number;
+	/** 先端の形: pointed=尖る（葉・苞）/ round=丸い倒卵形（フリージアの花びら） */
+	tip?: 'pointed' | 'round';
 	segmentsX?: number;
 	segmentsY?: number;
 }) {
-	const { length, width, curl, cup, segmentsX = 8, segmentsY = 24 } = options;
+	const { length, width, curl, cup, tip = 'pointed', segmentsX = 8, segmentsY = 24 } = options;
 	const g = new PlaneGeometry(width, length, segmentsX, segmentsY);
 	g.translate(0, length / 2, 0);
 	const pos = g.attributes.position;
@@ -25,8 +27,18 @@ export function createPetalGeometry(options: {
 		// 浮動小数点の誤差で範囲外になると、負の数の非整数乗で NaN になるため丸める
 		const t = MathUtils.clamp(y / length, 0, 1); // 0: 付け根 / 1: 先端
 		// 輪郭: 付け根は細く、中ほどで最も広く、先端は丸く閉じる
-		const s = Math.max(0, Math.sin(Math.PI * Math.pow(t, 0.72)));
-		const profile = Math.pow(s, 0.85) * 0.92 + 0.08 * (1 - t);
+		let profile: number;
+		if (tip === 'round') {
+			// 倒卵形: 付け根から広がり、先端寄り（7 割の位置）で最も広く、先は丸く閉じる
+			const peak = 0.7;
+			profile =
+				t < peak
+					? 0.28 + 0.72 * Math.sin((Math.PI / 2) * (t / peak))
+					: Math.sqrt(Math.max(0, 1 - Math.pow((t - peak) / (1 - peak), 2)));
+		} else {
+			const s = Math.max(0, Math.sin(Math.PI * Math.pow(t, 0.72)));
+			profile = Math.pow(s, 0.85) * 0.92 + 0.08 * (1 - t);
+		}
 		const u = x / (width / 2); // -1..1
 		const nx = u * (width / 2) * profile;
 		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5;
