@@ -649,7 +649,7 @@
 			p.ghostMaterial.map = map;
 			// いちばん手前の花びらだけ、少し暗くする（陰になっている感じ）
 			// 手前ほど明るく、奥ほど少し暗く（3D 感）。いちばん手前は陰として暗くする
-			const tint = p === frontmost ? (dark ? 0.55 : 0.6) : p.depthTint;
+			const tint = p === frontmost ? (dark ? 0.7 : 0.76) : p.depthTint;
 			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) {
 				// 灰色にくすまないよう、赤みを残して暗くする
 				m.color.setRGB(tint * 1.08, tint * 0.9, tint * 0.9);

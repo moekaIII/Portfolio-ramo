@@ -129,12 +129,14 @@ export function createSilkPetal(options: {
 		ctx.restore();
 	});
 
-	// 6. 透明度: 付け根ほど濃く、全体は光が透ける程度に。先端はぼかさず、くっきり残す
+	// 6. 透明度: 付け根（芯の近く）ほど透ける。先端はぼかさず、くっきり残す
 	ctx.globalCompositeOperation = 'destination-in';
 	const mask = ctx.createLinearGradient(0, H, 0, 0);
-	mask.addColorStop(0, 'rgba(0,0,0,0.95)');
-	mask.addColorStop(0.5, 'rgba(0,0,0,0.82)');
-	mask.addColorStop(1, 'rgba(0,0,0,0.78)');
+	// 芯に近い付け根ほど透け、中ほどから先は光を受けて色が乗る
+	mask.addColorStop(0, 'rgba(0,0,0,0.38)');
+	mask.addColorStop(0.18, 'rgba(0,0,0,0.5)');
+	mask.addColorStop(0.45, 'rgba(0,0,0,0.78)');
+	mask.addColorStop(1, 'rgba(0,0,0,0.8)');
 	ctx.fillStyle = mask;
 	ctx.fillRect(0, 0, W, H);
 	// 左右の縁だけ、ごくわずかに柔らかくする
