@@ -159,27 +159,54 @@ export function createSilkPetal(options: {
 	return texture;
 }
 
-/** スタジオの背景: 中心は暖かいクリーム、外側は淡いラベンダーとミントのグレーへ溶ける */
+/**
+ * スタジオの背景（奥行きのある空間）。画面中央が地平線（カメラの高さ）。
+ * - 上（奥の壁）: 淡いラベンダーグレーで、上へ行くほど少し暗い
+ * - 花の背後: 暖かい光がにじむ
+ * - 下（床）: 手前ほど明るく、地平線（奥）へ向かって暗く沈む。花の足元に光だまり
+ * - 四隅: 色味のある陰（ラベンダー・ミント・ローズ）で空間を閉じる
+ */
 export function createBackdrop(options: { dark: boolean; aspect: number }): CanvasTexture {
-	const H = 512;
-	const W = Math.max(256, Math.round(H * Math.min(3, Math.max(0.4, options.aspect))));
+	const H = 768;
+	const W = Math.max(384, Math.round(H * Math.min(3, Math.max(0.4, options.aspect))));
 	const canvas = Object.assign(document.createElement('canvas'), { width: W, height: H });
 	const ctx = canvas.getContext('2d')!;
 	const d = options.dark;
-	ctx.fillStyle = d ? '#16151a' : '#e9e7ea';
+	const c = (light: string, dark: string) => (d ? dark : light);
+
+	// 1. 縦のグラデーション: 奥の壁（上）→ 地平線 → 床（下、手前ほど明るい）
+	const v = ctx.createLinearGradient(0, 0, 0, H);
+	v.addColorStop(0, c('#dcd8e4', '#17151d'));
+	v.addColorStop(0.42, c('#ece8ec', '#221d24'));
+	v.addColorStop(0.5, c('#e4e0e2', '#1c181d')); // 地平線のすぐ下が最も奥（暗い）
+	v.addColorStop(0.75, c('#efebe8', '#241f22'));
+	v.addColorStop(1, c('#f7f3ee', '#2c2527'));
+	ctx.fillStyle = v;
 	ctx.fillRect(0, 0, W, H);
+
 	// 透明側も同じ色にする（「色 → 透明の黒」だと途中が灰色に濁る）
-	const glow = (x: number, y: number, r: number, c: string) => {
-		const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-		g.addColorStop(0, c);
-		g.addColorStop(1, c.replace(/[\d.]+\)$/, '0)'));
+	const glow = (x: number, y: number, rx: number, ry: number, color: string) => {
+		ctx.save();
+		ctx.translate(x, y);
+		ctx.scale(1, ry / rx);
+		const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+		g.addColorStop(0, color);
+		g.addColorStop(1, color.replace(/[\d.]+\)$/, '0)'));
 		ctx.fillStyle = g;
-		ctx.fillRect(0, 0, W, H);
+		ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
+		ctx.restore();
 	};
-	glow(W * 0.62, H * 0.45, H * 1.1, d ? 'rgba(62,48,46,0.95)' : 'rgba(251,248,242,1)');
-	glow(W * 0.12, H * 0.2, H * 0.7, d ? 'rgba(46,42,62,0.6)' : 'rgba(232,226,240,0.8)');
-	glow(W * 0.15, H * 0.95, H * 0.6, d ? 'rgba(36,48,46,0.6)' : 'rgba(224,232,226,0.8)');
-	glow(W * 0.95, H * 0.1, H * 0.5, d ? 'rgba(40,40,58,0.5)' : 'rgba(226,228,240,0.7)');
+	// 2. 花の背後に暖かい光
+	glow(W * 0.64, H * 0.4, H * 0.75, H * 0.65, c('rgba(255,244,232,0.95)', 'rgba(80,56,52,0.75)'));
+	// 3. 床の光だまり（横長の楕円 = 床に落ちた光に見える）
+	glow(W * 0.62, H * 0.8, H * 0.95, H * 0.22, c('rgba(255,248,240,0.9)', 'rgba(70,52,50,0.7)'));
+	glow(W * 0.62, H * 0.66, H * 0.5, H * 0.07, c('rgba(250,232,222,0.6)', 'rgba(90,60,56,0.45)'));
+	// 4. 四隅の色味のある陰
+	glow(0, 0, H * 0.9, H * 0.7, c('rgba(206,198,224,0.7)', 'rgba(30,26,46,0.85)'));
+	glow(0, H, H * 0.8, H * 0.55, c('rgba(208,224,214,0.7)', 'rgba(22,34,32,0.8)'));
+	glow(W, 0, H * 0.7, H * 0.55, c('rgba(226,212,226,0.6)', 'rgba(36,26,40,0.8)'));
+	glow(W, H, H * 0.6, H * 0.4, c('rgba(234,220,214,0.6)', 'rgba(34,26,28,0.7)'));
+
 	const t = new CanvasTexture(canvas);
 	t.colorSpace = SRGBColorSpace;
 	return t;

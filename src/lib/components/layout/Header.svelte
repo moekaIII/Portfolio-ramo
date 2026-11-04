@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Logo from './Logo.svelte';
 	import Nav from './Nav.svelte';
 	import MobileNav from './MobileNav.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
@@ -15,8 +14,7 @@
 		scrolled ? 'border-line bg-(--header-bg) backdrop-blur-md' : 'border-transparent'
 	]}
 >
-	<div class="mx-auto flex h-header w-full max-w-site items-center justify-between px-gutter">
-		<Logo />
+	<div class="mx-auto flex h-header w-full max-w-site items-center justify-end px-gutter">
 		<div class="hidden items-center gap-1 md:flex">
 			<nav aria-label="ページ内"><Nav /></nav>
 			<ThemeToggle />

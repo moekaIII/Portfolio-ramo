@@ -228,7 +228,8 @@
 		const zMax = Math.max(...zs);
 		petals.forEach((p, i) => {
 			const t = (zs[i] - zMin) / Math.max(zMax - zMin, 1e-3);
-			p.depthTint = 0.8 + t * 0.26;
+			// 奥行きの光は空間（背景・床）で表現するので、花びらはごく控えめに
+			p.depthTint = 0.94 + t * 0.08;
 		});
 	}
 
@@ -535,6 +536,8 @@
 	/** 花はこちらへ向きつつ、少し上と左へ傾く */
 	const BASE_ROTATION = new Vector3(-0.62, -0.34, 0.18); // baseQuat と同じ値
 
+	const plantBase = new Vector3();
+
 	function updateLayout(width: number, height: number) {
 		aspect = width / Math.max(height, 1);
 		camera.aspect = aspect;
@@ -544,8 +547,9 @@
 		const portrait = aspect < 1;
 		const radius = portrait ? halfW0 * 0.9 : halfH0 * 0.62;
 		plant.scale.setScalar(radius / FLOWER_RADIUS);
-		if (portrait) plant.position.set(halfW0 * 0.1, halfH0 * 0.2, 0);
-		else plant.position.set(halfW0 * 0.3, halfH0 * 0.12, 0);
+		if (portrait) plantBase.set(halfW0 * 0.1, halfH0 * 0.2, 0);
+		else plantBase.set(halfW0 * 0.3, halfH0 * 0.12, 0);
+		plant.position.copy(plantBase);
 		boundary.scale.set(0.012, halfH0 * 2.6, 1);
 		buildFloor(-halfH0 * 0.92, floorColors.line, floorColors.bg);
 		for (const t of tags) t.scale.set(1.6, 0.3, 1);
@@ -727,6 +731,8 @@
 	// ---- フレーム更新 ----
 	let boundaryX = 0;
 	let boundaryV = 0;
+	let parallaxX = 0;
+	let parallaxY = 0;
 	let gust = 0;
 	let gustStart = -100;
 	let gustStrength = 0;
@@ -748,13 +754,12 @@
 			elapsed += dt;
 			const idle = !hasPointer || elapsed - lastPointerAt > 2.5;
 
-			// カメラはカーソルに合わせてわずかに動く（視差）
-			const cx = idle ? Math.sin(elapsed * 0.12) * 0.4 : pointer.x * 0.7;
-			const cy = idle ? Math.sin(elapsed * 0.09) * 0.2 : pointer.y * 0.35;
-			camera.position.x += (cx - camera.position.x) * Math.min(1, dt * 1.2);
-			camera.position.y += (cy - camera.position.y) * Math.min(1, dt * 1.2);
-			camera.lookAt(0, 0, 0);
-			camera.updateMatrixWorld();
+			// 視差: カメラと床・背景は動かさず、花だけをカーソルに合わせてわずかに動かす
+			const cx = idle ? Math.sin(elapsed * 0.12) * 0.3 : -pointer.x * 0.35;
+			const cy = idle ? Math.sin(elapsed * 0.09) * 0.15 : -pointer.y * 0.18;
+			parallaxX += (cx - parallaxX) * Math.min(1, dt * 1.2);
+			parallaxY += (cy - parallaxY) * Math.min(1, dt * 1.2);
+			plant.position.set(plantBase.x + parallaxX, plantBase.y + parallaxY, plantBase.z);
 
 			// 境界のばね追従（操作がない間はゆっくり左右に揺れる）
 			const targetNdc = idle
