@@ -35,6 +35,8 @@ export const site = {
 	 */
 	form: {
 		fallbackEndpoint: 'https://formspree.io/f/your-form-id',
+		/** スパム対策のハニーポット項目名（Formspree: _gotcha / Web3Forms: botcheck） */
+		honeypotField: '_gotcha',
 		/** 追加で送るべき固定フィールド（Web3Forms の access_key など） */
 		extraFields: {} as Record<string, string>
 	}

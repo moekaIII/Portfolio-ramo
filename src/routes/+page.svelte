@@ -1,11 +1,20 @@
 <script lang="ts">
 	import Seo from '#lib/components/seo/Seo.svelte';
-	import Container from '#lib/components/ui/Container.svelte';
-	import SectionHeading from '#lib/components/ui/SectionHeading.svelte';
+	import Hero from '#lib/components/hero/Hero.svelte';
+	import ValueSummary from '#lib/components/home/ValueSummary.svelte';
+	import FeaturedWorks from '#lib/components/home/FeaturedWorks.svelte';
+	import ServicesOverview from '#lib/components/home/ServicesOverview.svelte';
+	import CtaBand from '#lib/components/home/CtaBand.svelte';
+	import { personJsonLd, professionalServiceJsonLd } from '#lib/utils/jsonld.ts';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 </script>
 
-<Seo />
+<Seo jsonLd={[personJsonLd(), professionalServiceJsonLd()]} type="profile" />
 
-<Container as="section" class="pt-[calc(var(--header-h)+6rem)] pb-section">
-	<SectionHeading level={1} eyebrow="Placeholder" title="Phase 2 — デザインシステム" />
-</Container>
+<Hero />
+<ValueSummary />
+<FeaturedWorks works={data.featured} />
+<ServicesOverview />
+<CtaBand />
