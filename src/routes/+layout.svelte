@@ -3,7 +3,6 @@
 	import 'lenis/dist/lenis.css';
 	import './layout.css';
 	import { onMount } from 'svelte';
-	import { onNavigate } from '$app/navigation';
 	import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 	import favicon from '#lib/assets/favicon.svg';
 	import Header from '#lib/components/layout/Header.svelte';
@@ -11,7 +10,6 @@
 	import SkipLink from '#lib/components/layout/SkipLink.svelte';
 	import SmoothScroll from '#lib/components/layout/SmoothScroll.svelte';
 	import { theme } from '#lib/state/theme.svelte.ts';
-	import { viewTransition } from '#lib/utils/view-transition.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -22,7 +20,6 @@
 		// それまでは OS の和文フォント（ヒラギノ / Noto Sans CJK / 游ゴシック）で表示される。
 		import('@fontsource-variable/noto-sans-jp');
 	});
-	onNavigate(viewTransition);
 </script>
 
 <svelte:head>

@@ -7,13 +7,7 @@
 	// reduced-motion の変更にも追従して生成 / 破棄する（$effect はクライアントでのみ実行）
 	$effect(() => {
 		if (prefersReducedMotion.current) return;
-		const headerOffset = parseFloat(getComputedStyle(document.documentElement).fontSize) * 5.5;
-		const lenis = new Lenis({
-			autoRaf: true,
-			lerp: 0.12,
-			anchors: { offset: -headerOffset },
-			stopInertiaOnNavigate: true
-		});
+		const lenis = new Lenis({ autoRaf: true, lerp: 0.12, stopInertiaOnNavigate: true });
 		smoothScroll.lenis = lenis;
 		return () => {
 			lenis.destroy();

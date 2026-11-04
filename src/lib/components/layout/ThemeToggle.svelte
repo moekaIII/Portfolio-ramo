@@ -1,7 +1,14 @@
 <script lang="ts">
 	import Sun from '@lucide/svelte/icons/sun';
 	import Moon from '@lucide/svelte/icons/moon';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { theme } from '#lib/state/theme.svelte.ts';
+
+	/** 配色が一瞬で切り替わる「チカッ」を避け、View Transitions でクロスフェードする */
+	function toggle() {
+		if (!document.startViewTransition || prefersReducedMotion.current) theme.toggle();
+		else document.startViewTransition(() => theme.toggle());
+	}
 
 	const label = $derived(
 		theme.current === 'dark' ? 'ライトテーマに切り替える' : 'ダークテーマに切り替える'
@@ -13,7 +20,7 @@
 	class="inline-flex size-11 items-center justify-center rounded-pill text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
 	aria-label={label}
 	title={label}
-	onclick={() => theme.toggle()}
+	onclick={toggle}
 >
 	{#if theme.current === 'dark'}
 		<Sun size={18} aria-hidden="true" />

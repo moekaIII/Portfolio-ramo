@@ -1,11 +1,9 @@
 <script lang="ts">
 	import Menu from '@lucide/svelte/icons/menu';
 	import X from '@lucide/svelte/icons/x';
-	import { afterNavigate } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { nav, site } from '#lib/config/site.ts';
+	import { site } from '#lib/config/site.ts';
 	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
+	import Nav from './Nav.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 
 	let dialog: HTMLDialogElement | undefined = $state();
@@ -17,10 +15,10 @@
 		smoothScroll.lock();
 	}
 	function close() {
+		// close イベントを待たずに解除する（直後のページ内スクロールを止めないため）
+		smoothScroll.unlock();
 		dialog?.close();
 	}
-
-	afterNavigate(() => close());
 </script>
 
 <button
@@ -61,21 +59,8 @@
 				</button>
 			</div>
 		</div>
-		<nav aria-label="メイン（モバイル）" class="mt-10 flex-1">
-			<ul class="divide-y divide-line border-y border-line">
-				{#each nav as item (item.href)}
-					<li>
-						<a
-							href={resolve(item.href)}
-							aria-current={page.url.pathname.startsWith(item.href) ? 'page' : undefined}
-							class="flex items-baseline justify-between py-5 aria-[current=page]:text-accent-text"
-						>
-							<span class="text-h3 font-semibold">{item.en}</span>
-							<span class="text-sm text-fg-muted">{item.label}</span>
-						</a>
-					</li>
-				{/each}
-			</ul>
+		<nav aria-label="ページ内（モバイル）" class="mt-10 flex-1">
+			<Nav variant="menu" onnavigate={close} />
 		</nav>
 		<a href="mailto:{site.author.email}" class="text-sm text-fg-muted underline underline-offset-4"
 			>{site.author.email}</a

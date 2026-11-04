@@ -2,19 +2,21 @@
 	import { onMount } from 'svelte';
 	import { Canvas } from '@threlte/core';
 	import { NoToneMapping, WebGLRenderer } from 'three';
-	import GravityGrid from '#lib/components/three/GravityGrid.svelte';
+	import SkillDesk from '#lib/components/three/SkillDesk.svelte';
+	import { deskLabels } from '#lib/content/desk-labels.ts';
 	import { QUALITY, detectQuality } from '#lib/three/quality.ts';
 
 	type Props = {
-		/** ポインタイベントを受け取る要素 */
-		target: HTMLElement;
+		arranged: boolean;
+		ontoggle: () => void;
 		/** 初回フレームの描画後に呼ばれる（フォールバックからのクロスフェード用） */
 		onready?: () => void;
 	};
 
-	let { target, onready }: Props = $props();
+	let { arranged, ontoggle, onready }: Props = $props();
 
 	const settings = QUALITY[detectQuality()];
+	const labels = deskLabels.slice(0, settings.maxBlocks);
 
 	let container: HTMLDivElement | undefined = $state();
 	let inView = $state(true);
@@ -22,18 +24,12 @@
 	const active = $derived(inView && pageVisible);
 
 	onMount(() => {
-		// 画面外では描画を止める
-		const io = new IntersectionObserver(([entry]) => (inView = entry.isIntersecting), {
-			rootMargin: '0px'
-		});
+		// 画面外・タブ非表示の間は物理演算も描画も止める
+		const io = new IntersectionObserver(([entry]) => (inView = entry.isIntersecting));
 		if (container) io.observe(container);
-
 		const onVisibility = () => (pageVisible = document.visibilityState === 'visible');
 		document.addEventListener('visibilitychange', onVisibility);
-
-		// 初回描画の完了を待ってから表示する
 		const raf = requestAnimationFrame(() => requestAnimationFrame(() => onready?.()));
-
 		return () => {
 			io.disconnect();
 			document.removeEventListener('visibilitychange', onVisibility);
@@ -52,14 +48,14 @@
 	}
 </script>
 
-<div bind:this={container} aria-hidden="true" class="absolute inset-0">
+<!-- 縦スクロールはブラウザに任せ、横方向の操作だけをブロックを押す動作に使う -->
+<div bind:this={container} aria-hidden="true" class="absolute inset-0 cursor-pointer touch-pan-y">
 	<Canvas
 		{createRenderer}
 		dpr={[1, settings.maxDpr]}
 		renderMode="on-demand"
 		toneMapping={NoToneMapping}
-		colorManagementEnabled={false}
 	>
-		<GravityGrid {settings} {active} {target} />
+		<SkillDesk {labels} {arranged} {active} {ontoggle} />
 	</Canvas>
 </div>

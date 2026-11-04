@@ -2,7 +2,6 @@
 	import { getThumbnail } from '#lib/content/thumbnails.ts';
 
 	type Props = {
-		slug: string;
 		src: string;
 		alt: string;
 		sizes: string;
@@ -11,16 +10,12 @@
 		class?: string;
 	};
 
-	let { slug, src, alt, sizes, priority = false, class: className = '' }: Props = $props();
+	let { src, alt, sizes, priority = false, class: className = '' }: Props = $props();
 
 	const picture = $derived(getThumbnail(src));
 </script>
 
-<!-- view-transition-name で一覧 ⇄ 詳細の共有要素遷移を行う -->
-<div
-	class={['overflow-hidden rounded-lg border border-line bg-surface', className]}
-	style:view-transition-name="work-{slug}"
->
+<div class={['overflow-hidden rounded-lg border border-line bg-surface', className]}>
 	<enhanced:img
 		src={picture}
 		{alt}

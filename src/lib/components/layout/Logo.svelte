@@ -1,12 +1,20 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { site } from '#lib/config/site.ts';
+	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
+
+	function toTop(event: MouseEvent) {
+		event.preventDefault();
+		if (smoothScroll.lenis) smoothScroll.lenis.scrollTo(0);
+		else window.scrollTo({ top: 0 });
+		document.getElementById('main')?.focus({ preventScroll: true });
+	}
 </script>
 
 <a
-	href={resolve('/')}
+	href="#main"
+	onclick={toTop}
 	class="inline-flex items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight"
-	aria-label="{site.name} ホーム"
+	aria-label="{site.name}（ページの先頭へ）"
 >
 	<svg viewBox="0 0 24 24" class="size-6" aria-hidden="true">
 		<rect x="1" y="1" width="22" height="22" rx="6" class="fill-accent" />

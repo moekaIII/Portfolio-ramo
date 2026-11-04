@@ -21,14 +21,13 @@
 	</h1>
 	<p class="mt-6 max-w-[36em] text-lead text-fg-muted">
 		{notFound
-			? 'URLが変更されたか、ページが削除された可能性があります。'
+			? 'このサイトは1ページ構成になりました。スキル・経歴・実績はすべてトップページにまとめています。'
 			: '時間をおいて再度お試しください。'}
 	</p>
 	<div class="mt-10 flex flex-wrap gap-3">
 		<Button href={resolve('/')}>
-			ホームへ戻る
+			トップページへ
 			{#snippet icon()}<ArrowLeft size={16} />{/snippet}
 		</Button>
-		<Button href={resolve('/works')} variant="secondary">実績を見る</Button>
 	</div>
 </Container>

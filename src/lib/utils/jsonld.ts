@@ -1,4 +1,5 @@
 import { site } from '#lib/config/site.ts';
+import { skills } from '#lib/content/profile.ts';
 import type { WorkMeta } from '#lib/types/work.ts';
 import { absoluteUrl } from './seo.ts';
 
@@ -48,30 +49,19 @@ export function professionalServiceJsonLd() {
 			addressLocality: site.author.location.locality,
 			addressCountry: site.author.location.country
 		},
-		serviceType: ['フロントエンド開発', 'UIデザイン', 'UX改善', 'デザインシステム構築']
+		serviceType: skills.map((g) => g.label)
 	};
 }
 
-export function creativeWorkJsonLd(work: WorkMeta) {
-	return [
-		{
-			'@context': 'https://schema.org',
-			'@type': 'CreativeWork',
-			name: work.title,
-			description: work.summary,
-			url: absoluteUrl(`/works/${work.slug}`),
-			creator: { '@id': personId },
-			keywords: work.tags.join(', '),
-			inLanguage: 'ja'
-		},
-		{
-			'@context': 'https://schema.org',
-			'@type': 'BreadcrumbList',
-			itemListElement: [
-				{ '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
-				{ '@type': 'ListItem', position: 2, name: 'Works', item: absoluteUrl('/works') },
-				{ '@type': 'ListItem', position: 3, name: work.title }
-			]
-		}
-	];
+export function worksJsonLd(works: WorkMeta[]) {
+	return works.map((work) => ({
+		'@context': 'https://schema.org',
+		'@type': 'CreativeWork',
+		name: work.title,
+		description: work.summary,
+		url: absoluteUrl(`/#works`),
+		creator: { '@id': personId },
+		keywords: work.tags.join(', '),
+		inLanguage: 'ja'
+	}));
 }

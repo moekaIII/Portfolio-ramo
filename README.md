@@ -1,6 +1,17 @@
 # Portfolio — Frontend Engineer / UI・UX Designer
 
-SvelteKit 3 + Svelte 5 (Runes) で構築した、全ページ静的プリレンダリングのポートフォリオサイトです。
+企業（採用担当・発注企業）向けに、スキルと経歴が一目で伝わることを目的とした1ページ構成のポートフォリオです。SvelteKit 3 + Svelte 5（Runes）で作り、静的サイトとしてプリレンダリングします。
+
+## ページ構成（`/` のみ）
+
+| セクション   | 内容                                                                          |
+| ------------ | ----------------------------------------------------------------------------- |
+| ヒーロー     | 氏名・職種・要点（経験 / 専門 / 主要技術 / 働き方）と、スキルを並べた 3D の机 |
+| `#skills`    | 領域別のスキル、習熟度、実務経験年数                                          |
+| `#career`    | 経歴（スクロールに合わせて進捗線が伸びる）                                    |
+| `#works`     | 実績。数値成果まで一覧で見え、詳細は開閉して読む                              |
+| `#strengths` | 強み                                                                          |
+| `#contact`   | メール（コピーボタン付き）と SNS                                              |
 
 ## コマンド
 
@@ -18,34 +29,31 @@ pnpm preview    # ビルド結果の確認
 
 ## 差し替えが必要な箇所（仮の値）
 
-| 何を                         | どこで                                                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 氏名・屋号・URL・SNS・メール | `src/lib/config/site.ts`                                                                                |
-| フォーム送信先               | 環境変数 `PUBLIC_FORM_ENDPOINT`（`.env.example` 参照）。未設定時は `site.ts` の `form.fallbackEndpoint` |
-| サービス・進め方・料金・FAQ  | `src/lib/content/services.ts`                                                                           |
-| 経歴・スキル・考え方・実績数 | `src/lib/content/profile.ts`                                                                            |
-| 実績（ケーススタディ）       | `src/content/works/*.md`                                                                                |
-| OGP 画像（1200×630）         | `static/og/default.png`                                                                                 |
+| 何を                     | どこで                                              |
+| ------------------------ | --------------------------------------------------- |
+| 氏名・URL・メール・SNS   | `src/lib/config/site.ts`                            |
+| スキル・要点・経歴・強み | `src/lib/content/profile.ts`                        |
+| 実績（ケーススタディ）   | `src/content/works/*.md` と `src/lib/assets/works/` |
+| OGP 画像（1200×630）     | `static/og/default.png`                             |
+
+### 3D の机に並ぶスキル
+
+`profile.ts` で `block` を指定したスキルだけが、ブロックとして机に並びます。先頭のブロックはアクセント色になります。モバイルでは先頭の 9 個だけを表示します。
+
+```ts
+{ name: 'TypeScript', block: 'TypeScript', level: 3, years: 7 }
+```
 
 ### アクセントカラーの変更
 
-`src/lib/styles/tokens.css` の 2 つの値だけで全体に反映されます（OKLCH）。
+`src/lib/styles/tokens.css` の 2 つの値だけで全体に反映されます（OKLCH）。3D のブロックも CSS トークンから色を読み取ります。
 
 ```css
 --accent-hue: 125; /* 色相 */
 --accent-chroma: 0.2; /* 彩度 */
 ```
 
-3D ヒーローも CSS トークンから色を読み取るため、追加の変更は不要です。色相を大きく変える場合（青系など）は、テーマごとの明度 `--accent-l-fill` / `--accent-l-text` を調整し、WCAG AA のコントラスト比を確認してください。
-
-### フォーム送信先
-
-Formspree / Web3Forms などの、`FormData` の POST を受け付けるサービスを想定しています。
-
-- `PUBLIC_FORM_ENDPOINT` に送信先 URL を設定します。
-- ハニーポットの項目名は `site.form.honeypotField` で指定します（Formspree: `_gotcha`、Web3Forms: `botcheck`）。
-- アクセスキーなどの固定フィールドは `site.form.extraFields` に追加します。
-- JS が無効な環境では、ネイティブのフォーム送信にフォールバックします。
+色相を大きく変える場合は、テーマごとの明度 `--accent-l-fill` / `--accent-l-text` を調整し、WCAG AA のコントラスト比を確認してください。
 
 ## 実績の追加
 
@@ -61,53 +69,46 @@ role: 担当範囲
 period: 2025.04 – 2025.10 # または「2025.04 – 継続中」
 category: development # development | ui-design | ux
 tags: [SvelteKit, TypeScript]
-summary: 一覧と OGP に使う要約
+summary: 一覧に出す要約
 thumbnail: my-project.png
 thumbnailAlt: 画像の説明
-featured: true # トップの注目実績に表示
+featured: true
 results:
   - { label: CVR, value: '+38', unit: '%', note: 計測条件 } # value は文字列で
 ---
 ```
 
-本文には `## 概要` `## 課題` `## 担当範囲` `## プロセス` `## 結果と今後` を書きます。数値成果（results）と使用技術（tags）は frontmatter から自動でレイアウトされます。
+本文の見出しは `####` を使います（ページ内でセクション h2 → 実績タイトル h3 の下に入るため）。
 
-## 構成
+## 3D「散らかったスキルを整列」
 
-```
-src/
-├─ content/works/          ケーススタディ（mdsvex）
-├─ env.ts                  環境変数の宣言（Kit 3: $app/env/public）
-├─ lib/
-│  ├─ config/              site.ts（サイト設定）, form.ts
-│  ├─ content/             サービス・プロフィールのデータ、frontmatter 検証、サムネイル
-│  ├─ server/works.ts      実績メタデータ（ビルド時のみ評価）
-│  ├─ styles/tokens.css    デザイントークン（色・余白・角丸・タイポ）
-│  ├─ three/               3D のシェーダー・ばね・品質設定・WebGL 判定
-│  ├─ state/               テーマ、スムーズスクロール
-│  └─ components/          layout / ui / seo / hero / three / home / works / services / about / contact
-└─ routes/                 /, /works, /works/[slug], /services, /about, /contact, sitemap.xml, robots.txt
-```
+- **操作**
+  - 机の上のブロックは、ポインタで押すと滑って回転します（`src/lib/three/desk-physics.ts`、物理ライブラリは使わない自前の 2D 物理です）。
+  - 「スキルを整列する」ボタンか机のクリックで、ブロックが自動レイアウトの位置に整列します。もう一度押すと散らかります。
+- **遅刻ブロック**
+  - 整列のたびに 1 個だけ遅れて跳ねながら最後尾に着き、言い訳の吹き出しを出します。
+  - 言い訳の文言は `LATE_EXCUSES` で変更できます。
+- **パフォーマンス**
+  - three.js はページの `load` 後のアイドル時間に動的 import するため、初回のバンドルには含まれません。
+  - 描画は on-demand です。ブロックが静止すると描画も 0 回/秒になり、画面外やタブが非表示のときも止まります。
+  - DPR はデスクトップで最大 2、モバイルで最大 1.5 です。
+  - ジオメトリ、マテリアル、テクスチャは明示的に dispose しています。
+- **フォールバック**: reduced-motion 時と WebGL2 非対応時は、整列済みの状態を HTML で描いた静的表示になり、three.js も読み込みません。
 
-## 実装メモ
+## その他の実装メモ
 
-- **3D ヒーロー（精密グリッドの重力場）**
-  - ページの `load` 後のアイドル時間に動的 import するため、three.js は初回のバンドルに含まれません。
-  - reduced-motion 時と WebGL2 非対応時は、CSS で描いた静的なドット格子を表示します。
-  - DPR はデスクトップで最大 2、モバイルで最大 1.5 です。モバイルでは点を約 3 千個に減らし、不透明度も下げています。
-  - 画面外やタブが非表示のときは描画を完全に停止します（描画呼び出し 0 回/秒を確認済み）。
-  - ジオメトリとマテリアルは明示的に dispose し、renderer は Threlte が dispose します。
 - **フォント**
   - Inter（欧文）は preload して、差し替えによる CLS を防いでいます。
-  - Noto Sans JP（分割された和文フォント）は表示後に読み込みます。それまでは OS の和文フォントで表示されます。
+  - Noto Sans JP（分割された和文フォント）は表示後に読み込み、それまでは OS の和文フォントで表示します。
 - **モーション**
-  - ページ遷移は View Transitions API を使い、実績カードのサムネイルを共有要素として遷移させます。
-  - gsap はサービスページのプロセス図（スクロール連動）だけで使っています。
+  - gsap は経歴タイムラインのスクロール連動だけで使っています。
+  - View Transitions はテーマ切り替えのクロスフェードに使っています。
   - lenis（スムーズスクロール）と reveal 表示は、reduced-motion 時は無効になります。
+- **ページ内ナビゲーション**: 移動先のセクションにフォーカスも移します。画面上で読んでいるセクションは `aria-current="location"` で示します。
 
 ## 品質（ローカルの preview で計測）
 
-- **Lighthouse（モバイル、ライトテーマ）**: 全6ページで Performance 96〜97、Accessibility / Best Practices / SEO 100
-- **axe-core（WCAG 2.2 AA + best-practice）**: ダーク / ライト × デスクトップ / モバイルの全組み合わせで違反 0 件
+- **Lighthouse（モバイル）**: Performance 98、Accessibility / Best Practices / SEO 100
+- **axe-core（WCAG 2.2 AA + best-practice）**: ダーク / ライト × デスクトップ / モバイル、3D 表示時・静的表示時のいずれも違反 0 件
 
-本番のホスティング環境（CDN・圧縮・HTTP/2）では数値が変わることがあります。
+本番のホスティング環境では数値が変わることがあります。

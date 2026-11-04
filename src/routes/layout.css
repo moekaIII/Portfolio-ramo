@@ -102,41 +102,16 @@
 	font-variant-numeric: tabular-nums;
 }
 
-/* ---------------------------------------------------------------
- * View Transitions（ページ遷移）
- * 控えめなクロスフェード + わずかな縦移動。共有要素は個別名で morph。
- * ------------------------------------------------------------- */
-@media (prefers-reduced-motion: no-preference) {
-	::view-transition-old(root) {
-		animation: vt-out 200ms var(--ease-in-out) both;
-	}
+/* View Transitions（テーマ切り替えのクロスフェード。ThemeToggle から開始） */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 360ms;
+	animation-timing-function: var(--ease-in-out);
+}
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
 	::view-transition-new(root) {
-		animation: vt-in 420ms var(--ease-out) both;
-	}
-	::view-transition-group(*) {
-		animation-duration: 480ms;
-		animation-timing-function: var(--ease-out);
-	}
-}
-
-/* ヘッダーは遷移中も固定表示 */
-.site-header {
-	view-transition-name: site-header;
-}
-::view-transition-old(site-header),
-::view-transition-new(site-header) {
-	animation: none;
-}
-
-@keyframes vt-out {
-	to {
-		opacity: 0;
-	}
-}
-@keyframes vt-in {
-	from {
-		opacity: 0;
-		transform: translateY(12px);
+		animation: none;
 	}
 }
 
@@ -163,8 +138,9 @@
 	& > :first-child {
 		margin-top: 0;
 	}
-	& h2 {
-		margin-top: 3.5em;
+	& h2,
+	& h4 {
+		margin-top: 2.75em;
 		margin-bottom: 1em;
 		font-size: var(--text-h3);
 		line-height: var(--text-h3--line-height);

@@ -1,7 +1,4 @@
 <script lang="ts">
-	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
-	import { resolve } from '$app/paths';
-	import Button from '#lib/components/ui/Button.svelte';
 	import Logo from './Logo.svelte';
 	import Nav from './Nav.svelte';
 	import MobileNav from './MobileNav.svelte';
@@ -20,13 +17,9 @@
 >
 	<div class="mx-auto flex h-header w-full max-w-site items-center justify-between px-gutter">
 		<Logo />
-		<div class="hidden items-center gap-2 md:flex">
-			<Nav />
+		<div class="hidden items-center gap-1 md:flex">
+			<nav aria-label="ページ内"><Nav /></nav>
 			<ThemeToggle />
-			<Button href={resolve('/contact')} class="ml-2">
-				相談する
-				{#snippet icon()}<ArrowUpRight size={16} />{/snippet}
-			</Button>
 		</div>
 		<div class="md:hidden">
 			<MobileNav />

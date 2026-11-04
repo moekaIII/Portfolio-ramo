@@ -1,19 +1,16 @@
 export type Quality = 'high' | 'low';
 
 export interface QualitySettings {
-	/** 点の間隔（CSS px）。列数はビューポート幅から算出 */
-	spacing: number;
-	/** 点全体の不透明度（テキストの可読性を優先して調整） */
-	opacity: number;
 	/** devicePixelRatio の上限 */
 	maxDpr: number;
-	pointSize: number;
+	/** 机に置くブロックの最大数 */
+	maxBlocks: number;
 	antialias: boolean;
 }
 
 export const QUALITY: Record<Quality, QualitySettings> = {
-	high: { spacing: 10, opacity: 1, maxDpr: 2, pointSize: 2.1, antialias: false },
-	low: { spacing: 13, opacity: 0.7, maxDpr: 1.5, pointSize: 2.2, antialias: false }
+	high: { maxDpr: 2, maxBlocks: 14, antialias: true },
+	low: { maxDpr: 1.5, maxBlocks: 9, antialias: false }
 };
 
 /** モバイル・低スペック・省データ設定では負荷を下げる */
