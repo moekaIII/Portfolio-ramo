@@ -6,11 +6,17 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import Container from '#lib/components/ui/Container.svelte';
 	import HeroVisual from './HeroVisual.svelte';
+
+	let section: HTMLElement | undefined = $state();
 </script>
 
-<section aria-labelledby="hero-heading" class="relative isolate overflow-hidden">
+<section
+	bind:this={section}
+	aria-labelledby="hero-heading"
+	class="relative isolate overflow-hidden"
+>
 	<div class="absolute inset-0 -z-10">
-		<HeroVisual />
+		<HeroVisual target={section} />
 		<!-- テキスト側の可読性を確保するスクリム（3D の上に重ねる） -->
 		<div
 			aria-hidden="true"
@@ -22,7 +28,12 @@
 		class="flex min-h-svh flex-col justify-end pt-[calc(var(--header-h)+4rem)] pb-[clamp(2.5rem,6vw,4rem)]"
 	>
 		<p class="eyebrow mb-8 flex items-center gap-3">
-			<span aria-hidden="true" class="h-px w-8 bg-accent-text"></span>{site.author.jobTitle}
+			<span aria-hidden="true" class="h-px w-8 shrink-0 bg-accent-text"></span>
+			<span>
+				{#each site.author.jobTitle.split(' / ') as part, i (part)}
+					<span class="inline-block">{i > 0 ? '/ ' : ''}{part}</span>{' '}
+				{/each}
+			</span>
 		</p>
 		<h1 id="hero-heading" class="max-w-[11em] text-display font-semibold">
 			デザインと実装の<br />境界をなくす。
