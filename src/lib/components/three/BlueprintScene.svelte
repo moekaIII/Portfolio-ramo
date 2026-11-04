@@ -153,6 +153,8 @@
 		flip: boolean;
 		/** 手前（花の下側）にあるほど 1 に近い */
 		lower: number;
+		/** カメラからの距離で決まる明るさ（手前ほど明るい） */
+		depthTint: number;
 		phase: number;
 		wave: number;
 	};
@@ -210,11 +212,25 @@
 			ghostMaterial,
 			pitch,
 			lower,
+			depthTint: 1,
 			flip: -Math.sin(angle) < 0,
 			phase: i * 1.3,
 			wave: 0
 		};
 	});
+
+	// 花びらの奥行き: 基本の向きで花びらの中ほどの位置を求め、カメラに近いほど明るくする
+	{
+		flower.rotation.set(-0.62, -0.34, 0.18);
+		flower.updateMatrixWorld(true);
+		const zs = petals.map((p) => p.mesh.localToWorld(new Vector3(0, PETAL_LENGTH * 0.55, 0)).z);
+		const zMin = Math.min(...zs);
+		const zMax = Math.max(...zs);
+		petals.forEach((p, i) => {
+			const t = (zs[i] - zMin) / Math.max(zMax - zMin, 1e-3);
+			p.depthTint = 0.8 + t * 0.26;
+		});
+	}
 
 	/** いちばん手前の花びら（少しだけ不透明にして、手前にあることを伝える） */
 	const frontmost = petals.reduce((a, b) => (b.lower > a.lower ? b : a));
@@ -365,6 +381,52 @@
 	const stemWire = track(
 		new WireframeGeometry(track(new TubeGeometry(stemCurve, 24, STEM_RADIUS, 5, false)))
 	);
+	/**
+	 * 茎のテクスチャ（TubeGeometry の UV: u = 長さ方向（0 = 花の付け根）、v = 周方向）。
+	 * 花の近くは黄緑〜オリーブ（わずかに赤み）、中ほどはセージ、根元へ向かって深い青緑。
+	 * 細い縦の筋と、周方向の明暗（丸み）を加える
+	 */
+	function stemTexture(dark: boolean) {
+		const W = 512;
+		const H = 64;
+		const c = Object.assign(document.createElement('canvas'), { width: W, height: H });
+		const ctx = c.getContext('2d')!;
+		const k = dark ? 0.82 : 1;
+		const rgb = (r: number, g: number, b: number, a = 1) =>
+			`rgba(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)},${a})`;
+		const g = ctx.createLinearGradient(0, 0, W, 0);
+		g.addColorStop(0, rgb(150, 160, 92));
+		g.addColorStop(0.04, rgb(160, 150, 96));
+		g.addColorStop(0.12, rgb(134, 150, 98));
+		g.addColorStop(0.45, rgb(118, 140, 104));
+		g.addColorStop(0.75, rgb(96, 124, 106));
+		g.addColorStop(1, rgb(78, 108, 104));
+		ctx.fillStyle = g;
+		ctx.fillRect(0, 0, W, H);
+		const rand = mulberry32(5);
+		for (let i = 0; i < 40; i++) {
+			ctx.fillStyle = rand() < 0.5 ? rgb(200, 205, 150, 0.08) : rgb(60, 80, 60, 0.1);
+			ctx.fillRect(0, rand() * H, W, 1 + rand() * 2);
+		}
+		// 花の付け根近くの、ほんのり赤い色づき
+		const blush = ctx.createLinearGradient(0, 0, W * 0.2, 0);
+		blush.addColorStop(0, rgb(190, 120, 90, 0.3));
+		blush.addColorStop(1, rgb(190, 120, 90, 0));
+		ctx.fillStyle = blush;
+		ctx.fillRect(0, 0, W * 0.2, H);
+		// 周方向の明暗（光の当たる側を明るく、反対側を暗く）
+		const round = ctx.createLinearGradient(0, 0, 0, H);
+		round.addColorStop(0, 'rgba(255,255,255,0.16)');
+		round.addColorStop(0.3, 'rgba(255,255,255,0)');
+		round.addColorStop(0.65, 'rgba(0,0,0,0.12)');
+		round.addColorStop(1, 'rgba(255,255,255,0.1)');
+		ctx.fillStyle = round;
+		ctx.fillRect(0, 0, W, H);
+		const t = new CanvasTexture(c);
+		t.colorSpace = SRGBColorSpace;
+		return t;
+	}
+
 	const stemMaterial = clip(
 		new MeshBasicMaterial({ transparent: true, opacity: 0.92, depthWrite: false }),
 		solidPlane
@@ -414,7 +476,57 @@
 	}
 
 	const root = new Group();
-	root.add(plant, boundary, ...tags);
+	// ---- DESIGN 側の奥行き: 地平線へ収束していく床の線（奥ほど背景色に溶ける）----
+	const floorMaterial = clip(
+		new LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }),
+		wirePlane
+	);
+	const floor = new LineSegments(track(new BufferGeometry()), floorMaterial);
+	let floorKey = '';
+	function buildFloor(y: number, lineColor: RGB, bg: RGB) {
+		const key = `${y.toFixed(2)}|${lineColor.join()}|${bg.join()}`;
+		if (key === floorKey) return;
+		floorKey = key;
+		const pos: number[] = [];
+		const col: number[] = [];
+		const NEAR = 6;
+		const FAR = -70;
+		const fade = (z: number) => {
+			const t = MathUtils.clamp((NEAR - z) / (NEAR - FAR), 0, 1);
+			// 奥ほど薄く、画面の手前（下端・氏名の背後）でも薄くする
+			// 画面の下端に見えるのはカメラから約 15 の距離。そこから 26 までをゆっくり濃くする
+			const d = CAMERA_Z - z;
+			const k = (1 - Math.pow(t, 0.55)) * MathUtils.smoothstep(d, 14, 26);
+			// 頂点色はリニア色空間で扱われるので、sRGB から変換して渡す
+			const c = new Color().setRGB(...mix(bg, lineColor, k), SRGBColorSpace);
+			return [c.r, c.g, c.b] as RGB;
+		};
+		const push = (a: Vector3, b: Vector3) => {
+			pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
+			col.push(...fade(a.z), ...fade(b.z));
+		};
+		// 奥へ伸びる線（遠近で一点へ収束して見える）
+		for (let x = -40; x <= 40; x += 1.6) {
+			const SEG = 12;
+			for (let k = 0; k < SEG; k++) {
+				const z0 = NEAR + ((FAR - NEAR) * k) / SEG;
+				const z1 = NEAR + ((FAR - NEAR) * (k + 1)) / SEG;
+				push(new Vector3(x, y, z0), new Vector3(x, y, z1));
+			}
+		}
+		// 横の線: 奥ほど間隔を広げる（遠近感を強める）
+		for (let z = NEAR, step = 0.9; z > FAR; z -= step, step *= 1.12) {
+			push(new Vector3(-40, y, z), new Vector3(40, y, z));
+		}
+		const g = new BufferGeometry();
+		g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+		g.setAttribute('color', new Float32BufferAttribute(col, 3));
+		floor.geometry.dispose();
+		floor.geometry = g;
+	}
+	let floorColors: { line: RGB; bg: RGB } = { line: [0.6, 0.6, 0.6], bg: [0.95, 0.95, 0.95] };
+
+	root.add(plant, floor, boundary, ...tags);
 
 	// ---- レイアウト: 花は画面の右寄り・やや上。茎は画面の下へ抜ける ----
 	let halfW0 = 6;
@@ -435,6 +547,7 @@
 		if (portrait) plant.position.set(halfW0 * 0.1, halfH0 * 0.2, 0);
 		else plant.position.set(halfW0 * 0.3, halfH0 * 0.12, 0);
 		boundary.scale.set(0.012, halfH0 * 2.6, 1);
+		buildFloor(-halfH0 * 0.92, floorColors.line, floorColors.bg);
 		for (const t of tags) t.scale.set(1.6, 0.3, 1);
 		applyBackdrop();
 	}
@@ -535,7 +648,8 @@
 			p.backMaterial.map = backMap;
 			p.ghostMaterial.map = map;
 			// いちばん手前の花びらだけ、少し暗くする（陰になっている感じ）
-			const tint = p === frontmost ? (dark ? 0.55 : 0.6) : 1;
+			// 手前ほど明るく、奥ほど少し暗く（3D 感）。いちばん手前は陰として暗くする
+			const tint = p === frontmost ? (dark ? 0.55 : 0.6) : p.depthTint;
 			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) {
 				// 灰色にくすまないよう、赤みを残して暗くする
 				m.color.setRGB(tint * 1.08, tint * 0.9, tint * 0.9);
@@ -545,7 +659,10 @@
 			oldBack?.dispose();
 		});
 		filamentMaterial.color = toColor([0.98, 0.62, 0.18]);
-		receptacleMaterial.color = toColor(dark ? [0.62, 0.56, 0.3] : [0.78, 0.72, 0.38]);
+		// 接合部（花托の首）は茎の付け根と同じ色
+		receptacleMaterial.color = toColor(
+			dark ? [0.59 * 0.82, 0.62 * 0.82, 0.37 * 0.82] : [0.6, 0.62, 0.37]
+		);
 		antherMaterial.color = toColor([1, 0.72, 0.22]);
 		centerShadeMaterial.color = toColor(dark ? [0.12, 0.06, 0.05] : [0.45, 0.2, 0.12]);
 		centerShadeMaterial.opacity = dark ? 0.55 : 0.32;
@@ -553,9 +670,18 @@
 		glowMaterial.blending = dark ? AdditiveBlending : NormalBlending;
 		glowMaterial.opacity = dark ? 0.55 : 0.7;
 		glowMaterial.needsUpdate = true;
-		stemMaterial.color = toColor(dark ? [0.42, 0.5, 0.36] : [0.48, 0.56, 0.4]);
+		const oldStem = stemMaterial.map;
+		stemMaterial.map = stemTexture(dark);
+		stemMaterial.color = new Color(1, 1, 1);
+		stemMaterial.needsUpdate = true;
+		oldStem?.dispose();
 		const muted = toColor(cssVarToRgb('--fg-muted'));
 		lineMuted.color = muted;
+		floorColors = {
+			line: mix(cssVarToRgb('--fg-muted'), cssVarToRgb('--bg'), dark ? 0.45 : 0.4),
+			bg: dark ? [0.13, 0.12, 0.15] : [0.94, 0.93, 0.94]
+		};
+		buildFloor(-halfH0 * 0.92, floorColors.line, floorColors.bg);
 		lineAccent.color = toColor(cssVarToRgb('--accent-text'));
 		boundaryMaterial.color = muted;
 		const prev = tagMaterials.map((m) => m.map);
@@ -584,7 +710,8 @@
 	}
 
 	function onPointerDown() {
-		petals.forEach((p, i) => (p.wave = 1 + i * 0.12));
+		// 花びらごとの時間差は短く（ほぼ同時にふわっと動く）
+		petals.forEach((p, i) => (p.wave = 1 + i * 0.04));
 		invalidate();
 	}
 
@@ -600,6 +727,10 @@
 	// ---- フレーム更新 ----
 	let boundaryX = 0;
 	let boundaryV = 0;
+	let gust = 0;
+	let gustStart = -100;
+	let gustStrength = 0;
+	let nextGustAt = 3;
 	let tiltX = 0;
 	let tiltY = 0;
 	let frameAcc = 0;
@@ -652,19 +783,36 @@
 			const ty = idle ? Math.sin(elapsed * 0.15) * 0.05 : pointer.x * 0.08;
 			tiltX += (tx - tiltX) * Math.min(1, dt * 0.8);
 			tiltY += (ty - tiltY) * Math.min(1, dt * 0.8);
-			flower.rotation.set(BASE_ROTATION.x - tiltX, BASE_ROTATION.y + tiltY, BASE_ROTATION.z);
-			plant.rotation.z = Math.sin(elapsed * 0.3) * 0.012;
+			// 微風: ときどき（6〜12 秒おき）ふっと吹いて、静かに収まる
+			if (elapsed >= nextGustAt) {
+				gustStart = elapsed;
+				gustStrength = 0.6 + Math.random() * 0.4;
+				nextGustAt = elapsed + 6 + Math.random() * 6;
+			}
+			const ga = elapsed - gustStart;
+			// 立ち上がり 0.8 秒・減衰 2.5 秒の山形
+			gust =
+				ga < 0 ? 0 : gustStrength * Math.min(1, ga / 0.8) * Math.exp(-Math.max(0, ga - 0.8) / 2.5);
+			const sway = Math.sin(ga * 2.2) * gust;
+			flower.rotation.set(
+				BASE_ROTATION.x - tiltX + sway * 0.03,
+				BASE_ROTATION.y + tiltY + sway * 0.05,
+				BASE_ROTATION.z + sway * 0.02
+			);
+			plant.rotation.z = Math.sin(elapsed * 0.3) * 0.012 + sway * 0.018;
 
 			// 花びら: 呼吸するように開閉し、残像は少し遅れてついてくる
 			for (const p of petals) {
 				const breathe = Math.sin(elapsed * 0.5 + p.phase) * 0.035;
 				let wave = 0;
 				if (p.wave > 0) {
-					p.wave = Math.max(0, p.wave - dt * 0.6);
+					p.wave = Math.max(0, p.wave - dt * 0.85);
 					const w = Math.min(1, p.wave);
 					wave = Math.sin((1 - w) * Math.PI * 2) * w * 0.12;
 				}
-				const x = p.pitch + breathe + wave;
+				// 微風で花びらがそよぐ（花びらごとに少しずつずれる）
+				const flutter = Math.sin((elapsed - gustStart) * 3.1 + p.phase * 1.7) * gust * 0.05;
+				const x = p.pitch + breathe + wave + flutter;
 				p.mesh.rotation.x = x;
 				p.ghosts.forEach((g, gi) => {
 					const lag = Math.sin(elapsed * 0.5 + p.phase - 0.6 - gi * 0.4) * 0.035;
@@ -702,6 +850,7 @@
 			...petals.flatMap((p) => [p.material, p.backMaterial, p.ghostMaterial]),
 			receptacleMaterial,
 			antherMaterial,
+			floorMaterial,
 			centerShadeMaterial,
 			filamentMaterial,
 			glowMaterial,
@@ -713,6 +862,7 @@
 		];
 		for (const m of materials) m.dispose();
 		glowTexture.dispose();
+		stemMaterial.map?.dispose();
 		shadeTexture.dispose();
 		backdrop?.dispose();
 		scene.background = null;
