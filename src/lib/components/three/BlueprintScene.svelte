@@ -233,6 +233,11 @@
 
 	/** いちばん手前の花びら（少しだけ不透明にして、手前にあることを伝える） */
 	const frontmost = petals.reduce((a, b) => (b.lower > a.lower ? b : a));
+	// 生え際を少し下げる: 花托の縁に沿って外側（画面の下）と、花托の奥へずらす
+	for (const m of [frontmost.mesh, ...frontmost.ghosts]) {
+		m.position.y += 0.32;
+		m.position.z -= 0.22;
+	}
 	frontmost.material.opacity = 0.84;
 	frontmost.backMaterial.opacity = 0.9;
 
@@ -654,6 +659,10 @@
 			// いちばん手前の花びらだけ、少し暗くする（陰になっている感じ）
 			// 手前ほど明るく、奥ほど少し暗く（3D 感）。いちばん手前は陰として暗くする
 			const tint = p === frontmost ? (dark ? 0.7 : 0.76) : p.depthTint;
+			// ライトモードでは明るい背景に溶けやすいので、花びらを少しだけ不透明にする
+			const isFront = p === frontmost;
+			p.material.opacity = (isFront ? 0.84 : 0.72) + (dark ? 0 : 0.08);
+			p.backMaterial.opacity = (isFront ? 0.9 : 0.8) + (dark ? 0 : 0.06);
 			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) {
 				// 灰色にくすまないよう、赤みを残して暗くする
 				m.color.setRGB(tint * 1.08, tint * 0.9, tint * 0.9);

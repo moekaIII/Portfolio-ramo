@@ -60,11 +60,11 @@ export function createPetalGeometry(options: {
 		const wave =
 			ruffle *
 			width *
-			Math.sin(t * Math.PI * 4.5 + u * 2) *
+			Math.sin(t * Math.PI * 4 + u * 2) *
 			Math.pow(Math.abs(u), 1.6) *
 			upper *
-			// 先端付近だけ波を弱め、先が尖って見えないようにする
-			(1 - 0.75 * MathUtils.smoothstep(t, 0.82, 1)) *
+			// 先端に近づくほど波をなだらかにし、先が尖ったりガタついたりしないようにする
+			(1 - 0.6 * MathUtils.smoothstep(t, 0.62, 1)) *
 			profile;
 		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5 + wave;
 		pos.setXYZ(i, nx, y, z);
