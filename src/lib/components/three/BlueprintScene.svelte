@@ -7,10 +7,13 @@
 		CanvasTexture,
 		CatmullRomCurve3,
 		Color,
+		BackSide,
 		DoubleSide,
+		FrontSide,
 		Float32BufferAttribute,
 		Group,
 		InstancedMesh,
+		LatheGeometry,
 		LineBasicMaterial,
 		LineSegments,
 		MathUtils,
@@ -30,7 +33,8 @@
 		Vector2,
 		Vector3,
 		WireframeGeometry,
-		type Material
+		type Material,
+		type Side
 	} from 'three';
 	import { theme } from '#lib/state/theme.svelte.ts';
 	import { cssVarToRgb } from '#lib/three/css-color.ts';
@@ -67,7 +71,8 @@
 	const PETALS = 5;
 	const PETAL_LENGTH = 3.4;
 	const PETAL_WIDTH = 3.5;
-	const PETAL_OFFSET = 0.18;
+	// 花びらは中心から生やす（付け根どうしが離れて見えないように）
+	const PETAL_OFFSET = 0.02;
 	const FLOWER_RADIUS = PETAL_OFFSET + PETAL_LENGTH;
 	const GHOSTS = high ? 2 : 1;
 
@@ -92,10 +97,11 @@
 	const petalOptions = {
 		length: PETAL_LENGTH,
 		width: PETAL_WIDTH,
-		curl: 0.14,
+		// 負の値で先端がわずかに外へ反り、花が少しだけ開く
+		curl: -0.12,
 		cup: 0.38,
 		tip: 'round' as const,
-		ruffle: 0.16
+		ruffle: 0.24
 	};
 	const petalGeometry = track(
 		createPetalGeometry({ ...petalOptions, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
@@ -108,13 +114,13 @@
 	const lineMuted = clip(new LineBasicMaterial({ transparent: true, opacity: 0.5 }), wirePlane);
 	const lineAccent = clip(new LineBasicMaterial({ transparent: true, opacity: 0.8 }), wirePlane);
 
-	const silkMaterial = (opacity: number) =>
+	const silkMaterial = (opacity: number, side: Side = DoubleSide) =>
 		clip(
 			new MeshBasicMaterial({
 				transparent: true,
 				opacity,
 				depthWrite: false,
-				side: DoubleSide,
+				side,
 				fog: false
 			}),
 			solidPlane
@@ -124,6 +130,8 @@
 		mesh: Mesh;
 		ghosts: Mesh[];
 		material: MeshBasicMaterial;
+		/** 花びらの裏側（手前の花びらで見える面）。表とは別の、白っぽく粉をふいた色調 */
+		backMaterial: MeshBasicMaterial;
 		ghostMaterial: MeshBasicMaterial;
 		pitch: number;
 		flip: boolean;
@@ -138,17 +146,21 @@
 		const angle = (i / PETALS) * Math.PI * 2 + 0.5 + (rand() - 0.5) * 0.35;
 		const holder = new Group();
 		holder.rotation.z = angle;
-		const material = silkMaterial(0.72);
+		const material = silkMaterial(0.72, FrontSide);
+		const backMaterial = silkMaterial(0.8, BackSide);
 		const ghostMaterial = silkMaterial(0.16);
 		const mesh = new Mesh(petalGeometry, material);
+		const back = new Mesh(petalGeometry, backMaterial);
+		back.renderOrder = i;
+		mesh.add(back);
 		mesh.position.y = PETAL_OFFSET;
 		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
 		const lower = Math.max(0, -Math.cos(angle));
 		const pitch = 0.45 + rand() * 0.25 + lower * 0.85;
 		mesh.rotation.x = pitch;
-		mesh.rotation.y = (rand() - 0.5) * 0.4;
-		mesh.scale.setScalar(0.85 + rand() * 0.3);
-		mesh.position.z = i * 0.02;
+		mesh.rotation.y = (rand() - 0.5) * 0.12;
+		mesh.scale.setScalar(0.9 + rand() * 0.2);
+		mesh.position.z = i * 0.006;
 		mesh.renderOrder = i;
 		mesh.add(new LineSegments(petalWire, i % 2 ? lineMuted : lineAccent));
 		holder.add(mesh);
@@ -170,6 +182,7 @@
 			mesh,
 			ghosts,
 			material,
+			backMaterial,
 			ghostMaterial,
 			pitch,
 			flip: -Math.sin(angle) < 0,
@@ -265,7 +278,26 @@
 	centerShade.position.set(0, -0.45, 0.75);
 	centerShade.renderOrder = 22;
 	glow.renderOrder = 19;
-	flower.add(glow, filaments, filamentWire, anthers, centerShade);
+	// 花托: 花びらの付け根を一つにまとめる、小さな杯形の台座
+	const receptacleProfile = Array.from({ length: 10 }, (_, i) => {
+		const t = i / 9;
+		return new Vector2(0.06 + 0.42 * Math.sin((t * Math.PI) / 2), -0.35 + t * 0.5);
+	});
+	const receptacleGeometry = track(new LatheGeometry(receptacleProfile, high ? 24 : 14));
+	receptacleGeometry.rotateX(Math.PI / 2);
+	const receptacleMaterial = clip(
+		new MeshBasicMaterial({ transparent: true, opacity: 0.95, depthWrite: false }),
+		solidPlane
+	);
+	const receptacle = new Mesh(receptacleGeometry, receptacleMaterial);
+	receptacle.renderOrder = -2;
+	const receptacleWire = new LineSegments(
+		track(
+			new WireframeGeometry(track(new LatheGeometry(receptacleProfile, 8).rotateX(Math.PI / 2)))
+		),
+		lineMuted
+	);
+	flower.add(receptacle, receptacleWire, glow, filaments, filamentWire, anthers, centerShade);
 
 	// ---- 茎: 細く、ゆるく波打ちながら下へ ----
 	const stemCurve = new CatmullRomCurve3([
@@ -422,13 +454,37 @@
 				flipText: p.flip,
 				anisotropy
 			});
+			// 裏側: 同じ筋（同じ seed）で、白っぽく淡いローズとピーチの色調
+			const pal = palettes[i];
+			const pale = (c: RGB, k: number) => mix(c, creamy, k);
+			const oldBack = p.backMaterial.map;
+			const backMap = createSilkPetal({
+				width: texSize,
+				height: Math.round(texSize * (PETAL_LENGTH / PETAL_WIDTH)),
+				seed: 31 + i * 13,
+				palette: {
+					heart: mix(pal.heart, [0.78, 0.82, 0.55], 0.45),
+					base: pale(pal.base, 0.45),
+					mid: pale(mix(pal.mid, rose, 0.35), 0.5),
+					blush: pale(rose, 0.45),
+					tip: pale(mix(pal.tip, peach, 0.3), 0.55),
+					haze: pale(lilac, 0.5),
+					rim: mix(rose, rust, 0.35),
+					ink: pal.ink,
+					accents: [rose, peach, lilac, creamy, [0.86, 0.9, 0.78]]
+				},
+				texts: [],
+				anisotropy
+			});
 			p.material.map = map;
+			p.backMaterial.map = backMap;
 			p.ghostMaterial.map = map;
-			p.material.needsUpdate = true;
-			p.ghostMaterial.needsUpdate = true;
+			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) m.needsUpdate = true;
 			old?.dispose();
+			oldBack?.dispose();
 		});
 		filamentMaterial.color = toColor([0.98, 0.62, 0.18]);
+		receptacleMaterial.color = toColor(dark ? [0.62, 0.56, 0.3] : [0.78, 0.72, 0.38]);
 		antherMaterial.color = toColor([1, 0.72, 0.22]);
 		centerShadeMaterial.color = toColor(dark ? [0.12, 0.06, 0.05] : [0.45, 0.2, 0.12]);
 		centerShadeMaterial.opacity = dark ? 0.55 : 0.32;
@@ -576,10 +632,14 @@
 		stop();
 		for (const g of geometries) g.dispose();
 		anthers.dispose();
-		for (const p of petals) p.material.map?.dispose();
+		for (const p of petals) {
+			p.material.map?.dispose();
+			p.backMaterial.map?.dispose();
+		}
 		for (const m of tagMaterials) m.map?.dispose();
 		const materials: Material[] = [
-			...petals.flatMap((p) => [p.material, p.ghostMaterial]),
+			...petals.flatMap((p) => [p.material, p.backMaterial, p.ghostMaterial]),
+			receptacleMaterial,
 			antherMaterial,
 			centerShadeMaterial,
 			filamentMaterial,
