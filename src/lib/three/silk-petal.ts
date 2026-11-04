@@ -34,6 +34,8 @@ export function createSilkPetal(options: {
 	palette: SilkPalette;
 	texts: string[];
 	flipText?: boolean;
+	/** 付け根の不透明度（芯の近くの透け具合） */
+	baseAlpha?: number;
 	anisotropy?: number;
 }): CanvasTexture {
 	const { width: W, height: H, palette: p, texts } = options;
@@ -133,8 +135,9 @@ export function createSilkPetal(options: {
 	ctx.globalCompositeOperation = 'destination-in';
 	const mask = ctx.createLinearGradient(0, H, 0, 0);
 	// 芯に近い付け根ほど透け、中ほどから先は光を受けて色が乗る
-	mask.addColorStop(0, 'rgba(0,0,0,0.38)');
-	mask.addColorStop(0.18, 'rgba(0,0,0,0.5)');
+	const ba = options.baseAlpha ?? 0.38;
+	mask.addColorStop(0, `rgba(0,0,0,${ba})`);
+	mask.addColorStop(0.18, `rgba(0,0,0,${ba + (0.78 - ba) * 0.3})`);
 	mask.addColorStop(0.45, 'rgba(0,0,0,0.78)');
 	mask.addColorStop(1, 'rgba(0,0,0,0.8)');
 	ctx.fillStyle = mask;

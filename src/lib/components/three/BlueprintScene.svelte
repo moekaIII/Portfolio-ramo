@@ -103,30 +103,27 @@
 		curl: -0.12,
 		cup: 0.38,
 		tip: 'round' as const,
-		ruffle: 0.24
+		ruffle: 0.2
 	};
-	const petalGeometry = track(
-		createPetalGeometry({ ...petalOptions, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
-	);
-	// 手前の花びら用: くぼみと反りを弱め、強く立ち上げても先が折れて尖らない形
-	const frontPetalOptions = { ...petalOptions, curl: 0.02, cup: 0.14, ruffle: 0.18 };
-	const frontPetalGeometry = track(
-		createPetalGeometry({
-			...frontPetalOptions,
-			segmentsX: high ? 36 : 20,
-			segmentsY: high ? 44 : 24
-		})
-	);
-	// DESIGN 側の線は、BUILD 側と同じ形状オプションから作る（形がずれないように）。
-	// 分割だけを粗くするので、輪郭と波打ちは一致する
-	const wireOf = (options: typeof petalOptions) =>
-		track(
-			new WireframeGeometry(
-				track(createPetalGeometry({ ...options, segmentsX: 10, segmentsY: 16 }))
+	// 手前の花びら用: くぼみと反りを弱め、強く立ち上げても先が折れない形
+	const frontPetalOptions = { ...petalOptions, curl: 0.02, cup: 0.18, ruffle: 0.2 };
+	/**
+	 * 花びらは 1 枚ずつ違う形（seed）で作る。DESIGN 側の線も同じオプション・seed から作り、
+	 * 分割だけを粗くするので、境界をまたいでも輪郭としわが一致する
+	 */
+	function petalShape(front: boolean, seed: number) {
+		const options = { ...(front ? frontPetalOptions : petalOptions), seed };
+		return {
+			geometry: track(
+				createPetalGeometry({ ...options, segmentsX: high ? 40 : 22, segmentsY: high ? 48 : 26 })
+			),
+			wire: track(
+				new WireframeGeometry(
+					track(createPetalGeometry({ ...options, segmentsX: 12, segmentsY: 18 }))
+				)
 			)
-		);
-	const petalWire = wireOf(petalOptions);
-	const frontPetalWire = wireOf(frontPetalOptions);
+		};
+	}
 	const lineMuted = clip(new LineBasicMaterial({ transparent: true, opacity: 0.5 }), wirePlane);
 	const lineAccent = clip(new LineBasicMaterial({ transparent: true, opacity: 0.8 }), wirePlane);
 
@@ -153,6 +150,8 @@
 		flip: boolean;
 		/** 手前（花の下側）にあるほど 1 に近い */
 		lower: number;
+		/** 手前の花びら（花芯を覆う） */
+		front: boolean;
 		/** カメラからの距離で決まる明るさ（手前ほど明るい） */
 		depthTint: number;
 		phase: number;
@@ -168,13 +167,17 @@
 		holder.rotation.z = angle;
 		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
 		const lower = Math.max(0, -Math.cos(angle));
-		const geometry = lower > 0.45 ? frontPetalGeometry : petalGeometry;
+		const front = lower > 0.45;
+		const shape = petalShape(front, 7 + i * 31);
+		const geometry = shape.geometry;
 		const material = silkMaterial(0.72, FrontSide);
 		const backMaterial = silkMaterial(0.8, BackSide);
 		const ghostMaterial = silkMaterial(0.16);
 		const mesh = new Mesh(geometry, material);
 		const back = new Mesh(geometry, backMaterial);
-		back.renderOrder = i;
+		// 手前の花びらは花芯（雄しべ）より後に描き、芯を覆うようにする
+		const order = front ? 30 + i : i;
+		back.renderOrder = order;
 		mesh.add(back);
 		mesh.position.y = PETAL_OFFSET;
 		const pitch = 0.45 + rand() * 0.25 + lower * 0.85;
@@ -182,13 +185,8 @@
 		mesh.rotation.y = (rand() - 0.5) * 0.12;
 		mesh.scale.setScalar(0.9 + rand() * 0.2);
 		mesh.position.z = i * 0.006;
-		mesh.renderOrder = i;
-		mesh.add(
-			new LineSegments(
-				geometry === frontPetalGeometry ? frontPetalWire : petalWire,
-				i % 2 ? lineMuted : lineAccent
-			)
-		);
+		mesh.renderOrder = order;
+		mesh.add(new LineSegments(shape.wire, i % 2 ? lineMuted : lineAccent));
 		holder.add(mesh);
 		// 残像: 少し大きく・少し回した淡い複製
 		const ghosts: Mesh[] = [];
@@ -199,7 +197,7 @@
 			// 残像は横方向にだけ広げ、先端はずらさない（先がぼけないように）
 			ghost.scale.set(mesh.scale.x * (1.05 + k * 0.04), mesh.scale.y, mesh.scale.z);
 			ghost.rotation.z = (k % 2 ? -1 : 1) * 0.025;
-			ghost.renderOrder = i - 0.5;
+			ghost.renderOrder = order - 0.5;
 			holder.add(ghost);
 			ghosts.push(ghost);
 		}
@@ -212,6 +210,7 @@
 			ghostMaterial,
 			pitch,
 			lower,
+			front,
 			depthTint: 1,
 			flip: -Math.sin(angle) < 0,
 			phase: i * 1.3,
@@ -624,6 +623,8 @@
 				palette: palettes[i],
 				texts: [],
 				flipText: p.flip,
+				// 手前の花びらは付け根も透けすぎないようにして、奥の花芯を隠す
+				baseAlpha: p.front ? 0.8 : 0.38,
 				anisotropy
 			});
 			// 裏側: 同じ筋（同じ seed）で、白っぽく淡いローズとピーチの色調
@@ -731,8 +732,6 @@
 	// ---- フレーム更新 ----
 	let boundaryX = 0;
 	let boundaryV = 0;
-	let parallaxX = 0;
-	let parallaxY = 0;
 	let gust = 0;
 	let gustStart = -100;
 	let gustStrength = 0;
@@ -753,13 +752,6 @@
 			const dt = Math.min(delta, 1 / 20);
 			elapsed += dt;
 			const idle = !hasPointer || elapsed - lastPointerAt > 2.5;
-
-			// 視差: カメラと床・背景は動かさず、花だけをカーソルに合わせてわずかに動かす
-			const cx = idle ? Math.sin(elapsed * 0.12) * 0.3 : -pointer.x * 0.35;
-			const cy = idle ? Math.sin(elapsed * 0.09) * 0.15 : -pointer.y * 0.18;
-			parallaxX += (cx - parallaxX) * Math.min(1, dt * 1.2);
-			parallaxY += (cy - parallaxY) * Math.min(1, dt * 1.2);
-			plant.position.set(plantBase.x + parallaxX, plantBase.y + parallaxY, plantBase.z);
 
 			// 境界のばね追従（操作がない間はゆっくり左右に揺れる）
 			const targetNdc = idle
@@ -783,9 +775,9 @@
 				for (const t of tags) t.quaternion.copy(camera.quaternion);
 			}
 
-			// 花: ゆっくり揺れる
-			const tx = idle ? Math.sin(elapsed * 0.2) * 0.04 : pointer.y * 0.06;
-			const ty = idle ? Math.sin(elapsed * 0.15) * 0.05 : pointer.x * 0.08;
+			// 花: マウスには反応せず、ゆっくり揺れるだけ
+			const tx = Math.sin(elapsed * 0.2) * 0.04;
+			const ty = Math.sin(elapsed * 0.15) * 0.05;
 			tiltX += (tx - tiltX) * Math.min(1, dt * 0.8);
 			tiltY += (ty - tiltY) * Math.min(1, dt * 0.8);
 			// 微風: ときどき（6〜12 秒おき）ふっと吹いて、静かに収まる

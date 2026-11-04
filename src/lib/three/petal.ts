@@ -1,4 +1,5 @@
 import { MathUtils, PlaneGeometry } from 'three';
+import { mulberry32 } from './random.ts';
 
 /**
  * 花びらの形状。分割した平面を、付け根と先端が細い輪郭に絞り、
@@ -16,6 +17,11 @@ export function createPetalGeometry(options: {
 	tip?: 'pointed' | 'round';
 	/** 縁の波打ち（幅に対する比）。ふわっとした花びらに使う */
 	ruffle?: number;
+	/**
+	 * 指定すると、規則的な波ではなく、花びらごとに違う不規則なしわ・左右非対称・
+	 * でこぼこした縁にする（自然界の薄い花びら。ポピーのような）
+	 */
+	seed?: number;
 	segmentsX?: number;
 	segmentsY?: number;
 }) {
@@ -26,12 +32,25 @@ export function createPetalGeometry(options: {
 		cup,
 		tip = 'pointed',
 		ruffle = 0,
+		seed,
 		segmentsX = 8,
 		segmentsY = 24
 	} = options;
 	const g = new PlaneGeometry(width, length, segmentsX, segmentsY);
 	g.translate(0, length / 2, 0);
 	const pos = g.attributes.position;
+	// 不規則なしわ: 周波数と位相の違う波を重ねる（花びらごとに seed で変わる）
+	const rand = mulberry32(seed ?? 1);
+	const terms = Array.from({ length: 6 }, (_, k) => ({
+		fu: 0.8 + rand() * 2.8,
+		ft: 1.2 + rand() * 4.2,
+		ph: rand() * Math.PI * 2,
+		a: 1 / (1 + k * 0.6)
+	}));
+	const ampSum = terms.reduce((s, t) => s + t.a, 0);
+	const asym = (rand() - 0.5) * 0.16; // 左右非対称（先がどちらかへ少し流れる）
+	const edgePh = rand() * Math.PI * 2;
+	const lobePh = rand() * Math.PI * 2;
 	for (let i = 0; i < pos.count; i++) {
 		const x = pos.getX(i);
 		const y = pos.getY(i);
@@ -53,7 +72,13 @@ export function createPetalGeometry(options: {
 			profile = Math.pow(s, 0.85) * 0.92 + 0.08 * (1 - t);
 		}
 		const u = x / (width / 2); // -1..1
-		const nx = u * (width / 2) * profile;
+		let ny = y;
+		if (seed !== undefined) {
+			// 縁のでこぼこ: 幅をゆるく増減させ、先端の縁も一様に丸くせず少し凹凸を付ける
+			profile *= 1 + 0.07 * Math.sin(t * Math.PI * 2.6 + lobePh) * t;
+			ny = y * (1 - 0.07 * (0.5 + 0.5 * Math.sin(u * Math.PI * 1.9 + edgePh)) * u * u * t);
+		}
+		const nx = u * (width / 2) * profile + (seed !== undefined ? asym * width * t * t : 0);
 		// 縁ほど大きく波打ち、花びらの上の方ほど波が強い（付け根は平ら）。
 		// 幅（profile）を掛けるので、細くなる先端でも尖らず丸いまま
 		const upper = MathUtils.smoothstep(t, 0.15, 0.7);
@@ -66,8 +91,28 @@ export function createPetalGeometry(options: {
 			// 先端付近だけ波を弱め、先が尖って見えないようにする
 			(1 - 0.75 * MathUtils.smoothstep(t, 0.82, 1)) *
 			profile;
-		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5 + wave;
-		pos.setXYZ(i, nx, y, z);
+		let crinkle = 0;
+		if (seed !== undefined) {
+			for (const k of terms)
+				crinkle += k.a * Math.sin(k.fu * u * Math.PI + k.ft * t * Math.PI + k.ph);
+			crinkle /= ampSum;
+		}
+		const natural =
+			seed === undefined
+				? 0
+				: ruffle *
+					width *
+					1.6 *
+					crinkle *
+					(0.3 + 0.7 * Math.pow(Math.abs(u), 1.3)) *
+					MathUtils.smoothstep(t, 0.08, 0.55) *
+					(1 - 0.4 * MathUtils.smoothstep(t, 0.85, 1)) *
+					profile;
+		const z =
+			curl * length * t * t -
+			cup * width * profile * (1 - u * u) * 0.5 +
+			(seed === undefined ? wave : natural);
+		pos.setXYZ(i, nx, ny, z);
 	}
 	pos.needsUpdate = true;
 	g.computeVertexNormals();
