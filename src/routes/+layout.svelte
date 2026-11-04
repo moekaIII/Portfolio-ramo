@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '@fontsource-variable/inter';
 	import '@fontsource-variable/noto-sans-jp';
+	import 'lenis/dist/lenis.css';
 	import './layout.css';
 	import { onMount } from 'svelte';
 	import { onNavigate } from '$app/navigation';
@@ -8,6 +9,7 @@
 	import Header from '#lib/components/layout/Header.svelte';
 	import Footer from '#lib/components/layout/Footer.svelte';
 	import SkipLink from '#lib/components/layout/SkipLink.svelte';
+	import SmoothScroll from '#lib/components/layout/SmoothScroll.svelte';
 	import { theme } from '#lib/state/theme.svelte.ts';
 	import { viewTransition } from '#lib/utils/view-transition.ts';
 	import type { LayoutProps } from './$types';
@@ -22,6 +24,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+<SmoothScroll />
 <SkipLink />
 <Header />
 <main id="main" tabindex="-1" class="outline-none">

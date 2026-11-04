@@ -5,6 +5,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { nav, site } from '#lib/config/site.ts';
+	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
 	import ThemeToggle from './ThemeToggle.svelte';
 
 	let dialog: HTMLDialogElement | undefined = $state();
@@ -13,6 +14,7 @@
 	function show() {
 		dialog?.showModal();
 		open = true;
+		smoothScroll.lock();
 	}
 	function close() {
 		dialog?.close();
@@ -39,7 +41,10 @@
 	aria-label="メニュー"
 	data-lenis-prevent
 	class="m-0 h-dvh max-h-none w-full max-w-none bg-bg p-0 text-fg backdrop:bg-transparent"
-	onclose={() => (open = false)}
+	onclose={() => {
+		open = false;
+		smoothScroll.unlock();
+	}}
 >
 	<div class="flex h-full flex-col px-gutter pb-10">
 		<div class="flex h-header items-center justify-between">

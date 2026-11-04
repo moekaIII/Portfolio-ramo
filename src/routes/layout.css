@@ -151,18 +151,6 @@
 	}
 }
 
-/* Lenis recommended base styles */
-html.lenis,
-html.lenis body {
-	height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-	overflow: clip;
-}
-.lenis [data-lenis-prevent] {
-	overscroll-behavior: contain;
-}
-
 /* ---------------------------------------------------------------
  * Long-form article (mdsvex). 日本語本文: 17px / 行間 1.9
  * ------------------------------------------------------------- */
