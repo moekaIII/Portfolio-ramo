@@ -103,27 +103,26 @@
 		curl: -0.12,
 		cup: 0.38,
 		tip: 'round' as const,
-		ruffle: 0.2
+		ruffle: 0.24
 	};
 	// 手前の花びら用: くぼみと反りを弱め、強く立ち上げても先が折れない形
-	const frontPetalOptions = { ...petalOptions, curl: 0.02, cup: 0.18, ruffle: 0.2 };
+	const frontPetalOptions = { ...petalOptions, curl: 0.02, cup: 0.14, ruffle: 0.18 };
 	/**
-	 * 花びらは 1 枚ずつ違う形（seed）で作る。DESIGN 側の線も同じオプション・seed から作り、
-	 * 分割だけを粗くするので、境界をまたいでも輪郭としわが一致する
+	 * 花びらの形（通常 / 手前用の 2 種類を共有）。DESIGN 側の線も同じオプションから作り、
+	 * 分割だけを粗くするので、境界をまたいでも輪郭と波打ちが一致する
 	 */
-	function petalShape(front: boolean, seed: number) {
-		const options = { ...(front ? frontPetalOptions : petalOptions), seed };
-		return {
-			geometry: track(
-				createPetalGeometry({ ...options, segmentsX: high ? 40 : 22, segmentsY: high ? 48 : 26 })
-			),
-			wire: track(
-				new WireframeGeometry(
-					track(createPetalGeometry({ ...options, segmentsX: 12, segmentsY: 18 }))
-				)
+	const makeShape = (options: typeof petalOptions) => ({
+		geometry: track(
+			createPetalGeometry({ ...options, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
+		),
+		wire: track(
+			new WireframeGeometry(
+				track(createPetalGeometry({ ...options, segmentsX: 10, segmentsY: 16 }))
 			)
-		};
-	}
+		)
+	});
+	const normalShape = makeShape(petalOptions);
+	const frontShape = makeShape(frontPetalOptions);
 	const lineMuted = clip(new LineBasicMaterial({ transparent: true, opacity: 0.5 }), wirePlane);
 	const lineAccent = clip(new LineBasicMaterial({ transparent: true, opacity: 0.8 }), wirePlane);
 
@@ -168,7 +167,7 @@
 		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
 		const lower = Math.max(0, -Math.cos(angle));
 		const front = lower > 0.45;
-		const shape = petalShape(front, 7 + i * 31);
+		const shape = front ? frontShape : normalShape;
 		const geometry = shape.geometry;
 		const material = silkMaterial(0.72, FrontSide);
 		const backMaterial = silkMaterial(0.8, BackSide);
