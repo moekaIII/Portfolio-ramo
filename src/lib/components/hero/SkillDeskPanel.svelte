@@ -52,10 +52,11 @@
 </script>
 
 <div class="relative flex h-full flex-col">
-	<div class="relative min-h-[18rem] flex-1">
+	<div class="relative min-h-[18rem] flex-1 overflow-hidden">
+		<!-- 装飾のため操作を受け取らない（透明になった後に下のボタンを塞がないように） -->
 		<div
 			class={[
-				'absolute inset-0 transition-opacity duration-700',
+				'pointer-events-none absolute inset-0 transition-opacity duration-700',
 				live ? 'opacity-0' : 'opacity-100'
 			]}
 		>

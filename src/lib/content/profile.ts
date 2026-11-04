@@ -18,6 +18,8 @@ export interface SkillGroup {
 	id: string;
 	group: string;
 	label: string;
+	/** 3D の机で整列したときの列見出し */
+	deskLabel: string;
 	items: Skill[];
 }
 
@@ -32,6 +34,7 @@ export const skills: SkillGroup[] = [
 		id: 'frontend',
 		group: 'Frontend',
 		label: 'フロントエンド',
+		deskLabel: 'フロントエンド',
 		items: [
 			{ name: 'TypeScript', block: 'TypeScript', level: 3, years: 7 },
 			{ name: 'Svelte / SvelteKit', block: 'Svelte', level: 3, years: 5 },
@@ -45,6 +48,7 @@ export const skills: SkillGroup[] = [
 		id: 'design',
 		group: 'Design',
 		label: 'UIデザイン',
+		deskLabel: 'デザイン',
 		items: [
 			{ name: 'UIデザイン（Figma）', block: 'Figma', level: 3, years: 9 },
 			{ name: 'デザインシステム構築', block: 'Design System', level: 3, years: 5 },
@@ -56,6 +60,7 @@ export const skills: SkillGroup[] = [
 		id: 'ux',
 		group: 'UX & Quality',
 		label: 'UX・品質',
+		deskLabel: 'その他',
 		items: [
 			{ name: 'ユーザーリサーチ・ユーザビリティテスト', block: 'UX Research', level: 3, years: 6 },
 			{ name: 'アクセシビリティ（WCAG 2.2）', block: 'a11y', level: 3, years: 6 },

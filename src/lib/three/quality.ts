@@ -3,17 +3,21 @@ export type Quality = 'high' | 'low';
 export interface QualitySettings {
 	/** devicePixelRatio の上限 */
 	maxDpr: number;
-	/** 机に置くブロックの最大数 */
-	maxBlocks: number;
+	/** 種類ごとに机へ置くブロックの最大数 */
+	blocksPerGroup: number;
 	antialias: boolean;
 }
 
 export const QUALITY: Record<Quality, QualitySettings> = {
-	high: { maxDpr: 2, maxBlocks: 14, antialias: true },
-	low: { maxDpr: 1.5, maxBlocks: 9, antialias: false }
+	high: { maxDpr: 2, blocksPerGroup: Infinity, antialias: true },
+	low: { maxDpr: 2, blocksPerGroup: 3, antialias: true }
 };
 
-/** モバイル・低スペック・省データ設定では負荷を下げる */
+/**
+ * モバイル・低スペック・省データ設定では、ブロック数を減らして負荷を下げる。
+ * 文字の読みやすさを優先し、解像度（DPR 上限 2）とアンチエイリアスは下げない。
+ * 静止時は再描画しないため、常時の負荷はほぼない。
+ */
 export function detectQuality(): Quality {
 	const coarse = matchMedia('(pointer: coarse)').matches;
 	const narrow = matchMedia('(max-width: 767px)').matches;

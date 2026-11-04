@@ -33,7 +33,7 @@
 			</dl>
 		</div>
 
-		<div class="col-span-full h-[24rem] md:col-span-6 md:h-[min(68svh,38rem)]">
+		<div class="col-span-full h-[21rem] md:col-span-6 md:h-[min(70svh,40rem)]">
 			<SkillDeskPanel />
 		</div>
 	</Container>

@@ -2,11 +2,13 @@
  * 「散らかったスキルを整列」の机上物理（three.js 非依存）。
  * - 机の上（XZ 平面）を滑るブロックを、長辺方向に並べた円で近似して衝突を解く
  * - scatter: 摩擦・壁・ブロック同士の衝突のみ
- * - arrange: 各ブロックが自動レイアウトの目標位置へばねで吸い寄せられる。1個だけ遅刻する
+ * - arrange: 左から「フロントエンド / デザイン / その他」の列に、左揃えの縦並びで整列する。
+ *   各ブロックは自分の席へばねで吸い寄せられる。1個だけ遅刻する
  */
 
 export interface Body {
 	index: number;
+	groupIndex: number;
 	w: number;
 	d: number;
 	x: number;
@@ -29,7 +31,24 @@ export interface Body {
 export type Mode = 'scatter' | 'arrange';
 
 /** ブロックに表示するラベル。accent はアクセント色で塗る（主力スキル） */
-export type DeskLabel = { text: string; accent: boolean };
+export type DeskLabel = { text: string; accent: boolean; groupIndex: number };
+
+/** スキルの種類（整列時の列） */
+export type DeskGroup = { label: string };
+
+/** 整列時の列見出しの位置（机のローカル座標。x は列の左端） */
+export type ColumnHeader = { groupIndex: number; x: number; z: number };
+
+/** 整列レイアウトの寸法（ワールド単位） */
+export const LAYOUT = {
+	/** 列同士の間隔 */
+	columnGap: 0.5,
+	/** 同じ列内のブロック同士の間隔 */
+	gapZ: 0.16,
+	headerHeight: 0.3,
+	/** 列見出しの下端から最初のブロックまで */
+	headerGap: 0.18
+} as const;
 
 const FRICTION = 2.6;
 const ANGULAR_FRICTION = 3.4;
@@ -56,18 +75,21 @@ export class Desk {
 	halfD = 2;
 	/** 遅刻するブロックの index（arrange のたびに変わる） */
 	lateIndex = -1;
-	/** 遅刻ブロックが到着した時刻（吹き出し表示用） */
-	lateArrivedAt = -Infinity;
-	/** レイアウトグリッドのガイドの不透明度（0..1） */
+	/** 列見出しの不透明度（0..1）。整列時にブロックより先に現れる */
 	guide = 0;
+	/** 整列時の列見出しの位置 */
+	headers: ColumnHeader[] = [];
+	/** 列見出しの文字幅（列の幅の計算に使う。setHeaderWidths で設定） */
+	private headerWidths: number[] = [];
+	/** 整列レイアウトの外寸（カメラの寄りの調整に使う） */
+	extent = { width: 0, depth: 0 };
 
 	pointer = { x: 0, z: 0, vx: 0, vz: 0, active: false };
 
 	private random = mulberry32(20251104);
-	private arrangeCount = 0;
 
-	constructor(sizes: { w: number; d: number }[]) {
-		this.bodies = sizes.map(({ w, d }, index) => {
+	constructor(sizes: { w: number; d: number; groupIndex: number }[]) {
+		this.bodies = sizes.map(({ w, d, groupIndex }, index) => {
 			const radius = d / 2;
 			const n = Math.max(1, Math.ceil(w / d));
 			const span = w / 2 - radius;
@@ -76,6 +98,7 @@ export class Desk {
 			);
 			return {
 				index,
+				groupIndex,
 				w,
 				d,
 				x: 0,
@@ -95,10 +118,16 @@ export class Desk {
 		});
 	}
 
+	setHeaderWidths(widths: number[]) {
+		this.headerWidths = widths;
+		this.layout();
+	}
+
+	/** 机の範囲を更新する（整列レイアウトは机の範囲に依存しない。外寸は extent で取得できる） */
 	setBounds(halfW: number, halfD: number) {
 		this.halfW = halfW;
 		this.halfD = halfD;
-		if (this.mode === 'arrange') this.layout();
+		this.layout();
 	}
 
 	/** 初期配置: 上空から机の上へ落とす */
@@ -132,54 +161,54 @@ export class Desk {
 
 	arrange() {
 		this.mode = 'arrange';
-		this.arrangeCount++;
-		// 2個目以降からランダムに1個を遅刻させる。遅刻したブロックは最後尾の席に着く
+		// 2個目以降からランダムに1個を遅刻させる（席は変わらない）
 		const candidates = this.bodies.slice(1);
 		const late = candidates[Math.floor(this.random() * candidates.length)];
 		this.lateIndex = late.index;
 		this.layout();
-		this.lateArrivedAt = -Infinity;
+		// 列見出しが浮かび上がってから、ブロックが順に自分の席へ向かう
 		this.bodies.forEach((b, i) => {
-			b.startAt = this.time + i * 0.035;
+			b.startAt = this.time + 0.18 + i * 0.035;
 		});
-		late.startAt = this.time + 1.1;
+		late.startAt = this.time + 1.3;
 	}
 
-	get arrangedCount() {
-		return this.arrangeCount;
-	}
-
-	/** flex-wrap 風の自動レイアウトで目標位置を決める */
+	/**
+	 * 左から種類順（groupIndex 順）の列に、左揃えの縦並びで並べる（列内は入力の並び順）。
+	 * 各列: [見出し] → [ブロック] → [ブロック] …
+	 */
 	private layout() {
-		const gapX = 0.16;
-		const gapZ = 0.2;
-		const maxW = this.halfW * 2 * 0.88;
-		const rows: Body[][] = [[]];
-		let rowW = 0;
-		const late = this.bodies[this.lateIndex];
-		const ordered = late ? [...this.bodies.filter((b) => b !== late), late] : this.bodies;
-		for (const b of ordered) {
-			const next = rowW === 0 ? b.w : rowW + gapX + b.w;
-			if (next > maxW && rowW > 0) {
-				rows.push([b]);
-				rowW = b.w;
-			} else {
-				rows.at(-1)!.push(b);
-				rowW = next;
-			}
-		}
+		const { columnGap, gapZ, headerHeight, headerGap } = LAYOUT;
 		const d = this.bodies[0]?.d ?? 0.6;
-		const totalD = rows.length * d + (rows.length - 1) * gapZ;
-		rows.forEach((row, ri) => {
-			const w = row.reduce((s, b) => s + b.w, 0) + gapX * (row.length - 1);
-			let x = -w / 2;
-			const z = -totalD / 2 + d / 2 + ri * (d + gapZ);
-			for (const b of row) {
+
+		const columns = new Map<number, Body[]>();
+		for (const b of this.bodies) {
+			const list = columns.get(b.groupIndex) ?? [];
+			list.push(b);
+			columns.set(b.groupIndex, list);
+		}
+		const ordered = [...columns.entries()].sort(([a], [b]) => a - b);
+
+		const colWidths = ordered.map(([gi, list]) =>
+			Math.max(this.headerWidths[gi] ?? 0, ...list.map((b) => b.w))
+		);
+		const width = colWidths.reduce((s, w) => s + w, 0) + columnGap * (ordered.length - 1);
+		const tallest = Math.max(...ordered.map(([, list]) => list.length));
+		const depth = headerHeight + headerGap + tallest * d + (tallest - 1) * gapZ;
+
+		const x0 = -width / 2;
+		const z0 = -depth / 2;
+		this.headers = [];
+		let x = x0;
+		ordered.forEach(([groupIndex, list], ci) => {
+			this.headers.push({ groupIndex, x, z: z0 + headerHeight / 2 });
+			list.forEach((b, i) => {
 				b.tx = x + b.w / 2;
-				b.tz = z;
-				x += b.w + gapX;
-			}
+				b.tz = z0 + headerHeight + headerGap + d / 2 + i * (d + gapZ);
+			});
+			x += colWidths[ci] + columnGap;
 		});
+		this.extent = { width, depth };
 	}
 
 	movePointer(x: number, z: number, dt: number) {
@@ -220,7 +249,7 @@ export class Desk {
 	private substep(dt: number) {
 		this.time += dt;
 		const arranged = this.mode === 'arrange';
-		this.guide += ((arranged ? 1 : 0) - this.guide) * Math.min(1, dt * 3);
+		this.guide += ((arranged ? 1 : 0) - this.guide) * Math.min(1, dt * (arranged ? 4 : 6));
 
 		for (const b of this.bodies) {
 			// 跳ね（見た目の高さ）
@@ -244,9 +273,6 @@ export class Desk {
 				b.va += (k * 1.2 * da - c * 1.1 * b.va) * dt;
 				if (late && b.y === 0 && b.vy === 0 && Math.hypot(b.tx - b.x, b.tz - b.z) > 0.8) {
 					b.vy = 4.5; // ぴょんぴょん跳ねながら向かう
-				}
-				if (late && this.lateArrivedAt < 0 && Math.hypot(b.tx - b.x, b.tz - b.z) < 0.05) {
-					this.lateArrivedAt = this.time;
 				}
 			} else {
 				const f = Math.exp(-FRICTION * dt);
@@ -375,12 +401,3 @@ export class Desk {
 		}
 	}
 }
-
-/** 遅刻ブロックの言い訳（整列するたびに順番に表示） */
-export const LATE_EXCUSES = [
-	'すみません、遅れました…',
-	'1px ずれてて直してました',
-	'レビュー待ちでした',
-	'キャッシュが残ってて…',
-	'ちょっと margin が…'
-];

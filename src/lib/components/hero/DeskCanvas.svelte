@@ -3,7 +3,7 @@
 	import { Canvas } from '@threlte/core';
 	import { NoToneMapping, WebGLRenderer } from 'three';
 	import SkillDesk from '#lib/components/three/SkillDesk.svelte';
-	import { deskLabels } from '#lib/content/desk-labels.ts';
+	import { deskGroups, getDeskLabels } from '#lib/content/desk-labels.ts';
 	import { QUALITY, detectQuality } from '#lib/three/quality.ts';
 
 	type Props = {
@@ -16,7 +16,7 @@
 	let { arranged, ontoggle, onready }: Props = $props();
 
 	const settings = QUALITY[detectQuality()];
-	const labels = deskLabels.slice(0, settings.maxBlocks);
+	const labels = getDeskLabels(settings.blocksPerGroup);
 
 	let container: HTMLDivElement | undefined = $state();
 	let inView = $state(true);
@@ -56,6 +56,6 @@
 		renderMode="on-demand"
 		toneMapping={NoToneMapping}
 	>
-		<SkillDesk {labels} {arranged} {active} {ontoggle} />
+		<SkillDesk {labels} groups={deskGroups} {arranged} {active} {ontoggle} />
 	</Canvas>
 </div>
