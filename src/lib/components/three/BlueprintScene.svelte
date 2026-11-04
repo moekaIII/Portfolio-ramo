@@ -145,7 +145,9 @@
 		const ghostMaterial = silkMaterial(0.16);
 		const mesh = new Mesh(petalGeometry, material);
 		mesh.position.y = PETAL_OFFSET;
-		const pitch = 0.45 + rand() * 0.35;
+		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
+		const lower = Math.max(0, -Math.cos(angle));
+		const pitch = 0.45 + rand() * 0.25 + lower * 0.85;
 		mesh.rotation.x = pitch;
 		mesh.rotation.y = (rand() - 0.5) * 0.4;
 		mesh.scale.setScalar(0.85 + rand() * 0.3);
@@ -159,7 +161,9 @@
 			const ghost = new Mesh(petalGeometry, ghostMaterial);
 			ghost.position.copy(mesh.position);
 			ghost.rotation.copy(mesh.rotation);
-			ghost.scale.copy(mesh.scale).multiplyScalar(1.04 + k * 0.04);
+			// 残像は横方向にだけ広げ、先端はずらさない（先がぼけないように）
+			ghost.scale.set(mesh.scale.x * (1.05 + k * 0.04), mesh.scale.y, mesh.scale.z);
+			ghost.rotation.z = (k % 2 ? -1 : 1) * 0.025;
 			ghost.renderOrder = i - 0.5;
 			holder.add(ghost);
 			ghosts.push(ghost);
@@ -353,14 +357,25 @@
 		const coral: RGB = [0.98, 0.62, 0.48];
 		const pink: RGB = [0.98, 0.8, 0.8];
 		const rust: RGB = [0.62, 0.24, 0.12];
+		const gold: RGB = [0.99, 0.74, 0.22];
+		const peach: RGB = [1, 0.74, 0.58];
+		const rose: RGB = [0.95, 0.55, 0.62];
+		const magenta: RGB = [0.86, 0.36, 0.56];
+		const lilac: RGB = [0.84, 0.76, 0.92];
+		const creamy: RGB = [1, 0.95, 0.86];
+		const apricot: RGB = [0.98, 0.6, 0.32];
 		const palettes: SilkPalette[] = [0, 1, 2, 3, 4].map((i) => {
 			const warmth = [0.0, 0.35, 0.75, 0.55, 0.15][i];
 			return {
-				base: mix(orange, [0.98, 0.7, 0.25], 0.25 - warmth * 0.2),
-				mid: mix(coral, orange, 0.5 - warmth * 0.4),
-				tip: mix(pink, coral, 0.35 - warmth * 0.3),
+				heart: mix(gold, orange, warmth * 0.4),
+				base: mix(orange, apricot, 0.3 + warmth * 0.3),
+				mid: mix(coral, peach, warmth * 0.5),
+				blush: mix(rose, coral, warmth * 0.6),
+				tip: mix(pink, lilac, 0.2 + (1 - warmth) * 0.25),
+				haze: mix(lilac, creamy, warmth * 0.5),
 				rim: rust,
-				ink: mix(rust, [0.4, 0.15, 0.1], 0.4)
+				ink: mix(rust, [0.4, 0.15, 0.1], 0.4),
+				accents: [gold, peach, rose, magenta, lilac, creamy, apricot]
 			};
 		});
 		const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -503,7 +518,7 @@
 				p.mesh.rotation.x = x;
 				p.ghosts.forEach((g, gi) => {
 					const lag = Math.sin(elapsed * 0.5 + p.phase - 0.6 - gi * 0.4) * 0.035;
-					g.rotation.x = p.pitch + lag + wave * 0.7 + 0.03 * (gi + 1);
+					g.rotation.x = x + (lag - breathe) * 0.4;
 				});
 			}
 

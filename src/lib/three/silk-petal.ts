@@ -5,7 +5,7 @@ import { mulberry32, type RGB } from './watercolor.ts';
  * 光が透ける薄い花びら（ポピーのような）のテクスチャ。
  * UV: u = 幅方向（0..1）、v = 付け根(0)→先端(1)。テクスチャの縁がそのまま花びらの縁になる。
  * - 付け根の濃いオレンジから、先端の淡いピンクへ溶けるグラデーション
- * - 縁へ向かってゆっくり透明になる（ふわっとした輪郭）
+ * - ゴールド・ピーチ・ローズ・マゼンタ・ライラック・淡いグリーンのにじみを重ねた、複雑な色味
  * - 薄い布のような、付け根から伸びる淡い筋と、縁の一部に溜まる深いさび色
  */
 export interface SilkPalette {
@@ -14,6 +14,14 @@ export interface SilkPalette {
 	tip: RGB;
 	rim: RGB;
 	ink: RGB;
+	/** 付け根の差し色（ゴールドなど） */
+	heart: RGB;
+	/** 中ほどの差し色（ローズなど） */
+	blush: RGB;
+	/** 先端寄りの差し色（ライラックなど） */
+	haze: RGB;
+	/** 花びらの上に薄く重ねる、さまざまな色のにじみ */
+	accents: RGB[];
 }
 
 const css = ([r, g, b]: RGB, a: number) =>
@@ -34,11 +42,14 @@ export function createSilkPetal(options: {
 	const ctx = canvas.getContext('2d')!;
 	const Y = (v: number) => H - v * H;
 
-	// 1. 色: 付け根 → 中ほど → 先端
+	// 1. 色: 付け根のゴールド → オレンジ → コーラル → ローズ → 先端の淡いライラックピンク
 	const g = ctx.createLinearGradient(0, H, 0, 0);
-	g.addColorStop(0, css(p.base, 1));
-	g.addColorStop(0.3 + rand() * 0.1, css(p.mid, 1));
-	g.addColorStop(1, css(p.tip, 1));
+	g.addColorStop(0, css(p.heart, 1));
+	g.addColorStop(0.12 + rand() * 0.05, css(p.base, 1));
+	g.addColorStop(0.35 + rand() * 0.08, css(p.mid, 1));
+	g.addColorStop(0.62 + rand() * 0.08, css(p.blush, 1));
+	g.addColorStop(0.85, css(p.tip, 1));
+	g.addColorStop(1, css(p.haze, 1));
 	ctx.fillStyle = g;
 	ctx.fillRect(0, 0, W, H);
 
@@ -54,12 +65,25 @@ export function createSilkPetal(options: {
 		const v = rand();
 		blob(rand() * W, Y(v), W * (0.2 + rand() * 0.3), v < 0.5 ? p.mid : p.tip, 0.25);
 	}
+	// 複雑さ: いろいろな色のにじみを、小さいものから大きいものまで薄く重ねる
+	for (let i = 0; i < 46; i++) {
+		const c = p.accents[Math.floor(rand() * p.accents.length)];
+		blob(rand() * W, Y(rand()), W * (0.06 + rand() * 0.28), c, 0.08 + rand() * 0.16);
+	}
+	// 付け根まわりのゴールドと、淡いグリーンの透け
+	for (let i = 0; i < 6; i++) {
+		blob(W * (0.3 + rand() * 0.4), Y(rand() * 0.18), W * (0.12 + rand() * 0.15), p.heart, 0.3);
+	}
+	blob(W * 0.5, Y(0.02), W * 0.22, [0.6, 0.72, 0.45], 0.22);
 
 	// 3. 付け根から放射状に伸びる、薄い布のような筋（ひだ）
 	ctx.lineCap = 'round';
 	for (let i = 0; i < 26; i++) {
 		const u = rand();
-		ctx.strokeStyle = css(rand() < 0.5 ? p.base : p.rim, 0.05 + rand() * 0.07);
+		const vein = [p.base, p.rim, p.blush, ...p.accents][
+			Math.floor(rand() * (3 + p.accents.length))
+		];
+		ctx.strokeStyle = css(vein, 0.05 + rand() * 0.09);
 		ctx.lineWidth = W * (0.004 + rand() * 0.01);
 		ctx.beginPath();
 		ctx.moveTo(W * 0.5, H);
@@ -105,25 +129,25 @@ export function createSilkPetal(options: {
 		ctx.restore();
 	});
 
-	// 6. 透明度: 中心ほど濃く、縁へ向かってゆっくり透ける（不規則に）
+	// 6. 透明度: 付け根ほど濃く、全体は光が透ける程度に。先端はぼかさず、くっきり残す
 	ctx.globalCompositeOperation = 'destination-in';
-	const mask = ctx.createRadialGradient(W * 0.5, Y(0.05), 0, W * 0.5, Y(0.45), H * 0.7);
+	const mask = ctx.createLinearGradient(0, H, 0, 0);
 	mask.addColorStop(0, 'rgba(0,0,0,0.95)');
-	mask.addColorStop(0.55, 'rgba(0,0,0,0.78)');
-	mask.addColorStop(1, 'rgba(0,0,0,0.38)');
+	mask.addColorStop(0.5, 'rgba(0,0,0,0.82)');
+	mask.addColorStop(1, 'rgba(0,0,0,0.78)');
 	ctx.fillStyle = mask;
 	ctx.fillRect(0, 0, W, H);
+	// 左右の縁だけ、ごくわずかに柔らかくする
 	ctx.globalCompositeOperation = 'destination-out';
-	for (let i = 0; i < 320; i++) {
-		const t = rand();
-		const r = W * (0.05 + rand() * 0.08);
-		const s = rand();
-		const [x, y] = s < 0.38 ? [-r * 0.2, Y(t)] : s < 0.76 ? [W + r * 0.2, Y(t)] : [W * t, -r * 0.2];
-		const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
-		rg.addColorStop(0, 'rgba(0,0,0,0.5)');
+	for (let i = 0; i < 140; i++) {
+		const t = rand() * 0.85;
+		const r = W * (0.02 + rand() * 0.03);
+		const x = rand() < 0.5 ? -r * 0.4 : W + r * 0.4;
+		const rg = ctx.createRadialGradient(x, Y(t), 0, x, Y(t), r);
+		rg.addColorStop(0, 'rgba(0,0,0,0.45)');
 		rg.addColorStop(1, 'rgba(0,0,0,0)');
 		ctx.fillStyle = rg;
-		ctx.fillRect(x - r, y - r, r * 2, r * 2);
+		ctx.fillRect(x - r, Y(t) - r, r * 2, r * 2);
 	}
 	ctx.globalCompositeOperation = 'source-over';
 
