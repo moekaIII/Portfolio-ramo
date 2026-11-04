@@ -29,9 +29,9 @@
 	>
 		<p class="eyebrow mb-8 flex items-center gap-3">
 			<span aria-hidden="true" class="h-px w-8 shrink-0 bg-accent-text"></span>
-			<span>
+			<span class="flex flex-wrap gap-x-[0.5em]">
 				{#each site.author.jobTitle.split(' / ') as part, i (part)}
-					<span class="inline-block">{i > 0 ? '/ ' : ''}{part}</span>{' '}
+					<span>{i > 0 ? '/ ' : ''}{part}</span>
 				{/each}
 			</span>
 		</p>
