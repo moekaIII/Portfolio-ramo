@@ -32,12 +32,11 @@
 		WireframeGeometry,
 		type Material
 	} from 'three';
-	import { skillChips } from '#lib/content/hero-skills.ts';
 	import { theme } from '#lib/state/theme.svelte.ts';
 	import { cssVarToRgb } from '#lib/three/css-color.ts';
 	import { createPetalGeometry } from '#lib/three/petal.ts';
 	import { createBackdrop, createSilkPetal, type SilkPalette } from '#lib/three/silk-petal.ts';
-	import { mulberry32, type RGB } from '#lib/three/watercolor.ts';
+	import { mulberry32, type RGB } from '#lib/three/random.ts';
 	import type { QualitySettings } from '#lib/three/quality.ts';
 
 	type Props = {
@@ -96,10 +95,10 @@
 		curl: 0.14,
 		cup: 0.38,
 		tip: 'round' as const,
-		ruffle: 0.2
+		ruffle: 0.16
 	};
 	const petalGeometry = track(
-		createPetalGeometry({ ...petalOptions, segmentsX: high ? 28 : 16, segmentsY: high ? 32 : 18 })
+		createPetalGeometry({ ...petalOptions, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
 	);
 	const petalWire = track(
 		new WireframeGeometry(
@@ -121,13 +120,11 @@
 			solidPlane
 		);
 
-	const perPetal = Math.ceil(skillChips.length / PETALS);
 	type Petal = {
 		mesh: Mesh;
 		ghosts: Mesh[];
 		material: MeshBasicMaterial;
 		ghostMaterial: MeshBasicMaterial;
-		texts: string[];
 		pitch: number;
 		flip: boolean;
 		phase: number;
@@ -174,7 +171,6 @@
 			ghosts,
 			material,
 			ghostMaterial,
-			texts: skillChips.slice(i * perPetal, (i + 1) * perPetal).map((c) => c.text),
 			pitch,
 			flip: -Math.sin(angle) < 0,
 			phase: i * 1.3,
@@ -185,6 +181,8 @@
 	// ---- 花芯: 放射状に広がる細い雄しべと、先の葯。中心は赤みを帯びて光る ----
 	const filamentCount = high ? 220 : 110;
 	const filamentPositions: number[] = [];
+	const filamentColors: number[] = [];
+	const shade: number[] = [];
 	const antherMatrix = new Matrix4();
 	const antherGeometry = track(new SphereGeometry(0.035, 6, 4));
 	const antherMaterial = clip(
@@ -203,11 +201,23 @@
 		const s = 0.7 + rand() * 0.8;
 		antherMatrix.makeScale(s, s * 0.6, s).setPosition(x, y, z);
 		anthers.setMatrixAt(i, antherMatrix);
+		// 手前（花の下側 = -Y）の雄しべほど、立ち上がった花びらの陰になって暗い
+		const lit = MathUtils.smoothstep(y, -0.55, 0.45);
+		shade.push(0.32 + 0.68 * lit);
+		filamentColors.push(0.5, 0.5, 0.5, ...Array(3).fill(0.3 + 0.7 * lit));
 	}
+	// 葯の明るさ（陰の濃さ）をインスタンスごとの色で掛ける
+	shade.forEach((k, i) => anthers.setColorAt(i, new Color(k, k, k)));
 	const filamentGeometry = track(new BufferGeometry());
 	filamentGeometry.setAttribute('position', new Float32BufferAttribute(filamentPositions, 3));
+	filamentGeometry.setAttribute('color', new Float32BufferAttribute(filamentColors, 3));
 	const filamentMaterial = clip(
-		new LineBasicMaterial({ transparent: true, opacity: 0.75, depthWrite: false }),
+		new LineBasicMaterial({
+			transparent: true,
+			opacity: 0.8,
+			depthWrite: false,
+			vertexColors: true
+		}),
 		solidPlane
 	);
 	const filaments = new LineSegments(filamentGeometry, filamentMaterial);
@@ -232,9 +242,30 @@
 	);
 	const glow = new Sprite(glowMaterial);
 	glow.scale.setScalar(3.2);
-	glow.position.z = 0.4;
+	// 光は奥側（上）へずらし、手前側は陰に沈める
+	glow.position.set(0, 0.35, 0.4);
+	// 手前の花びらが落とす影（花芯の手前側に重ねる柔らかい暗がり）
+	const shadeTexture = (() => {
+		const c = Object.assign(document.createElement('canvas'), { width: 128, height: 128 });
+		const ctx = c.getContext('2d')!;
+		const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+		g.addColorStop(0, 'rgba(255,255,255,1)');
+		g.addColorStop(0.5, 'rgba(255,255,255,0.55)');
+		g.addColorStop(1, 'rgba(255,255,255,0)');
+		ctx.fillStyle = g;
+		ctx.fillRect(0, 0, 128, 128);
+		return new CanvasTexture(c);
+	})();
+	const centerShadeMaterial = clip(
+		new SpriteMaterial({ map: shadeTexture, transparent: true, depthWrite: false }),
+		solidPlane
+	);
+	const centerShade = new Sprite(centerShadeMaterial);
+	centerShade.scale.set(1.9, 1.2, 1);
+	centerShade.position.set(0, -0.45, 0.75);
+	centerShade.renderOrder = 22;
 	glow.renderOrder = 19;
-	flower.add(glow, filaments, filamentWire, anthers);
+	flower.add(glow, filaments, filamentWire, anthers, centerShade);
 
 	// ---- 茎: 細く、ゆるく波打ちながら下へ ----
 	const stemCurve = new CatmullRomCurve3([
@@ -387,7 +418,7 @@
 				height: Math.round(texSize * (PETAL_LENGTH / PETAL_WIDTH)),
 				seed: 31 + i * 13,
 				palette: palettes[i],
-				texts: p.texts,
+				texts: [],
 				flipText: p.flip,
 				anisotropy
 			});
@@ -399,6 +430,8 @@
 		});
 		filamentMaterial.color = toColor([0.98, 0.62, 0.18]);
 		antherMaterial.color = toColor([1, 0.72, 0.22]);
+		centerShadeMaterial.color = toColor(dark ? [0.12, 0.06, 0.05] : [0.45, 0.2, 0.12]);
+		centerShadeMaterial.opacity = dark ? 0.55 : 0.32;
 		glowMaterial.color = toColor([1, 0.35, 0.18]);
 		glowMaterial.blending = dark ? AdditiveBlending : NormalBlending;
 		glowMaterial.opacity = dark ? 0.55 : 0.7;
@@ -548,6 +581,7 @@
 		const materials: Material[] = [
 			...petals.flatMap((p) => [p.material, p.ghostMaterial]),
 			antherMaterial,
+			centerShadeMaterial,
 			filamentMaterial,
 			glowMaterial,
 			stemMaterial,
@@ -558,6 +592,7 @@
 		];
 		for (const m of materials) m.dispose();
 		glowTexture.dispose();
+		shadeTexture.dispose();
 		backdrop?.dispose();
 		scene.background = null;
 	});

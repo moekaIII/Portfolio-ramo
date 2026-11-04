@@ -1,5 +1,5 @@
 import { CanvasTexture, SRGBColorSpace } from 'three';
-import { mulberry32, type RGB } from './watercolor.ts';
+import { mulberry32, type RGB } from './random.ts';
 
 /**
  * 光が透ける薄い花びら（ポピーのような）のテクスチャ。

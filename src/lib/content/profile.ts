@@ -7,8 +7,6 @@ export type SkillLevel = 1 | 2 | 3;
 
 export interface Skill {
 	name: string;
-	/** ヒーローの 3D に流す短い英語名（未指定なら 3D には出さない） */
-	tag?: string;
 	level: SkillLevel;
 	/** 実務経験年数 */
 	years: number;
@@ -33,12 +31,12 @@ export const skills: SkillGroup[] = [
 		group: 'Frontend',
 		label: 'フロントエンド',
 		items: [
-			{ name: 'TypeScript', tag: 'TypeScript', level: 3, years: 7 },
-			{ name: 'Svelte / SvelteKit', tag: 'SvelteKit', level: 3, years: 5 },
-			{ name: 'React / Next.js', tag: 'Next.js', level: 3, years: 6 },
-			{ name: 'HTML / CSS（設計・アクセシブルな実装）', tag: 'CSS', level: 3, years: 10 },
-			{ name: 'Three.js / WebGL', tag: 'WebGL', level: 2, years: 3 },
-			{ name: 'Node.js', tag: 'Node.js', level: 2, years: 5 }
+			{ name: 'TypeScript', level: 3, years: 7 },
+			{ name: 'Svelte / SvelteKit', level: 3, years: 5 },
+			{ name: 'React / Next.js', level: 3, years: 6 },
+			{ name: 'HTML / CSS（設計・アクセシブルな実装）', level: 3, years: 10 },
+			{ name: 'Three.js / WebGL', level: 2, years: 3 },
+			{ name: 'Node.js', level: 2, years: 5 }
 		]
 	},
 	{
@@ -46,10 +44,10 @@ export const skills: SkillGroup[] = [
 		group: 'Design',
 		label: 'UIデザイン',
 		items: [
-			{ name: 'UIデザイン（Figma）', tag: 'Figma', level: 3, years: 9 },
-			{ name: 'デザインシステム構築', tag: 'Design Systems', level: 3, years: 5 },
-			{ name: 'プロトタイピング', tag: 'Prototyping', level: 3, years: 8 },
-			{ name: 'モーションデザイン', tag: 'Motion', level: 2, years: 4 }
+			{ name: 'UIデザイン（Figma）', level: 3, years: 9 },
+			{ name: 'デザインシステム構築', level: 3, years: 5 },
+			{ name: 'プロトタイピング', level: 3, years: 8 },
+			{ name: 'モーションデザイン', level: 2, years: 4 }
 		]
 	},
 	{
@@ -57,11 +55,11 @@ export const skills: SkillGroup[] = [
 		group: 'UX & Quality',
 		label: 'UX・品質',
 		items: [
-			{ name: 'ユーザーリサーチ・ユーザビリティテスト', tag: 'UX Research', level: 3, years: 6 },
-			{ name: 'アクセシビリティ（WCAG 2.2）', tag: 'Accessibility', level: 3, years: 6 },
-			{ name: 'Webパフォーマンス（Core Web Vitals）', tag: 'Web Performance', level: 3, years: 5 },
-			{ name: 'テスト自動化（Vitest / Playwright）', tag: 'Testing', level: 2, years: 4 },
-			{ name: 'アクセス解析・A/Bテスト', tag: 'A/B Testing', level: 2, years: 5 }
+			{ name: 'ユーザーリサーチ・ユーザビリティテスト', level: 3, years: 6 },
+			{ name: 'アクセシビリティ（WCAG 2.2）', level: 3, years: 6 },
+			{ name: 'Webパフォーマンス（Core Web Vitals）', level: 3, years: 5 },
+			{ name: 'テスト自動化（Vitest / Playwright）', level: 2, years: 4 },
+			{ name: 'アクセス解析・A/Bテスト', level: 2, years: 5 }
 		]
 	}
 ];

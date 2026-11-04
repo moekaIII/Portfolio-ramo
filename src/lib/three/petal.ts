@@ -53,8 +53,14 @@ export function createPetalGeometry(options: {
 		const u = x / (width / 2); // -1..1
 		const nx = u * (width / 2) * profile;
 		// 縁ほど大きく波打つ（中心線はほぼ動かない）
+		// 先端に向かって波を消し、先が尖らないようにする（sin(πt) は付け根と先端で 0）
 		const wave =
-			ruffle * width * Math.sin(t * Math.PI * 5 + u * 2.2) * Math.pow(Math.abs(u), 2) * t;
+			ruffle *
+			width *
+			Math.sin(t * Math.PI * 3 + u * 1.6) *
+			Math.pow(Math.abs(u), 2) *
+			Math.sin(Math.PI * Math.min(1, t * 1.1)) *
+			profile;
 		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5 + wave;
 		pos.setXYZ(i, nx, y, z);
 	}
