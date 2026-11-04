@@ -18,7 +18,9 @@ export default defineConfig({
 				warningFilter: (warning) =>
 					!(warning.code === 'script_context_deprecated' && warning.filename?.endsWith('.md'))
 			},
-			adapter: adapter(),
+			adapter: adapter({ fallback: '404.html' }),
+			// 小さなメイン CSS は HTML にインライン化し、レンダーブロッキングなリクエストをなくす
+			inlineStyleThreshold: 50_000,
 			preprocess: [mdsvex({ extensions: ['.svx', '.md'] })],
 			extensions: ['.svelte', '.svx', '.md']
 		})
