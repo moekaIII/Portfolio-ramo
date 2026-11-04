@@ -2,21 +2,12 @@
 	import { onMount } from 'svelte';
 	import { Canvas } from '@threlte/core';
 	import { NoToneMapping, WebGLRenderer } from 'three';
-	import SkillDesk from '#lib/components/three/SkillDesk.svelte';
-	import { deskGroups, getDeskLabels } from '#lib/content/desk-labels.ts';
+	import BlueprintScene from '#lib/components/three/BlueprintScene.svelte';
 	import { QUALITY, detectQuality } from '#lib/three/quality.ts';
 
-	type Props = {
-		arranged: boolean;
-		ontoggle: () => void;
-		/** 初回フレームの描画後に呼ばれる（フォールバックからのクロスフェード用） */
-		onready?: () => void;
-	};
-
-	let { arranged, ontoggle, onready }: Props = $props();
+	let { onready }: { onready?: () => void } = $props();
 
 	const settings = QUALITY[detectQuality()];
-	const labels = getDeskLabels(settings.blocksPerGroup);
 
 	let container: HTMLDivElement | undefined = $state();
 	let inView = $state(true);
@@ -24,7 +15,7 @@
 	const active = $derived(inView && pageVisible);
 
 	onMount(() => {
-		// 画面外・タブ非表示の間は物理演算も描画も止める
+		// 画面外・タブ非表示の間は描画を止める
 		const io = new IntersectionObserver(([entry]) => (inView = entry.isIntersecting));
 		if (container) io.observe(container);
 		const onVisibility = () => (pageVisible = document.visibilityState === 'visible');
@@ -48,14 +39,13 @@
 	}
 </script>
 
-<!-- 縦スクロールはブラウザに任せ、横方向の操作だけをブロックを押す動作に使う -->
-<div bind:this={container} aria-hidden="true" class="absolute inset-0 cursor-pointer touch-pan-y">
+<div bind:this={container} aria-hidden="true" class="absolute inset-0 touch-pan-y">
 	<Canvas
 		{createRenderer}
 		dpr={[1, settings.maxDpr]}
 		renderMode="on-demand"
 		toneMapping={NoToneMapping}
 	>
-		<SkillDesk {labels} groups={deskGroups} {arranged} {active} {ontoggle} />
+		<BlueprintScene {settings} {active} />
 	</Canvas>
 </div>

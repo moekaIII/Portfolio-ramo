@@ -1,26 +1,25 @@
 <script lang="ts">
 	import { site } from '#lib/config/site.ts';
 	import Container from '#lib/components/ui/Container.svelte';
-	import SkillDeskPanel from './SkillDeskPanel.svelte';
+	import HeroVisual from './HeroVisual.svelte';
 </script>
 
-<!-- メインビジュアル: 氏名・見出し・肩書きと、スキルの机だけに絞る -->
-<section aria-labelledby="hero-heading" class="relative overflow-hidden">
+<!--
+  メインビジュアル: 3D を画面いっぱいに使い、文字は左下の氏名・肩書きだけ。
+  「デザインと実装の境界をなくす」は、設計図（左）と実物（右）の境界を動かす 3D そのもので表現する。
+-->
+<section aria-labelledby="hero-heading" class="relative isolate min-h-svh overflow-hidden">
+	<div class="absolute inset-0 -z-10">
+		<HeroVisual />
+	</div>
 	<Container
-		class="grid-12 min-h-svh content-center items-center gap-y-12 pt-[calc(var(--header-h)+2.5rem)] pb-[clamp(3rem,7vw,5rem)]"
+		class="pointer-events-none flex min-h-svh flex-col justify-end pb-[clamp(2rem,5vw,3.5rem)]"
 	>
-		<div class="col-span-full md:col-span-6">
-			<p class="mb-6 text-sm font-medium">
-				{site.author.name}<span class="ml-3 text-fg-muted">{site.author.nameEn}</span>
-			</p>
-			<h1 id="hero-heading" class="text-h1 font-semibold">
-				デザインと実装の<br />境界をなくす。
-			</h1>
-			<p class="mt-6 text-fg-muted">{site.author.jobTitle}</p>
-		</div>
-
-		<div class="col-span-full h-[21rem] md:col-span-6 md:h-[min(70svh,40rem)]">
-			<SkillDeskPanel />
-		</div>
+		<h1 id="hero-heading" class="pointer-events-auto w-fit text-sm leading-relaxed">
+			<span class="block font-semibold">
+				{site.author.name}<span class="ml-3 font-normal text-fg-muted">{site.author.nameEn}</span>
+			</span>
+			<span class="block text-fg-muted">{site.author.jobTitle}</span>
+		</h1>
 	</Container>
 </section>

@@ -1,5 +1,5 @@
 /**
- * スキル・経歴・強み。トップページの全セクションと 3D ヒーローのブロックはこのデータから生成される。
+ * スキル・要点・経歴・強み。トップページの各セクションはこのデータから生成される。
  * TODO(owner): 実際の内容に差し替える
  */
 
@@ -7,8 +7,8 @@ export type SkillLevel = 1 | 2 | 3;
 
 export interface Skill {
 	name: string;
-	/** 3D ブロックに表示する短い名前（未指定なら 3D には出さない） */
-	block?: string;
+	/** ヒーローの 3D に流す短い英語名（未指定なら 3D には出さない） */
+	tag?: string;
 	level: SkillLevel;
 	/** 実務経験年数 */
 	years: number;
@@ -18,8 +18,6 @@ export interface SkillGroup {
 	id: string;
 	group: string;
 	label: string;
-	/** 3D の机で整列したときの列見出し */
-	deskLabel: string;
 	items: Skill[];
 }
 
@@ -34,39 +32,36 @@ export const skills: SkillGroup[] = [
 		id: 'frontend',
 		group: 'Frontend',
 		label: 'フロントエンド',
-		deskLabel: 'フロントエンド',
 		items: [
-			{ name: 'TypeScript', block: 'TypeScript', level: 3, years: 7 },
-			{ name: 'Svelte / SvelteKit', block: 'Svelte', level: 3, years: 5 },
-			{ name: 'React / Next.js', block: 'React', level: 3, years: 6 },
-			{ name: 'HTML / CSS（設計・アクセシブルな実装）', block: 'CSS', level: 3, years: 10 },
-			{ name: 'Three.js / WebGL', block: 'WebGL', level: 2, years: 3 },
-			{ name: 'Node.js', block: 'Node.js', level: 2, years: 5 }
+			{ name: 'TypeScript', tag: 'TypeScript', level: 3, years: 7 },
+			{ name: 'Svelte / SvelteKit', tag: 'SvelteKit', level: 3, years: 5 },
+			{ name: 'React / Next.js', tag: 'Next.js', level: 3, years: 6 },
+			{ name: 'HTML / CSS（設計・アクセシブルな実装）', tag: 'CSS', level: 3, years: 10 },
+			{ name: 'Three.js / WebGL', tag: 'WebGL', level: 2, years: 3 },
+			{ name: 'Node.js', tag: 'Node.js', level: 2, years: 5 }
 		]
 	},
 	{
 		id: 'design',
 		group: 'Design',
 		label: 'UIデザイン',
-		deskLabel: 'デザイン',
 		items: [
-			{ name: 'UIデザイン（Figma）', block: 'Figma', level: 3, years: 9 },
-			{ name: 'デザインシステム構築', block: 'Design System', level: 3, years: 5 },
-			{ name: 'プロトタイピング', level: 3, years: 8 },
-			{ name: 'モーションデザイン', block: 'Motion', level: 2, years: 4 }
+			{ name: 'UIデザイン（Figma）', tag: 'Figma', level: 3, years: 9 },
+			{ name: 'デザインシステム構築', tag: 'Design Systems', level: 3, years: 5 },
+			{ name: 'プロトタイピング', tag: 'Prototyping', level: 3, years: 8 },
+			{ name: 'モーションデザイン', tag: 'Motion', level: 2, years: 4 }
 		]
 	},
 	{
 		id: 'ux',
 		group: 'UX & Quality',
 		label: 'UX・品質',
-		deskLabel: 'その他',
 		items: [
-			{ name: 'ユーザーリサーチ・ユーザビリティテスト', block: 'UX Research', level: 3, years: 6 },
-			{ name: 'アクセシビリティ（WCAG 2.2）', block: 'a11y', level: 3, years: 6 },
-			{ name: 'Webパフォーマンス（Core Web Vitals）', block: 'Web Perf', level: 3, years: 5 },
-			{ name: 'テスト自動化（Vitest / Playwright）', block: 'Testing', level: 2, years: 4 },
-			{ name: 'アクセス解析・A/Bテスト', level: 2, years: 5 }
+			{ name: 'ユーザーリサーチ・ユーザビリティテスト', tag: 'UX Research', level: 3, years: 6 },
+			{ name: 'アクセシビリティ（WCAG 2.2）', tag: 'Accessibility', level: 3, years: 6 },
+			{ name: 'Webパフォーマンス（Core Web Vitals）', tag: 'Web Performance', level: 3, years: 5 },
+			{ name: 'テスト自動化（Vitest / Playwright）', tag: 'Testing', level: 2, years: 4 },
+			{ name: 'アクセス解析・A/Bテスト', tag: 'A/B Testing', level: 2, years: 5 }
 		]
 	}
 ];
