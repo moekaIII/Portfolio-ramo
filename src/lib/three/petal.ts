@@ -41,11 +41,13 @@ export function createPetalGeometry(options: {
 		let profile: number;
 		if (tip === 'round') {
 			// 倒卵形: 付け根から広がり、先端寄り（7 割の位置）で最も広く、先は丸く閉じる
-			const peak = 0.7;
+			const peak = 0.62;
 			profile =
 				t < peak
-					? 0.28 + 0.72 * Math.sin((Math.PI / 2) * (t / peak))
-					: Math.sqrt(Math.max(0, 1 - Math.pow((t - peak) / (1 - peak), 2)));
+					? // 付け根も幅を持たせ、側面が折れて角にならないようにする
+						0.42 + 0.58 * Math.sin((Math.PI / 2) * (t / peak))
+					: // 超楕円で先をふっくら丸く閉じる（ただの円弧より尖って見えにくい）
+						Math.pow(Math.max(0, 1 - Math.pow((t - peak) / (1 - peak), 3.4)), 1 / 3.4);
 		} else {
 			const s = Math.max(0, Math.sin(Math.PI * Math.pow(t, 0.72)));
 			profile = Math.pow(s, 0.85) * 0.92 + 0.08 * (1 - t);
@@ -61,6 +63,8 @@ export function createPetalGeometry(options: {
 			Math.sin(t * Math.PI * 4.5 + u * 2) *
 			Math.pow(Math.abs(u), 1.6) *
 			upper *
+			// 先端付近だけ波を弱め、先が尖って見えないようにする
+			(1 - 0.75 * MathUtils.smoothstep(t, 0.82, 1)) *
 			profile;
 		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5 + wave;
 		pos.setXYZ(i, nx, y, z);

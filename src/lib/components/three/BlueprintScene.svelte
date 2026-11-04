@@ -106,6 +106,17 @@
 	const petalGeometry = track(
 		createPetalGeometry({ ...petalOptions, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
 	);
+	// 手前の花びら用: くぼみと反りを弱め、強く立ち上げても先が折れて尖らない形
+	const frontPetalGeometry = track(
+		createPetalGeometry({
+			...petalOptions,
+			curl: 0.02,
+			cup: 0.14,
+			ruffle: 0.18,
+			segmentsX: high ? 36 : 20,
+			segmentsY: high ? 44 : 24
+		})
+	);
 	const petalWire = track(
 		new WireframeGeometry(
 			track(createPetalGeometry({ ...petalOptions, segmentsX: 6, segmentsY: 8 }))
@@ -135,6 +146,8 @@
 		ghostMaterial: MeshBasicMaterial;
 		pitch: number;
 		flip: boolean;
+		/** 手前（花の下側）にあるほど 1 に近い */
+		lower: number;
 		phase: number;
 		wave: number;
 	};
@@ -146,16 +159,17 @@
 		const angle = (i / PETALS) * Math.PI * 2 + 0.5 + (rand() - 0.5) * 0.35;
 		const holder = new Group();
 		holder.rotation.z = angle;
+		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
+		const lower = Math.max(0, -Math.cos(angle));
+		const geometry = lower > 0.45 ? frontPetalGeometry : petalGeometry;
 		const material = silkMaterial(0.72, FrontSide);
 		const backMaterial = silkMaterial(0.8, BackSide);
 		const ghostMaterial = silkMaterial(0.16);
-		const mesh = new Mesh(petalGeometry, material);
-		const back = new Mesh(petalGeometry, backMaterial);
+		const mesh = new Mesh(geometry, material);
+		const back = new Mesh(geometry, backMaterial);
 		back.renderOrder = i;
 		mesh.add(back);
 		mesh.position.y = PETAL_OFFSET;
-		// 手前（花の下側）の花びらほど大きく立ち上げ、花全体を上へ向けて杯のように開く
-		const lower = Math.max(0, -Math.cos(angle));
 		const pitch = 0.45 + rand() * 0.25 + lower * 0.85;
 		mesh.rotation.x = pitch;
 		mesh.rotation.y = (rand() - 0.5) * 0.12;
@@ -167,7 +181,7 @@
 		// 残像: 少し大きく・少し回した淡い複製
 		const ghosts: Mesh[] = [];
 		for (let k = 0; k < GHOSTS; k++) {
-			const ghost = new Mesh(petalGeometry, ghostMaterial);
+			const ghost = new Mesh(geometry, ghostMaterial);
 			ghost.position.copy(mesh.position);
 			ghost.rotation.copy(mesh.rotation);
 			// 残像は横方向にだけ広げ、先端はずらさない（先がぼけないように）
@@ -185,11 +199,15 @@
 			backMaterial,
 			ghostMaterial,
 			pitch,
+			lower,
 			flip: -Math.sin(angle) < 0,
 			phase: i * 1.3,
 			wave: 0
 		};
 	});
+
+	/** いちばん手前の花びら */
+	const frontmost = petals.reduce((a, b) => (b.lower > a.lower ? b : a));
 
 	// ---- 花芯: 放射状に広がる細い雄しべと、先の葯。中心は赤みを帯びて光る ----
 	const filamentCount = high ? 220 : 110;
@@ -479,7 +497,13 @@
 			p.material.map = map;
 			p.backMaterial.map = backMap;
 			p.ghostMaterial.map = map;
-			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) m.needsUpdate = true;
+			// いちばん手前の花びらだけ、少し暗くする（陰になっている感じ）
+			const tint = p === frontmost ? (dark ? 0.55 : 0.6) : 1;
+			for (const m of [p.material, p.backMaterial, p.ghostMaterial]) {
+				// 灰色にくすまないよう、赤みを残して暗くする
+				m.color.setRGB(tint * 1.08, tint * 0.9, tint * 0.9);
+				m.needsUpdate = true;
+			}
 			old?.dispose();
 			oldBack?.dispose();
 		});
