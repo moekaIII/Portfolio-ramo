@@ -1,39 +1,6 @@
-<script lang="ts">
-	import { skillChips } from '#lib/content/hero-skills.ts';
-
-	/** 3D 版と同じフリージアの構図（立ち上がって水平に折れる茎の上側に、先端へ向かって小さくなる花） */
-	const STEM = 'M560 860 C 562 600, 566 420, 600 360 S 700 318, 820 318 S 1300 330, 1480 380';
-	type Bloom = { x: number; y: number; r: number; tone: number; text?: string };
-	const pts = [
-		[700, 270],
-		[800, 262],
-		[900, 262],
-		[1000, 266],
-		[1095, 272],
-		[1185, 282],
-		[1270, 296],
-		[1345, 312],
-		[1410, 330],
-		[1465, 350]
-	];
-	const pairs: { tone: number; text: string }[] = skillChips.map((c) => ({
-		tone: c.group,
-		text: c.text
-	}));
-	const blooms: Bloom[] = pts.map(([x, y], i) => ({
-		x,
-		y,
-		r: 62 - i * 4.2,
-		tone: pairs[i * 2]?.tone ?? 1,
-		text: pairs[i * 2]?.text
-	}));
-	const petalPath = (r: number) =>
-		`M0 0 C ${r * 0.45} ${-r * 0.25}, ${r * 0.45} ${-r * 0.85}, 0 ${-r} C ${-r * 0.45} ${-r * 0.85}, ${-r * 0.45} ${-r * 0.25}, 0 0Z`;
-</script>
-
 <!--
-  3D が使えない / reduced-motion 時の静的表示。左は設計図（線）、右は実物（面）。
-  同じ花を CSS 変数を切り替えて 2 回描き、境界線の左右で切り抜いている。
+  3D が使えない / reduced-motion 時の静的表示。3D 版と同じ「光が透ける一輪の花」と、
+  継ぎ目のないスタジオ背景を SVG で描く（左は設計図の線、右は実物）。スキル名は #skills にあるため装飾扱い。
 -->
 <svg
 	aria-hidden="true"
@@ -42,80 +9,75 @@
 	preserveAspectRatio="xMidYMid slice"
 >
 	<defs>
-		<pattern id="bp-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-			<path d="M40 0H0V40" fill="none" stroke="var(--line-strong)" stroke-opacity=".2" />
-		</pattern>
-		<clipPath id="bp-left"><rect x="0" y="0" width="900" height="900" /></clipPath>
-		<clipPath id="bp-right"><rect x="900" y="0" width="700" height="900" /></clipPath>
-		<g id="bp-plant">
+		<radialGradient id="sf-bg" cx="0.62" cy="0.45" r="0.8">
+			<stop offset="0" style="stop-color: var(--sf-bg-center)" />
+			<stop offset="1" style="stop-color: var(--sf-bg-edge)" />
+		</radialGradient>
+		<radialGradient id="sf-petal" cx="0.5" cy="1" r="1.1">
+			<stop offset="0" stop-color="#f5852f" />
+			<stop offset="0.45" stop-color="#fa9e7a" />
+			<stop offset="1" stop-color="#fbcfcd" stop-opacity="0.55" />
+		</radialGradient>
+		<filter id="sf-soft" x="-20%" y="-20%" width="140%" height="140%">
+			<feGaussianBlur stdDeviation="6" />
+		</filter>
+		<clipPath id="sf-left"><rect width="1000" height="900" /></clipPath>
+		<clipPath id="sf-right"><rect x="1000" width="600" height="900" /></clipPath>
+		<g id="sf-flower">
 			<path
-				d={STEM}
+				d="M1180 470 C 1170 600, 1150 720, 1140 900"
 				fill="none"
-				style="stroke: var(--pstem)"
-				stroke-width="7"
-				stroke-linecap="round"
+				style="stroke: var(--sf-stem)"
+				stroke-width="6"
 			/>
-			{#each blooms as b, i (i)}
-				<g transform="translate({b.x} {b.y - b.r * 0.2})">
-					{#each [0, 60, 120, 180, 240, 300] as a (a)}
-						<path
-							d={petalPath(b.r)}
-							transform="rotate({a + i * 11})"
-							style="fill: var(--p{b.tone}); stroke: var(--ps)"
-						/>
-					{/each}
-					{#if b.text}
-						<text
-							y={-b.r * 0.55}
-							text-anchor="middle"
-							class="bp-text"
-							style="fill: var(--pink{b.tone})">{b.text}</text
-						>
-					{/if}
-				</g>
-			{/each}
+			<g transform="translate(1180 430)">
+				{#each [-160, -95, -20, 50, 120] as a, i (a)}
+					<path
+						transform="rotate({a}) scale({0.95 + (i % 2) * 0.12})"
+						d="M0 0 C 140 -30, 210 -220, 120 -330 C 60 -390, -60 -390, -120 -330 C -210 -220, -140 -30, 0 0Z"
+						style="fill: var(--sf-fill); stroke: var(--sf-line)"
+						opacity="0.75"
+					/>
+				{/each}
+				<circle r="40" style="fill: var(--sf-center)" />
+			</g>
 		</g>
 	</defs>
-	<g clip-path="url(#bp-left)" class="bp-wire">
-		<rect width="1600" height="900" fill="url(#bp-grid)" />
-		<use href="#bp-plant" />
-	</g>
-	<g clip-path="url(#bp-right)" class="bp-solid">
-		<use href="#bp-plant" />
-	</g>
-	<line x1="900" y1="0" x2="900" y2="900" stroke="var(--accent-text)" stroke-width="2" />
-	<text x="880" y="150" text-anchor="end" class="bp-tag" fill="var(--fg-muted)">DESIGN</text>
-	<text x="920" y="150" class="bp-tag" fill="var(--accent-text)">BUILD</text>
+
+	<rect width="1600" height="900" fill="url(#sf-bg)" />
+	<g clip-path="url(#sf-left)" class="sf-wire"><use href="#sf-flower" /></g>
+	<g clip-path="url(#sf-right)" class="sf-solid" filter="url(#sf-soft)"><use href="#sf-flower" /></g
+	>
+	<line x1="1000" y1="0" x2="1000" y2="900" stroke="var(--fg-muted)" stroke-opacity=".55" />
+	<text x="980" y="120" text-anchor="end" class="sf-tag">DESIGN</text>
+	<text x="1020" y="120" class="sf-tag">BUILD</text>
 </svg>
 
 <style>
-	.bp-wire {
-		--p0: none;
-		--p1: none;
-		--p2: none;
-		--pink0: none;
-		--pink1: none;
-		--pink2: none;
-		--ps: var(--fg-muted);
-		--pstem: var(--fg-muted);
-		stroke-width: 1.2px;
+	svg {
+		--sf-bg-center: #faf6ee;
+		--sf-bg-edge: #e2e2ea;
 	}
-	.bp-solid {
-		--p0: var(--accent);
-		--p1: oklch(0.96 0.005 90);
-		--p2: var(--fg-muted);
-		--pink0: color-mix(in oklch, var(--on-accent) 55%, transparent);
-		--pink1: oklch(0.5 0.01 90 / 0.6);
-		--pink2: color-mix(in oklch, var(--bg) 60%, transparent);
-		--ps: transparent;
-		--pstem: var(--surface-2);
+	:global([data-theme='dark']) svg {
+		--sf-bg-center: #3e302e;
+		--sf-bg-edge: #16151a;
 	}
-	.bp-text {
-		font: 600 11px var(--font-sans);
-		letter-spacing: 0.04em;
+	.sf-wire {
+		--sf-fill: none;
+		--sf-center: none;
+		--sf-line: var(--fg-muted);
+		--sf-stem: var(--fg-muted);
+		stroke-width: 1.4px;
 	}
-	.bp-tag {
-		font: 600 22px var(--font-sans);
-		letter-spacing: 0.16em;
+	.sf-solid {
+		--sf-fill: url(#sf-petal);
+		--sf-center: #f0702a;
+		--sf-line: none;
+		--sf-stem: #7a8f66;
+	}
+	.sf-tag {
+		font: 500 20px var(--font-sans);
+		letter-spacing: 0.2em;
+		fill: var(--fg-muted);
 	}
 </style>

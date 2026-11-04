@@ -14,10 +14,21 @@ export function createPetalGeometry(options: {
 	cup: number;
 	/** 先端の形: pointed=尖る（葉・苞）/ round=丸い倒卵形（フリージアの花びら） */
 	tip?: 'pointed' | 'round';
+	/** 縁の波打ち（幅に対する比）。ふわっとした花びらに使う */
+	ruffle?: number;
 	segmentsX?: number;
 	segmentsY?: number;
 }) {
-	const { length, width, curl, cup, tip = 'pointed', segmentsX = 8, segmentsY = 24 } = options;
+	const {
+		length,
+		width,
+		curl,
+		cup,
+		tip = 'pointed',
+		ruffle = 0,
+		segmentsX = 8,
+		segmentsY = 24
+	} = options;
 	const g = new PlaneGeometry(width, length, segmentsX, segmentsY);
 	g.translate(0, length / 2, 0);
 	const pos = g.attributes.position;
@@ -41,7 +52,10 @@ export function createPetalGeometry(options: {
 		}
 		const u = x / (width / 2); // -1..1
 		const nx = u * (width / 2) * profile;
-		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5;
+		// 縁ほど大きく波打つ（中心線はほぼ動かない）
+		const wave =
+			ruffle * width * Math.sin(t * Math.PI * 5 + u * 2.2) * Math.pow(Math.abs(u), 2) * t;
+		const z = curl * length * t * t - cup * width * profile * (1 - u * u) * 0.5 + wave;
 		pos.setXYZ(i, nx, y, z);
 	}
 	pos.needsUpdate = true;
