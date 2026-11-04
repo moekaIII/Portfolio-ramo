@@ -3,7 +3,7 @@
  * - 机の上（XZ 平面）を滑るブロックを、長辺方向に並べた円で近似して衝突を解く
  * - scatter: 摩擦・壁・ブロック同士の衝突のみ
  * - arrange: 左から「フロントエンド / デザイン / その他」の列に、左揃えの縦並びで整列する。
- *   各ブロックは自分の席へばねで吸い寄せられる。1個だけ遅刻する
+ *   各ブロックは自分の席へばねで吸い寄せられる
  */
 
 export interface Body {
@@ -50,11 +50,16 @@ export const LAYOUT = {
 	headerGap: 0.18
 } as const;
 
-const FRICTION = 2.6;
+const FRICTION = 3.6;
 const ANGULAR_FRICTION = 3.4;
 const RESTITUTION = 0.45;
 const GRAVITY = 28;
-const POINTER_RADIUS = 0.42;
+/** ポインタの当たり判定（指先ほどの大きさ。大きいとブロックが大きく動きすぎる） */
+const POINTER_RADIUS = 0.22;
+/** ポインタの速度のうちブロックへ伝える割合（弾き飛ばさず、そっと押す程度） */
+const POINTER_TRANSFER = 0.4;
+/** ポインタに押されたときの最大速度 */
+const POINTER_MAX_SPEED = 1.8;
 
 /** 決定論的な乱数（毎回同じ「散らかり方」で始めるため） */
 function mulberry32(seed: number) {
@@ -73,8 +78,6 @@ export class Desk {
 	time = 0;
 	halfW = 3;
 	halfD = 2;
-	/** 遅刻するブロックの index（arrange のたびに変わる） */
-	lateIndex = -1;
 	/** 列見出しの不透明度（0..1）。整列時にブロックより先に現れる */
 	guide = 0;
 	/** 整列時の列見出しの位置 */
@@ -161,16 +164,11 @@ export class Desk {
 
 	arrange() {
 		this.mode = 'arrange';
-		// 2個目以降からランダムに1個を遅刻させる（席は変わらない）
-		const candidates = this.bodies.slice(1);
-		const late = candidates[Math.floor(this.random() * candidates.length)];
-		this.lateIndex = late.index;
 		this.layout();
 		// 列見出しが浮かび上がってから、ブロックが順に自分の席へ向かう
 		this.bodies.forEach((b, i) => {
 			b.startAt = this.time + 0.18 + i * 0.035;
 		});
-		late.startAt = this.time + 1.3;
 	}
 
 	/**
@@ -261,19 +259,13 @@ export class Desk {
 			}
 
 			if (arranged && this.time >= b.startAt) {
-				const late = b.index === this.lateIndex;
-				// 遅刻ブロックは慌てているので、ばねが硬く減衰が弱い（行き過ぎてプルプルする）
-				const k = late ? 120 : 70;
-				const zeta = late ? 0.32 : 0.8;
-				const c = 2 * Math.sqrt(k) * zeta;
+				const k = 70;
+				const c = 2 * Math.sqrt(k) * 0.8;
 				b.vx += (k * (b.tx - b.x) - c * b.vx) * dt;
 				b.vz += (k * (b.tz - b.z) - c * b.vz) * dt;
 				// 角度は最短方向で 0 へ
 				const da = Math.atan2(Math.sin(-b.a), Math.cos(-b.a));
 				b.va += (k * 1.2 * da - c * 1.1 * b.va) * dt;
-				if (late && b.y === 0 && b.vy === 0 && Math.hypot(b.tx - b.x, b.tz - b.z) > 0.8) {
-					b.vy = 4.5; // ぴょんぴょん跳ねながら向かう
-				}
 			} else {
 				const f = Math.exp(-FRICTION * dt);
 				b.vx *= f;
@@ -366,14 +358,19 @@ export class Desk {
 				const dist = Math.sqrt(dist2);
 				const nx = dx / dist;
 				const nz = dz / dist;
-				b.x += nx * (min - dist);
-				b.z += nz * (min - dist);
-				// ポインタは無限質量: 法線方向の相対速度を打ち消して押し出す
-				const rv = (b.vx - p.vx) * nx + (b.vz - p.vz) * nz;
+				// めり込みは押し戻さない（押し戻すとポインタがブロックを運び続けてしまう）。
+				// ポインタの速度の一部だけを伝えるので、ポインタは必ずブロックを追い越してすり抜け、
+				// 移動はブロックの長さの半分程度に収まる
+				const rv = (b.vx - p.vx * POINTER_TRANSFER) * nx + (b.vz - p.vz * POINTER_TRANSFER) * nz;
 				if (rv < 0) {
-					const jn = -(1 + RESTITUTION) * rv;
-					this.applyImpulse(b, jn * nx, jn * nz, cx - nx * b.radius, cz - nz * b.radius);
+					this.applyImpulse(b, -rv * nx, -rv * nz, cx - nx * b.radius, cz - nz * b.radius);
 				}
+				const speed = Math.hypot(b.vx, b.vz);
+				if (speed > POINTER_MAX_SPEED) {
+					b.vx *= POINTER_MAX_SPEED / speed;
+					b.vz *= POINTER_MAX_SPEED / speed;
+				}
+				b.va = Math.max(-3, Math.min(3, b.va));
 			}
 		}
 	}
