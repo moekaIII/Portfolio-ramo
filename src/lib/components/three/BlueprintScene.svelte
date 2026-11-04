@@ -6,6 +6,7 @@
 		BufferGeometry,
 		CanvasTexture,
 		CatmullRomCurve3,
+		Euler,
 		Color,
 		BackSide,
 		DoubleSide,
@@ -24,6 +25,7 @@
 		PerspectiveCamera,
 		PlaneGeometry,
 		Plane,
+		Quaternion,
 		Raycaster,
 		SphereGeometry,
 		Sprite,
@@ -107,21 +109,24 @@
 		createPetalGeometry({ ...petalOptions, segmentsX: high ? 36 : 20, segmentsY: high ? 44 : 24 })
 	);
 	// 手前の花びら用: くぼみと反りを弱め、強く立ち上げても先が折れて尖らない形
+	const frontPetalOptions = { ...petalOptions, curl: 0.02, cup: 0.14, ruffle: 0.18 };
 	const frontPetalGeometry = track(
 		createPetalGeometry({
-			...petalOptions,
-			curl: 0.02,
-			cup: 0.14,
-			ruffle: 0.18,
+			...frontPetalOptions,
 			segmentsX: high ? 36 : 20,
 			segmentsY: high ? 44 : 24
 		})
 	);
-	const petalWire = track(
-		new WireframeGeometry(
-			track(createPetalGeometry({ ...petalOptions, segmentsX: 6, segmentsY: 8 }))
-		)
-	);
+	// DESIGN 側の線は、BUILD 側と同じ形状オプションから作る（形がずれないように）。
+	// 分割だけを粗くするので、輪郭と波打ちは一致する
+	const wireOf = (options: typeof petalOptions) =>
+		track(
+			new WireframeGeometry(
+				track(createPetalGeometry({ ...options, segmentsX: 10, segmentsY: 16 }))
+			)
+		);
+	const petalWire = wireOf(petalOptions);
+	const frontPetalWire = wireOf(frontPetalOptions);
 	const lineMuted = clip(new LineBasicMaterial({ transparent: true, opacity: 0.5 }), wirePlane);
 	const lineAccent = clip(new LineBasicMaterial({ transparent: true, opacity: 0.8 }), wirePlane);
 
@@ -176,7 +181,12 @@
 		mesh.scale.setScalar(0.9 + rand() * 0.2);
 		mesh.position.z = i * 0.006;
 		mesh.renderOrder = i;
-		mesh.add(new LineSegments(petalWire, i % 2 ? lineMuted : lineAccent));
+		mesh.add(
+			new LineSegments(
+				geometry === frontPetalGeometry ? frontPetalWire : petalWire,
+				i % 2 ? lineMuted : lineAccent
+			)
+		);
 		holder.add(mesh);
 		// 残像: 少し大きく・少し回した淡い複製
 		const ghosts: Mesh[] = [];
@@ -206,8 +216,10 @@
 		};
 	});
 
-	/** いちばん手前の花びら */
+	/** いちばん手前の花びら（少しだけ不透明にして、手前にあることを伝える） */
 	const frontmost = petals.reduce((a, b) => (b.lower > a.lower ? b : a));
+	frontmost.material.opacity = 0.84;
+	frontmost.backMaterial.opacity = 0.9;
 
 	// ---- 花芯: 放射状に広がる細い雄しべと、先の葯。中心は赤みを帯びて光る ----
 	const filamentCount = high ? 220 : 110;
@@ -297,10 +309,21 @@
 	centerShade.renderOrder = 22;
 	glow.renderOrder = 19;
 	// 花托: 花びらの付け根を一つにまとめる、小さな杯形の台座
-	const receptacleProfile = Array.from({ length: 10 }, (_, i) => {
-		const t = i / 9;
-		return new Vector2(0.06 + 0.42 * Math.sin((t * Math.PI) / 2), -0.35 + t * 0.5);
-	});
+	// 下は茎と同じ太さの首から始まり、ふくらんで花びらの付け根を受け止める
+	const STEM_RADIUS = 0.075;
+	const NECK_BOTTOM = -0.75;
+	const receptacleProfile = [
+		new Vector2(STEM_RADIUS, NECK_BOTTOM),
+		new Vector2(STEM_RADIUS * 1.05, -0.6),
+		new Vector2(STEM_RADIUS * 1.25, -0.45),
+		...Array.from({ length: 8 }, (_, i) => {
+			const t = (i + 1) / 8;
+			return new Vector2(
+				STEM_RADIUS * 1.25 + (0.46 - STEM_RADIUS * 1.25) * Math.sin((t * Math.PI) / 2),
+				-0.45 + t * 0.6
+			);
+		})
+	];
 	const receptacleGeometry = track(new LatheGeometry(receptacleProfile, high ? 24 : 14));
 	receptacleGeometry.rotateX(Math.PI / 2);
 	const receptacleMaterial = clip(
@@ -317,17 +340,30 @@
 	);
 	flower.add(receptacle, receptacleWire, glow, filaments, filamentWire, anthers, centerShade);
 
-	// ---- 茎: 細く、ゆるく波打ちながら下へ ----
-	const stemCurve = new CatmullRomCurve3([
-		new Vector3(0, -0.2, -0.6),
-		new Vector3(-0.15, -2.2, -0.6),
-		new Vector3(-0.55, -4.6, -0.2),
-		new Vector3(-0.5, -7.2, 0),
-		new Vector3(-0.85, -10, 0.1)
-	]);
-	const stemGeometry = track(new TubeGeometry(stemCurve, 64, 0.075, high ? 8 : 5, false));
+	// ---- 茎: 花托の首から、花の向きに沿って後ろへ伸び、ゆるく波打ちながら下へ ----
+	// 茎は花のグループの中に置き、花托と必ずつながるようにする。
+	// 形は親（plant）の座標で設計し、花の基本の向きの逆回転で花の座標へ変換する
+	const baseQuat = new Quaternion().setFromEuler(new Euler(-0.62, -0.34, 0.18));
+	const toFlower = baseQuat.clone().invert();
+	const neck = new Vector3(0, 0, NECK_BOTTOM).applyQuaternion(baseQuat);
+	const back = new Vector3(0, 0, -1).applyQuaternion(baseQuat);
+	const stemCurve = new CatmullRomCurve3(
+		[
+			neck,
+			neck.clone().addScaledVector(back, 0.35),
+			neck
+				.clone()
+				.addScaledVector(back, 0.7)
+				.add(new Vector3(0, -0.5, 0)),
+			new Vector3(-0.2, -2.6, -0.7),
+			new Vector3(-0.55, -4.8, -0.3),
+			new Vector3(-0.5, -7.2, 0),
+			new Vector3(-0.85, -10, 0.1)
+		].map((p) => p.applyQuaternion(toFlower))
+	);
+	const stemGeometry = track(new TubeGeometry(stemCurve, 96, STEM_RADIUS, high ? 10 : 6, false));
 	const stemWire = track(
-		new WireframeGeometry(track(new TubeGeometry(stemCurve, 16, 0.075, 4, false)))
+		new WireframeGeometry(track(new TubeGeometry(stemCurve, 24, STEM_RADIUS, 5, false)))
 	);
 	const stemMaterial = clip(
 		new MeshBasicMaterial({ transparent: true, opacity: 0.92, depthWrite: false }),
@@ -338,7 +374,8 @@
 	const stemLines = new LineSegments(stemWire, lineMuted);
 
 	const plant = new Group();
-	plant.add(stem, stemLines, flower);
+	flower.add(stem, stemLines);
+	plant.add(flower);
 
 	// ---- 境界線とタグ「DESIGN | BUILD」 ----
 	const planeGeometry = track(new PlaneGeometry(1, 1));
@@ -384,7 +421,7 @@
 	let halfH0 = 4;
 	let aspect = 1.6;
 	/** 花はこちらへ向きつつ、少し上と左へ傾く */
-	const BASE_ROTATION = new Vector3(-0.62, -0.34, 0.18);
+	const BASE_ROTATION = new Vector3(-0.62, -0.34, 0.18); // baseQuat と同じ値
 
 	function updateLayout(width: number, height: number) {
 		aspect = width / Math.max(height, 1);
