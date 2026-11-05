@@ -4,7 +4,8 @@ import { site } from '#lib/config/site.ts';
 export function absoluteUrl(path: string): string {
 	if (/^https?:\/\//.test(path)) return path;
 	const normalized = path === '/' ? '' : path.replace(/\/$/, '');
-	return `${site.url}${normalized.startsWith('/') || normalized === '' ? '' : '/'}${normalized}`;
+	const base = site.url.replace(/\/+$/, '');
+	return `${base}${normalized.startsWith('/') || normalized === '' ? '' : '/'}${normalized}`;
 }
 
 /** JSON-LD を <script> として安全に埋め込める文字列にする */

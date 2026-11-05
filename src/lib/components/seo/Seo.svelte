@@ -20,7 +20,7 @@
 		title,
 		description = site.description,
 		image = site.ogImage,
-		imageAlt = site.name,
+		imageAlt = `${site.name} — ${site.author.jobTitle}。左がワイヤーフレーム、右が実物で描かれた花`,
 		type = 'website',
 		noindex = false,
 		jsonLd
@@ -44,6 +44,10 @@
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={canonical} />
 	<meta property="og:image" content={ogImage} />
+	{#if image === site.ogImage}
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+	{/if}
 	<meta property="og:image:alt" content={imageAlt} />
 	<meta name="twitter:card" content="summary_large_image" />
 
