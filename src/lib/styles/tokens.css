@@ -43,6 +43,14 @@
 		radial-gradient(80% 60% at 100% 0%, rgb(36 26 40 / 0.8), transparent 65%),
 		radial-gradient(90% 70% at 64% 55%, rgb(80 56 52 / 0.75), transparent 70%),
 		linear-gradient(180deg, #17151d, #221d24 42%, #241f22 75%, #2c2527);
+	/* 同じ色味の枠線用グラデーション（ラベンダー → ローズ → ピーチ → ミント） */
+	--hero-edge: linear-gradient(
+		135deg,
+		rgb(150 136 204),
+		rgb(204 140 168) 38%,
+		rgb(214 166 136) 66%,
+		rgb(122 176 154)
+	);
 
 	--accent: oklch(var(--accent-l-fill) var(--accent-chroma) var(--accent-hue));
 	--accent-text: oklch(
@@ -88,6 +96,13 @@
 		radial-gradient(80% 60% at 100% 0%, rgb(226 212 226 / 0.6), transparent 65%),
 		radial-gradient(90% 70% at 64% 55%, rgb(255 244 232 / 0.95), transparent 70%),
 		linear-gradient(180deg, #dcd8e4, #ece8ec 42%, #efebe8 75%, #f7f3ee);
+	--hero-edge: linear-gradient(
+		135deg,
+		rgb(164 152 212),
+		rgb(222 162 186) 38%,
+		rgb(236 186 152) 66%,
+		rgb(146 196 172)
+	);
 }
 
 /* Tailwind theme: semantic tokens → utilities (bg-bg, text-fg-muted, border-line …) */

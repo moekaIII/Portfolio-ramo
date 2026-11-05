@@ -27,7 +27,7 @@
 -->
 <article
 	aria-labelledby="work-{work.slug}"
-	class="work-card group relative isolate flex h-full flex-col overflow-hidden rounded-lg border border-line bg-bg p-7 transition-colors duration-500 ease-out-expo hover:border-line-strong md:p-9"
+	class="work-card group relative isolate flex h-full cursor-pointer flex-col rounded-lg border border-line bg-bg p-7 transition-colors duration-500 ease-out-expo focus-within:border-transparent hover:border-transparent md:p-9"
 >
 	<p class="font-mono text-xs text-fg-muted tabular">{work.period}</p>
 
@@ -46,7 +46,7 @@
 		</ul>
 		<button
 			type="button"
-			class="shrink-0 rounded-pill text-fg-muted group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
+			class="shrink-0 cursor-pointer rounded-pill text-fg-muted group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
 			aria-haspopup="dialog"
 			aria-label="{work.title}の詳細を見る"
 			onclick={show}
@@ -107,7 +107,8 @@
 	.work-card::before {
 		content: '';
 		position: absolute;
-		inset: 0;
+		inset: -1px;
+		border-radius: inherit;
 		z-index: -1;
 		background: var(--hero-wash);
 		opacity: 0;
@@ -116,6 +117,25 @@
 	.work-card:hover::before,
 	.work-card:focus-within::before {
 		opacity: 0.55;
+	}
+	/* 枠線もグラデーションに（1px の縁だけを残すマスク） */
+	.work-card::after {
+		content: '';
+		position: absolute;
+		inset: -1px;
+		border: 1px solid transparent;
+		border-radius: inherit;
+		background: var(--hero-edge) border-box;
+		mask:
+			linear-gradient(#000 0 0) padding-box exclude,
+			linear-gradient(#000 0 0) border-box;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 500ms var(--ease-out);
+	}
+	.work-card:hover::after,
+	.work-card:focus-within::after {
+		opacity: 1;
 	}
 	.tag-label {
 		border: 1px solid var(--line);
