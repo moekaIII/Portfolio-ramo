@@ -5,7 +5,6 @@
 	import Section from '#lib/components/sections/Section.svelte';
 	import Concept from '#lib/components/sections/Concept.svelte';
 	import Strengths from '#lib/components/sections/Strengths.svelte';
-	import Glance from '#lib/components/profile/Glance.svelte';
 	import SkillChart from '#lib/components/profile/SkillChart.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
 	import WorksCarousel from '#lib/components/works/WorksCarousel.svelte';
