@@ -62,6 +62,8 @@
 	);
 	--accent-soft: oklch(var(--accent-l-fill) var(--accent-chroma) var(--accent-hue) / 0.12);
 	--focus: var(--accent-text);
+	/* グラフのバー（面の色に対して 3:1 以上、明度は帯 0.48–0.67 に収める） */
+	--chart-bar: oklch(0.66 0.16 var(--accent-hue));
 
 	/* ===== Layout ===== */
 	--container: 90rem; /* 1440px */
@@ -93,6 +95,7 @@
 	--fg-muted: oklch(0.44 0.01 260);
 	--error: oklch(0.52 0.19 27); /* 5.8:1 on bg */
 	--header-bg: oklch(0.985 0.002 100 / 0.78);
+	--chart-bar: oklch(0.5 0.15 var(--accent-hue));
 	--hero-wash:
 		radial-gradient(110% 80% at 0% 0%, rgb(222 214 244 / 0.75), transparent 65%),
 		radial-gradient(90% 70% at 0% 100%, rgb(214 238 224 / 0.75), transparent 65%),

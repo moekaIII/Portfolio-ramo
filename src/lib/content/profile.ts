@@ -8,8 +8,10 @@ export type SkillLevel = 1 | 2 | 3;
 export interface Skill {
 	name: string;
 	level: SkillLevel;
-	/** 実務経験年数 */
+	/** 実務経験年数（0.5 年単位） */
 	years: number;
+	/** このスキルを使った実績の slug（src/content/works/<slug>.md）。ツールチップに表示する */
+	works?: string[];
 }
 
 export interface SkillGroup {
@@ -29,46 +31,80 @@ export const skills: SkillGroup[] = [
 	{
 		id: 'frontend',
 		group: 'Frontend',
-		label: 'フロントエンド',
+		label: 'フロントエンド実装',
 		items: [
-			{ name: 'TypeScript', level: 3, years: 7 },
-			{ name: 'Svelte / SvelteKit', level: 3, years: 5 },
-			{ name: 'React / Next.js', level: 3, years: 6 },
-			{ name: 'HTML / CSS（設計・アクセシブルな実装）', level: 3, years: 10 },
-			{ name: 'Three.js / WebGL', level: 2, years: 3 },
-			{ name: 'Node.js', level: 2, years: 5 }
+			{
+				name: 'TypeScript / JavaScript',
+				level: 3,
+				years: 4,
+				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
+			},
+			{
+				name: 'HTML / CSS・アクセシビリティ',
+				level: 3,
+				years: 4,
+				works: ['maas-webapp', 'game-anime-site']
+			},
+			{
+				name: 'Svelte / SvelteKit',
+				level: 3,
+				years: 2.5,
+				works: ['dev-platform', 'game-anime-site', 'owned-media']
+			},
+			{ name: 'GSAP・SVG アニメーション', level: 3, years: 2.5, works: ['game-anime-site'] },
+			{ name: 'Vue.js / Pinia', level: 2, years: 1.5, works: ['gov-dashboard', 'maas-webapp'] },
+			{ name: 'データ可視化（Chart.js・地図 API）', level: 2, years: 1, works: ['gov-dashboard'] }
+		]
+	},
+	{
+		id: 'platform',
+		group: 'Platform',
+		label: '開発基盤・運用',
+		items: [
+			{
+				name: '外部 API との連携',
+				level: 2,
+				years: 3,
+				works: ['maas-webapp', 'gov-dashboard']
+			},
+			{
+				name: 'ヘッドレス CMS（microCMS ほか）',
+				level: 3,
+				years: 2.5,
+				works: ['owned-media', 'game-anime-site', 'dev-platform']
+			},
+			{ name: '開発基盤の設計・技術選定', level: 3, years: 2, works: ['dev-platform'] },
+			{ name: 'GitHub Actions・運用の自動化', level: 3, years: 2, works: ['dev-platform'] },
+			{
+				name: '生成 AI の活用（Copilot / ChatGPT / Codex）',
+				level: 2,
+				years: 2,
+				works: ['dev-platform', 'game-anime-site', 'owned-media']
+			}
 		]
 	},
 	{
 		id: 'design',
-		group: 'Design',
-		label: 'UIデザイン',
+		group: 'Design & Mobile',
+		label: 'デザイン・モバイル・育成',
 		items: [
-			{ name: 'UIデザイン（Figma）', level: 3, years: 9 },
-			{ name: 'デザインシステム構築', level: 3, years: 5 },
-			{ name: 'プロトタイピング', level: 3, years: 8 },
-			{ name: 'モーションデザイン', level: 2, years: 4 }
-		]
-	},
-	{
-		id: 'ux',
-		group: 'UX & Quality',
-		label: 'UX・品質',
-		items: [
-			{ name: 'ユーザーリサーチ・ユーザビリティテスト', level: 3, years: 6 },
-			{ name: 'アクセシビリティ（WCAG 2.2）', level: 3, years: 6 },
-			{ name: 'Webパフォーマンス（Core Web Vitals）', level: 3, years: 5 },
-			{ name: 'テスト自動化（Vitest / Playwright）', level: 2, years: 4 },
-			{ name: 'アクセス解析・A/Bテスト', level: 2, years: 5 }
+			{
+				name: 'UI 設計（Figma）',
+				level: 2,
+				years: 4,
+				works: ['maas-webapp', 'owned-media', 'game-anime-site']
+			},
+			{ name: 'Swift / iOS アプリ開発', level: 2, years: 0.5, works: ['ios-app'] },
+			{ name: '技術教材の制作・研修講師', level: 2, years: 0.5, works: ['ios-app'] }
 		]
 	}
 ];
 
 /** ファーストビューに置く「一目でわかる」要約 */
 export const glance: { term: string; value: string }[] = [
-	{ term: '経験', value: 'Web制作・開発 10年（うちリード 4年）' },
-	{ term: '専門', value: 'フロントエンド開発 × UI/UXデザイン' },
-	{ term: '主要技術', value: 'TypeScript / Svelte / React / Figma' },
+	{ term: '経験', value: 'Webサイト・アプリ開発 約5年' },
+	{ term: '専門', value: 'フロントエンド開発 × 開発基盤づくり' },
+	{ term: '主要技術', value: 'Svelte / Vue.js / TypeScript / GSAP' },
 	{ term: '働き方', value: '正社員・業務委託ともに相談可 / フルリモート可' }
 ];
 
@@ -119,17 +155,32 @@ export const career: CareerItem[] = [
 	}
 ];
 
-export const strengths: { title: string; body: string }[] = [
+export interface Strength {
+	title: string;
+	body: string;
+	/** 裏付けとなる実績の slug */
+	proof: string[];
+}
+
+export const strengths: Strength[] = [
 	{
-		title: 'デザインと実装の間で、意図を落とさない',
-		body: '同じ人間がデザインと実装を担うため、職種間の「伝言ゲーム」が起きません。細部の品質を保ったまま、意思決定も速くなります。'
+		title: '課題を見つけ、仕組みにして解決する',
+		body: 'チームに開発基盤がないと気づけば自ら提案し、技術選定から運用フローの自動化まで担いました。作って終わりにせず、チームが改善し続けられる状態をつくります。この取り組みで、2025年に全社のベストエンジニア賞を受賞しました。',
+		proof: ['dev-platform']
 	},
 	{
-		title: '見た目ではなく、数字で成果を語る',
-		body: 'KPIの設計から効果測定まで。リリースして終わりにせず、事業の数字が動いたかどうかを確かめるところまでを仕事と考えています。'
+		title: '表現力と品質を両立させる',
+		body: 'ゲーム・アニメ公式サイトを10件以上手がけ、世界観を伝えるアニメーション演出と、アクセスが集中しても崩れない表示速度を両立してきました。アプリケーションでは、アクセシビリティにも細部まで配慮します。',
+		proof: ['game-anime-site', 'maas-webapp']
 	},
 	{
-		title: 'チームが自走できる仕組みを残す',
-		body: 'デザインシステム、ドキュメント、テストと計測の自動化。自分がいなくなっても品質が保たれる状態をつくります。'
+		title: '職種や会社の垣根を越えて、合意をつくる',
+		body: 'ディレクター・デザイナーから、他社のエンジニアや CMS 制作会社まで。仕様が固まる前から議論に加わり、要望と実装コストの両方を踏まえた代替案を出すことで、手戻りと摩擦を減らします。',
+		proof: ['gov-dashboard', 'maas-webapp', 'owned-media']
+	},
+	{
+		title: '知識を体系化し、チームに広げる',
+		body: 'サブマネージャーとしてのコードレビューや、iOS の学習教材・研修づくりを通じて、相手の理解度に合わせて伝える力を培いました。個人に閉じた知見を、チーム全体の資産に変えていきます。',
+		proof: ['dev-platform', 'gov-dashboard', 'ios-app']
 	}
 ];

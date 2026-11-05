@@ -5,7 +5,7 @@
 	import Section from '#lib/components/sections/Section.svelte';
 	import Strengths from '#lib/components/sections/Strengths.svelte';
 	import Glance from '#lib/components/profile/Glance.svelte';
-	import SkillMatrix from '#lib/components/profile/SkillMatrix.svelte';
+	import SkillChart from '#lib/components/profile/SkillChart.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
 	import WorksCarousel from '#lib/components/works/WorksCarousel.svelte';
 	import { career, skills } from '#lib/content/profile.ts';
@@ -35,20 +35,25 @@
 	<WorksCarousel works={data.works} />
 </Section>
 
-<Section id="strengths" eyebrow="Strengths" title="強み">
-	<Strengths />
+<Section
+	id="strengths"
+	eyebrow="Strengths"
+	title="強み"
+	lead="これまでの実績から見えた、チームと事業にもたらせる4つの価値です。"
+>
+	<Strengths works={data.works} />
 </Section>
 
 <Section
 	id="skills"
 	eyebrow="Skills"
 	title="スキル"
-	lead="設計・デザイン・実装・品質の領域を、ひとつのプロジェクトの中で行き来できることが強みです。"
+	lead="実装を軸に、開発基盤の設計・運用から UI 設計、モバイル、教材づくりまで。"
 	tone="surface"
 >
 	<Glance />
 	<div class="mt-14">
-		<SkillMatrix groups={skills} />
+		<SkillChart groups={skills} works={data.works} />
 	</div>
 </Section>
 
