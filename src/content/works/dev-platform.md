@@ -1,11 +1,24 @@
 ---
-title: フロントエンド開発基盤の構築
+title: フロントエンド開発基盤の構築・運用
 slug: dev-platform
 client: 社内 Web 制作チーム
 role: 導入提案・技術選定・基盤構築・運用の仕組み化・導入支援
-period: 2025.04 – 継続中
+period: 2024.08 – 2026.06
 category: development
-tags: [Svelte, SvelteKit, Enhanced Image, GitHub Actions, GitHub Issues / Wiki, 生成AI]
+tags:
+  [
+    Svelte5,
+    SvelteKit,
+    GitHub Actions,
+    GitHub Copilot,
+    ChatGPT,
+    Codex,
+    GSAP,
+    microCMS,
+    NILTO,
+    Kuroco,
+    Figma
+  ]
 summary: JavaScript フレームワークの開発基盤がなかったチームに Svelte を提案・導入。画像の軽量化の自動化や、GitHub を使った継続的な運用フローまで整え、2025年10月に全社のベストエンジニア賞を受賞しました。
 featured: true
 order: 1
