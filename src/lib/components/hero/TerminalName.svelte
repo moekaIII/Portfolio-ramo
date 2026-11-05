@@ -1,8 +1,9 @@
 <script lang="ts">
 	import '@fontsource-variable/jetbrains-mono';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { site } from '#lib/config/site.ts';
+	import { intro } from '#lib/state/intro.svelte.ts';
 
 	const name = site.author.name;
 	// 初期値は全文（プリレンダリング / JS 無効時はそのまま読める）
@@ -10,7 +11,17 @@
 	let done = $state(true);
 	let started = $state(false);
 
-	onMount(() => {
+	let mounted = $state(false);
+	onMount(() => (mounted = true));
+
+	// ローディング演出が終わってから打ち込み始める（開始条件だけを追跡し、1 回だけ動かす）
+	$effect(() => {
+		if (!mounted || !intro.done) return;
+		return untrack(startTyping);
+	});
+
+	function startTyping() {
+		if (started) return;
 		if (prefersReducedMotion.current) {
 			started = true;
 			return;
@@ -31,7 +42,7 @@
 		};
 		timer = window.setTimeout(step, 600);
 		return () => window.clearTimeout(timer);
-	});
+	}
 </script>
 
 <!--

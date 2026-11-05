@@ -6,6 +6,7 @@
 	import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 	import favicon from '#lib/assets/favicon.png';
 	import Header from '#lib/components/layout/Header.svelte';
+	import Loader from '#lib/components/layout/Loader.svelte';
 	import SkipLink from '#lib/components/layout/SkipLink.svelte';
 	import SmoothScroll from '#lib/components/layout/SmoothScroll.svelte';
 	import Footer from '#lib/components/layout/Footer.svelte';
@@ -28,6 +29,7 @@
 	<link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 </svelte:head>
 
+<Loader />
 <SmoothScroll />
 <SkipLink />
 <Header />
