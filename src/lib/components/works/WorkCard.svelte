@@ -22,12 +22,13 @@
 </script>
 
 <!--
-  実績カード（テキストのみ）。番号を上、内容を下に置き、間を余白として見せる。
+  実績カード（テキストのみ）。番号の下に余白を取り、タイトルの位置は全カードで揃える。
+  タグは下端に寄せる。ホバーでヒーローの背景の色味が浮かぶ。
   カード全体がボタンになり、ケーススタディ全文はモーダルで開く。
 -->
 <article
 	aria-labelledby="work-{work.slug}"
-	class="work-card group relative flex h-full flex-col rounded-lg border border-line bg-bg p-7 transition-[border-color,translate] duration-300 ease-out-expo hover:-translate-y-1 hover:border-fg-muted md:p-9"
+	class="work-card group relative isolate flex h-full flex-col overflow-hidden rounded-lg border border-line bg-bg p-7 transition-colors duration-500 ease-out-expo hover:border-line-strong md:p-9"
 >
 	<div class="flex items-start justify-between font-mono text-xs text-fg-muted">
 		<span>
@@ -38,18 +39,20 @@
 		<span class="tabular">{work.period}</span>
 	</div>
 
-	<!-- 余白: 内容は下に寄せる -->
-	<div class="mt-auto pt-16">
+	<!-- 余白のあとに内容。上から積むので、タイトルの位置は全カードで揃う -->
+	<div class="pt-16">
 		<p class="eyebrow">{WORK_CATEGORIES[work.category].en}</p>
 		<h3 id="work-{work.slug}" class="mt-3 text-h3 leading-snug font-semibold">{work.title}</h3>
 		<p class="mt-2 text-sm text-fg-muted">{work.client}</p>
 		<p class="mt-6 line-clamp-4 text-[0.9375rem] leading-relaxed">{work.summary}</p>
 	</div>
 
-	<div class="mt-8 flex items-end justify-between gap-6 border-t border-line pt-5">
-		<p class="font-mono text-xs leading-relaxed text-fg-muted">
-			<span class="sr-only">使用技術: </span>{work.tags.join(' · ')}
-		</p>
+	<div class="mt-auto flex items-end justify-between gap-6 pt-10">
+		<ul class="flex flex-wrap gap-1.5" aria-label="使用技術">
+			{#each work.tags as tag (tag)}
+				<li class="tag-label">{tag}</li>
+			{/each}
+		</ul>
 		<button
 			type="button"
 			class="shrink-0 rounded-pill border border-line-strong p-2.5 text-fg-muted transition-colors group-hover:border-fg group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
@@ -94,7 +97,11 @@
 			</button>
 		</div>
 		<p class="mt-8 max-w-[42em] text-lead">{work.summary}</p>
-		<p class="mt-6 font-mono text-xs text-fg-muted">{work.tags.join(' · ')}</p>
+		<ul class="mt-6 flex flex-wrap gap-1.5" aria-label="使用技術">
+			{#each work.tags as tag (tag)}
+				<li class="tag-label">{tag}</li>
+			{/each}
+		</ul>
 		{#if Article}
 			<div class="prose-site mt-10 max-w-none border-t border-line pt-4">
 				<Article />
@@ -104,6 +111,31 @@
 </dialog>
 
 <style>
+	/* ホバーでヒーローの背景の色味を重ねる（グラデーションは遷移できないので不透明度で） */
+	.work-card::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--hero-wash);
+		opacity: 0;
+		transition: opacity 500ms var(--ease-out);
+	}
+	.work-card:hover::before,
+	.work-card:focus-within::before {
+		opacity: 1;
+	}
+	.tag-label {
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+		padding: 0.25rem 0.625rem;
+		font-family: var(--font-mono);
+		font-size: 0.6875rem;
+		line-height: 1.4;
+		color: var(--fg-muted);
+		white-space: nowrap;
+	}
 	.work-dialog[open] {
 		animation: dialog-in var(--dur-base) var(--ease-out);
 	}

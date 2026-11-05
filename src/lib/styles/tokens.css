@@ -36,6 +36,14 @@
 	--error: oklch(0.76 0.14 25); /* 8.3:1 on bg */
 	--header-bg: oklch(0.18 0.006 260 / 0.72);
 
+	/* ヒーローのスタジオ背景（createBackdrop）と同じ色味。実績カードのホバーなどに使う */
+	--hero-wash:
+		radial-gradient(110% 80% at 0% 0%, rgb(30 26 46 / 0.85), transparent 65%),
+		radial-gradient(90% 70% at 0% 100%, rgb(22 34 32 / 0.8), transparent 65%),
+		radial-gradient(80% 60% at 100% 0%, rgb(36 26 40 / 0.8), transparent 65%),
+		radial-gradient(90% 70% at 64% 55%, rgb(80 56 52 / 0.75), transparent 70%),
+		linear-gradient(180deg, #17151d, #221d24 42%, #241f22 75%, #2c2527);
+
 	--accent: oklch(var(--accent-l-fill) var(--accent-chroma) var(--accent-hue));
 	--accent-text: oklch(
 		var(--accent-l-text) calc(var(--accent-chroma) * var(--accent-text-chroma-scale))
@@ -74,6 +82,12 @@
 	--fg-muted: oklch(0.44 0.01 260);
 	--error: oklch(0.52 0.19 27); /* 5.8:1 on bg */
 	--header-bg: oklch(0.985 0.002 100 / 0.78);
+	--hero-wash:
+		radial-gradient(110% 80% at 0% 0%, rgb(206 198 224 / 0.7), transparent 65%),
+		radial-gradient(90% 70% at 0% 100%, rgb(208 224 214 / 0.7), transparent 65%),
+		radial-gradient(80% 60% at 100% 0%, rgb(226 212 226 / 0.6), transparent 65%),
+		radial-gradient(90% 70% at 64% 55%, rgb(255 244 232 / 0.95), transparent 70%),
+		linear-gradient(180deg, #dcd8e4, #ece8ec 42%, #efebe8 75%, #f7f3ee);
 }
 
 /* Tailwind theme: semantic tokens → utilities (bg-bg, text-fg-muted, border-line …) */
