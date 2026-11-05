@@ -5,10 +5,9 @@
 	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
 	import { WORK_CATEGORIES, type WorkMeta } from '#lib/types/work.ts';
 
-	let { work, index, total }: { work: WorkMeta; index: number; total: number } = $props();
+	let { work }: { work: WorkMeta } = $props();
 
 	const Article = $derived(getArticle(work.slug));
-	const num = $derived(String(index + 1).padStart(2, '0'));
 	let dialog: HTMLDialogElement | undefined = $state();
 
 	function show() {
@@ -22,7 +21,7 @@
 </script>
 
 <!--
-  実績カード（テキストのみ）。番号の下に余白を取り、タイトルの位置は全カードで揃える。
+  実績カード（テキストのみ）。期間の下に余白を取り、タイトルの位置は全カードで揃える。
   タグは下端に寄せる。ホバーでヒーローの背景の色味が浮かぶ。
   カード全体がボタンになり、ケーススタディ全文はモーダルで開く。
 -->
@@ -30,19 +29,11 @@
 	aria-labelledby="work-{work.slug}"
 	class="work-card group relative isolate flex h-full flex-col overflow-hidden rounded-lg border border-line bg-bg p-7 transition-colors duration-500 ease-out-expo hover:border-line-strong md:p-9"
 >
-	<div class="flex items-start justify-between font-mono text-xs text-fg-muted">
-		<span>
-			<span class="text-accent-text tabular">{num}</span><span>
-				/ {String(total).padStart(2, '0')}</span
-			>
-		</span>
-		<span class="tabular">{work.period}</span>
-	</div>
+	<p class="font-mono text-xs text-fg-muted tabular">{work.period}</p>
 
 	<!-- 余白のあとに内容。上から積むので、タイトルの位置は全カードで揃う -->
 	<div class="pt-16">
-		<p class="eyebrow">{WORK_CATEGORIES[work.category].en}</p>
-		<h3 id="work-{work.slug}" class="mt-3 text-h3 leading-snug font-semibold">{work.title}</h3>
+		<h3 id="work-{work.slug}" class="text-h3 leading-snug font-semibold">{work.title}</h3>
 		<p class="mt-2 text-sm text-fg-muted">{work.client}</p>
 		<p class="mt-6 line-clamp-4 text-[0.9375rem] leading-relaxed">{work.summary}</p>
 	</div>
@@ -55,16 +46,17 @@
 		</ul>
 		<button
 			type="button"
-			class="shrink-0 rounded-pill border border-line-strong p-2.5 text-fg-muted transition-colors group-hover:border-fg group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
+			class="shrink-0 rounded-pill text-fg-muted group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
 			aria-haspopup="dialog"
 			aria-label="{work.title}の詳細を見る"
 			onclick={show}
 		>
-			<ArrowUpRight
-				size={16}
-				aria-hidden="true"
-				class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-			/>
+			<!-- 拡大は内側の円だけに掛ける（ボタン自体を変形すると、カード全体のクリック範囲が縮むため） -->
+			<span
+				class="block rounded-pill border border-line-strong p-2.5 transition-[border-color,scale] duration-300 ease-out-expo group-hover:scale-125 group-hover:border-fg"
+			>
+				<ArrowUpRight size={16} aria-hidden="true" />
+			</span>
 		</button>
 	</div>
 </article>
@@ -81,7 +73,7 @@
 		<div class="flex items-start justify-between gap-6">
 			<div>
 				<p class="font-mono text-xs text-fg-muted">
-					<span class="text-accent-text">{num}</span> · <span class="tabular">{work.period}</span>
+					<span class="tabular">{work.period}</span>
 				</p>
 				<p class="eyebrow mt-4">{WORK_CATEGORIES[work.category].en}</p>
 				<h3 id="work-dialog-{work.slug}" class="mt-2 text-h2 font-semibold">{work.title}</h3>
@@ -123,7 +115,7 @@
 	}
 	.work-card:hover::before,
 	.work-card:focus-within::before {
-		opacity: 1;
+		opacity: 0.55;
 	}
 	.tag-label {
 		border: 1px solid var(--line);

@@ -47,9 +47,9 @@
 		aria-label="実績（横にスクロールできます）"
 	>
 		<ul class="flex w-max gap-(--grid-gap)">
-			{#each works as work, i (work.slug)}
+			{#each works as work (work.slug)}
 				<li class="w-[min(84vw,26rem)] shrink-0 snap-start md:w-[min(42vw,28rem)]">
-					<WorkCard {work} index={i} total={works.length} />
+					<WorkCard {work} />
 				</li>
 			{/each}
 		</ul>

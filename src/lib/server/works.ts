@@ -9,8 +9,10 @@ const modules = import.meta.glob<Record<string, unknown>>('/src/content/works/*.
 
 const works: WorkMeta[] = Object.entries(modules)
 	.map(([file, metadata]) => parseWorkMeta(file, metadata))
-	// 期間の開始年月で新しい順
-	.sort((a, b) => b.period.localeCompare(a.period));
+	// order の小さい順。order がないものはその後ろに、期間の開始年月で新しい順
+	.sort(
+		(a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || b.period.localeCompare(a.period)
+	);
 
 const slugs = new Set<string>();
 for (const w of works) {

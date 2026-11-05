@@ -21,4 +21,6 @@ export interface WorkMeta {
 	summary: string;
 	/** トップページの注目実績に表示するか */
 	featured: boolean;
+	/** 並び順（1 が先頭）。省略した実績は、指定したものの後に期間の新しい順で並ぶ */
+	order?: number;
 }

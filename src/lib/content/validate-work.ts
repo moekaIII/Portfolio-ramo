@@ -55,6 +55,10 @@ export function parseWorkMeta(file: string, raw: unknown): WorkMeta {
 			`category "${category}" は ${Object.keys(WORK_CATEGORIES).join(' / ')} のいずれかにしてください`
 		);
 
+	const order = raw.order;
+	if (order !== undefined && !(Number.isInteger(order) && (order as number) >= 1))
+		throw new WorkSchemaError(file, `order は 1 以上の整数にしてください（"${String(order)}"）`);
+
 	return {
 		title: str('title'),
 		slug,
@@ -64,6 +68,7 @@ export function parseWorkMeta(file: string, raw: unknown): WorkMeta {
 		tags: strArray('tags'),
 		category: category as WorkCategory,
 		summary: str('summary'),
-		featured: raw.featured === true
+		featured: raw.featured === true,
+		...(typeof order === 'number' && { order })
 	};
 }
