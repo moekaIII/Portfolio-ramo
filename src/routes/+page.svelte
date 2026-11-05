@@ -36,23 +36,12 @@
 	<WorksCarousel works={data.works} />
 </Section>
 
-<Section
-	id="strengths"
-	eyebrow="Strengths"
-	title="強み"
-	lead="実績から見えた、チームにもたらせる3つの価値です。"
->
+<Section id="strengths" eyebrow="Strengths" title="強み" lead="">
 	<Strengths works={data.works} />
 </Section>
 
-<Section
-	id="skills"
-	eyebrow="Skills"
-	title="スキル"
-	lead="実装を軸に、開発基盤の設計・運用から UI 設計、モバイル、教材づくりまで。"
-	tone="surface"
->
-	<Glance />
+<Section id="skills" eyebrow="Skills" title="スキル" lead="" tone="surface">
+	<!-- <Glance /> -->
 	<div class="mt-14">
 		<SkillChart groups={skills} works={data.works} />
 	</div>
@@ -67,12 +56,6 @@
 	<CareerTimeline items={career} />
 </Section>
 
-<Section
-	id="concept"
-	eyebrow="Concept"
-	title="このサイトについて"
-	lead="大切にしている考え方を、このサイト自体で表現しました。"
-	tone="surface"
->
+<Section id="concept" eyebrow="Concept" title="このサイトについて" tone="surface">
 	<Concept />
 </Section>

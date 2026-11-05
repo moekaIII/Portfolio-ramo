@@ -34,15 +34,27 @@ export const skills: SkillGroup[] = [
 		label: 'フロントエンド実装',
 		items: [
 			{
-				name: 'TypeScript / JavaScript',
+				name: '生成AI（Copilot / ChatGPT / Codex）',
+				level: 2,
+				years: 4,
+				works: ['game-anime-site', 'dev-platform', 'owned-media']
+			},
+			{
+				name: 'JavaScript',
 				level: 3,
-				years: 5.5,
+				years: 7,
+				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
+			},
+			{
+				name: 'TypeScript',
+				level: 3,
+				years: 3,
 				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
 				level: 3,
-				years: 5.5,
+				years: 8,
 				works: ['maas-webapp', 'game-anime-site']
 			},
 			{
@@ -53,13 +65,13 @@ export const skills: SkillGroup[] = [
 			},
 			{ name: 'GSAP・SVG アニメーション', level: 3, years: 5.5, works: ['game-anime-site'] },
 			{ name: 'Vue.js / Pinia', level: 2, years: 3, works: ['gov-dashboard', 'maas-webapp'] },
-			{ name: 'データ可視化（Chart.js・地図 API）', level: 2, years: 1, works: ['gov-dashboard'] }
+			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
 		]
 	},
 	{
-		id: 'platform',
-		group: 'Platform',
-		label: '開発基盤・運用',
+		id: 'uiux',
+		group: 'uiux',
+		label: 'UI/UXデザイン',
 		items: [
 			{
 				name: '外部 API との連携',
@@ -89,10 +101,10 @@ export const skills: SkillGroup[] = [
 		label: 'デザイン・モバイル・育成',
 		items: [
 			{
-				name: 'UI 設計（Figma）',
+				name: 'UI/UX 設計・デザイン（Figma / Adobe XD）',
 				level: 2,
 				years: 4,
-				works: ['maas-webapp', 'owned-media', 'game-anime-site']
+				works: ['game-anime-site']
 			},
 			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },
 			{ name: '技術教材の制作・研修講師', level: 2, years: 1.5, works: ['ios-app'] }

@@ -3,9 +3,9 @@ title: iOS アプリの開発と学習教材の制作
 slug: ios-app
 client: iOS アプリ開発・研修事業
 role: 企画・仕様策定・iOS アプリ開発・教材制作・研修講師
-period: 2021.10 – 2022.04
+period: 2019.05 – 2020.09
 category: development
-tags: [Swift, Xcode, App Store Connect]
+tags: [Swift, Xcode, App Store Connect, Firebase, Adobe Premire]
 summary: iOS アプリの企画・仕様策定から実装までを担当し、UI の配置や操作性を繰り返し検証。Swift の基礎から App Store へのリリースまでを網羅した学習教材も制作し、他社向け研修の受注につながりました。
 featured: false
 order: 7
