@@ -122,7 +122,7 @@ pnpm は `packageManager` で 10.x に固定しています。Node 24.6 同梱�
 | 氏名・URL・SNS         | `src/lib/config/site.ts`     |
 | スキル・経歴・強み     | `src/lib/content/profile.ts` |
 | 実績（ケーススタディ） | `src/content/works/*.md`     |
-| OGP 画像（1200×630）   | `static/og/default.png`      |
+| OGP 画像（1200×630）   | `static/og/ogp.png`          |
 
 ### 実績の追加
 
