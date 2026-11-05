@@ -1,54 +1,132 @@
-# Portfolio — Frontend Engineer / UI・UX Designer
+# Moeka Ihara — Portfolio
 
-企業（採用担当・発注企業）向けに、スキルと経歴が一目で伝わることを目的とした1ページ構成のポートフォリオです。SvelteKit 3 + Svelte 5（Runes）で作り、静的サイトとしてプリレンダリングします。
+**フロントエンドエンジニア / UI・UXデザイナー** のポートフォリオサイトです。
+設計・デザイン・実装の境界を越えて柔軟に働いてきたことをコンセプトに、サイト自体も設計から実装・品質保証まで一人でつくりました。
 
-## ページ構成（`/` のみ）
+> 🔗 **公開 URL**: _準備中_
 
-| セクション   | 内容                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------- |
-| ヒーロー     | 画面いっぱいの 3D（光が透ける一輪の花）と、左下にターミナル風に入力される氏名（JetBrains Mono）と肩書き |
-| `#works`     | 実績。テキストのみのカードを横スクロールで並べ、カードを押すとケーススタディ全文をモーダルで読む        |
-| `#strengths` | 強み                                                                                                    |
-| `#skills`    | 要点（経験 / 専門 / 主要技術 / 働き方）、領域別のスキル・習熟度・実務経験年数                           |
-| `#career`    | 経歴（スクロールに合わせて進捗線が伸びる）                                                              |
+![Lighthouse Accessibility 100](https://img.shields.io/badge/Accessibility-100-0cce6b) ![Lighthouse Best Practices 100](https://img.shields.io/badge/Best_Practices-100-0cce6b) ![Lighthouse SEO 100](https://img.shields.io/badge/SEO-100-0cce6b) ![axe-core 0 violations](https://img.shields.io/badge/axe--core-0_violations-0cce6b) ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6)
 
-## コマンド
+---
+
+## 私について
+
+|          |                                                                 |
+| -------- | --------------------------------------------------------------- |
+| 経験     | iOS・Web 開発 約7年（iOS アプリ → Web 受託開発 → フリーランス） |
+| 専門     | フロントエンド開発 × 開発基盤づくり                             |
+| 主要技術 | Svelte 5 / SvelteKit · Vue.js · TypeScript · GSAP               |
+| 受賞     | 2025年10月 全社ベストエンジニア賞（開発基盤の構築・運用）       |
+
+- **課題を見つけ、仕組みで解決する** — 開発基盤のなかったチームに Svelte を提案・導入し、技術選定から GitHub Actions による運用の自動化まで担当しました。
+- **表現力と品質を両立する** — ゲーム・TVアニメの公式サイトを 10 件以上、ピクセルパーフェクト・完全レスポンシブで実装しました。
+- **職種や会社を越えてつなぐ** — サブマネージャーとしてのコードレビュー、仕様検討段階からの代替案の提案、他社 API との調整、学習教材の制作と研修講師を経験しています。
+
+実績の詳細（ケーススタディ）はサイト内の「実績」から読めます。原稿は [`src/content/works/`](src/content/works/) にあります。
+
+---
+
+## このリポジトリで見てほしいところ
+
+### 1. 3D で表現したコンセプト
+
+ファーストビューの花は、カーソルを境に **左が設計図（ワイヤーフレーム）、右が実物** として描かれます。「デザインが実装へ変わる」過程そのものを、1 つのシーンで表現しました。
+
+- カメラを通るクリッピング平面で、同じ形状を「線」と「面」に塗り分けています。境界はカーソルに追従します。
+- 花びらの質感・色・背景は、画像を使わず Canvas で手続き的に生成しています（[`silk-petal.ts`](src/lib/three/silk-petal.ts)）。
+- 実装は [`BlueprintScene.svelte`](src/lib/components/three/BlueprintScene.svelte) です。
+
+### 2. 演出とパフォーマンスの両立
+
+- three.js はローディング演出の間に動的 import し、初回描画が終わってから本編を見せます。
+- 描画は必要なときだけ行います（Threlte の on-demand レンダリング）。画面外やタブが非表示のときは止めます。
+- モバイルでは形状の分割数・テクスチャ解像度・フレームレート・DPR を下げます。
+- ジオメトリ・マテリアル・テクスチャは明示的に破棄します。
+- 全ページを事前に生成した静的サイトです（adapter-static）。
+
+### 3. アクセシビリティ（WCAG 2.2 AA）
+
+- axe-core による自動チェックで、ライト / ダーク × デスクトップ / モバイルのいずれも違反 0 件です。
+- 「視差効果を減らす」設定や WebGL 非対応の環境では、3D・スムーズスクロール・ローディングを止め、同じ構図の静的な表示に切り替えます。
+- キーボードだけで全ての操作ができます。ページ内ナビゲーションでは、移動先へフォーカスも移します。
+- スキルのグラフは、値をすべて文字でも表示し、色だけに頼りません。
+
+### 4. 型安全なコンテンツ管理
+
+- 実績は Markdown（mdsvex）で書き、frontmatter をビルド時に検証します。不正な値があるとビルドが失敗します（[`validate-work.ts`](src/lib/content/validate-work.ts)）。
+- スキル・経歴・強みは型付きのデータ（[`profile.ts`](src/lib/content/profile.ts)）から生成します。
+
+### 5. デザイントークン
+
+- 色は OKLCH のトークンで管理し、ライト / ダークの両テーマを持っています（[`tokens.css`](src/lib/styles/tokens.css)）。
+- アクセントカラーは 2 つの値を変えるだけで、3D を含むサイト全体に反映されます。
+
+---
+
+## 品質
+
+ローカルの preview で計測しました（Lighthouse 12・モバイル）。
+
+| 指標                    | 結果                                                |
+| ----------------------- | --------------------------------------------------- |
+| Performance             | 84〜94（3D を含むため、計測環境の負荷で変動します） |
+| Accessibility           | 100                                                 |
+| Best Practices          | 100                                                 |
+| SEO                     | 100                                                 |
+| axe-core（WCAG 2.2 AA） | 違反 0 件                                           |
+
+`pnpm check`（型チェック）と `pnpm lint`（Prettier + ESLint）を、変更のたびに通しています。
+
+---
+
+## 技術スタック
+
+| 領域           | 技術                                                        |
+| -------------- | ----------------------------------------------------------- |
+| フレームワーク | SvelteKit 3 · Svelte 5（Runes） · TypeScript（strict）      |
+| スタイル       | Tailwind CSS v4 · OKLCH デザイントークン                    |
+| 3D             | three.js · Threlte                                          |
+| モーション     | GSAP（経歴のスクロール連動のみ） · Lenis · View Transitions |
+| コンテンツ     | mdsvex（Markdown）                                          |
+| 品質           | svelte-check · ESLint · Prettier · axe-core · Lighthouse    |
+| ビルド         | Vite · adapter-static（プリレンダリング） · pnpm            |
+
+---
+
+## ローカルで動かす
 
 ```sh
 pnpm install
 pnpm dev        # 開発サーバー
-pnpm check      # 型チェック（svelte-check）
-pnpm lint       # Prettier + ESLint
-pnpm format     # 自動整形
 pnpm build      # build/ に静的サイトを出力
 pnpm preview    # ビルド結果の確認
 ```
 
-> pnpm は `packageManager` で **10.x に固定**しています。Node 24.6 同梱の Corepack 0.34 が pnpm 12 のエントリポイント（`pnpm.mjs`）を解決できないためです。
+<details>
+<summary>開発・運用メモ（コマンド・内容の更新方法）</summary>
 
-## 差し替えが必要な箇所（仮の値）
+### コマンド
 
-| 何を                     | どこで                       |
-| ------------------------ | ---------------------------- |
-| 氏名・URL・メール・SNS   | `src/lib/config/site.ts`     |
-| スキル・要点・経歴・強み | `src/lib/content/profile.ts` |
-| 実績（ケーススタディ）   | `src/content/works/*.md`     |
-| OGP 画像（1200×630）     | `static/og/default.png`      |
-
-### アクセントカラーの変更
-
-`src/lib/styles/tokens.css` の 2 つの値だけで全体に反映されます（OKLCH）。3D のブロックも CSS トークンから色を読み取ります。
-
-```css
---accent-hue: 125; /* 色相 */
---accent-chroma: 0.2; /* 彩度 */
+```sh
+pnpm check      # 型チェック（svelte-check）
+pnpm lint       # Prettier + ESLint
+pnpm format     # 自動整形
 ```
 
-色相を大きく変える場合は、テーマごとの明度 `--accent-l-fill` / `--accent-l-text` を調整し、WCAG AA のコントラスト比を確認してください。
+pnpm は `packageManager` で 10.x に固定しています。Node 24.6 同梱の Corepack 0.34 が、pnpm 12 のエントリポイントを解決できないためです。
 
-## 実績の追加
+### 内容の更新
 
-`src/content/works/<slug>.md` を作成します（画像は不要です）。frontmatter はビルド時に検証され、不正な値があるとビルドが失敗します（`src/lib/content/validate-work.ts`）。
+| 何を                   | どこで                       |
+| ---------------------- | ---------------------------- |
+| 氏名・URL・SNS         | `src/lib/config/site.ts`     |
+| スキル・経歴・強み     | `src/lib/content/profile.ts` |
+| 実績（ケーススタディ） | `src/content/works/*.md`     |
+| OGP 画像（1200×630）   | `static/og/default.png`      |
+
+### 実績の追加
+
+`src/content/works/<slug>.md` を作成します。
 
 ```yaml
 ---
@@ -59,52 +137,23 @@ role: 担当範囲
 period: 2025.04 – 2025.10 # または「2025.04 – 継続中」
 category: development # development | ui-design | ux
 tags: [SvelteKit, TypeScript]
-summary: 一覧に出す要約
+summary: カードに出す要約（PC 4 行・スマホ 6 行まで）
 featured: true
 order: 1 # 並び順（省略すると、指定したものの後に期間の新しい順）
 ---
 ```
 
-カードには期間・タイトル・クライアント・要約（PC 4 行・スマホ 6 行まで）・タグが出ます。本文はカードを押したときのモーダルにだけ表示されます。
+本文の見出しは `####` を使います（セクションの h2 → 実績タイトルの h3 の下に入るため）。
 
-本文の見出しは `####` を使います（ページ内でセクション h2 → 実績タイトル h3 の下に入るため）。
+### アクセントカラーの変更
 
-## 3D「設計図と実物の境界」
+`src/lib/styles/tokens.css` の 2 つの値で、全体に反映されます。
 
-見出しの考え方「デザインと実装の境界をなくす」を、そのまま 3D で表現しています（`src/lib/components/three/BlueprintScene.svelte`）。
+```css
+--accent-hue: 125; /* 色相 */
+--accent-chroma: 0.2; /* 彩度 */
+```
 
-- **構図**
-  - 光が透ける薄い花びら（ポピーのような）を持つ一輪の花が、画面の右寄りに浮かびます。細い茎はゆるく波打ちながら下へ抜けます。
-  - 花びらは付け根の濃いオレンジから、コーラル、淡いピンクへ溶けるグラデーションで、縁の一部に深いさび色が入ります（テクスチャは手続き的に生成。`src/lib/three/silk-petal.ts`）。
-  - 陰影は使わず（`MeshBasicMaterial`）、半透明の花びらが重なることで色が深まります。各花びらに少しずらした淡い残像を重ね、二重露光のような柔らかい輪郭にしています。
-  - 花芯は、放射状に広がる細い雄しべと葯です。立ち上がった手前の花びらの陰で、花芯の手前側は暗く沈みます。
-  - 花びらは呼吸するようにゆっくり開閉し、クリックかタップでふわっと揺れます。
-  - カーソルの位置を境に、左（DESIGN）は設計図の線、右（BUILD）は実物として描かれます。
-- **空間**
-  - 継ぎ目のないスタジオ背景です。中心は暖かいクリーム色で、外側は淡いラベンダーとミントのグレーへ溶けます。ダークテーマでは、同じ配色を暗く沈めた背景にしています。
-  - 奥の壁は上へ行くほど暗く、床は手前ほど明るく地平線へ向かって沈み、花の足元に光だまりがあります。四隅には淡い色味の陰を置いています（`createBackdrop`）。
-  - カメラと床・背景は固定で、花だけがカーソルに合わせてわずかに動きます（視差）。DESIGN 側の床の線はマウスで動きません。
-- **パフォーマンス**
-  - three.js は、最初の操作（マウス移動・スクロール・タップ・キー入力）か読み込み完了の 3.5 秒後の早い方で動的 import します。それまでは同じ構図の静的表示（SVG）が見えています。
-  - 画面外やタブが非表示のときは、物理演算も描画も止めます。DPR はデスクトップで最大 2、モバイルで最大 1.5 です。
-  - モバイルでは、形状の分割数とテクスチャ解像度を下げ、30fps で描画します。
-  - ジオメトリ、マテリアル、テクスチャ、環境マップは明示的に dispose しています。
-- **フォールバック**: reduced-motion 時と WebGL2 非対応時は、同じ構図の SVG（左は線、右は面）を表示し、three.js も読み込みません。
+色相を大きく変える場合は、テーマごとの明度 `--accent-l-fill` / `--accent-l-text` を調整し、WCAG AA のコントラスト比を確認してください。
 
-## その他の実装メモ
-
-- **フォント**
-  - Inter（欧文）は preload して、差し替えによる CLS を防いでいます。
-  - Noto Sans JP（分割された和文フォント）は表示後に読み込み、それまでは OS の和文フォントで表示します。
-- **モーション**
-  - gsap は経歴タイムラインのスクロール連動だけで使っています。
-  - View Transitions はテーマ切り替えのクロスフェードに使っています。
-  - lenis（スムーズスクロール）と reveal 表示は、reduced-motion 時は無効になります。
-- **ページ内ナビゲーション**: 移動先のセクションにフォーカスも移します。画面上で読んでいるセクションは `aria-current="location"` で示します。
-
-## 品質（ローカルの preview で計測）
-
-- **Lighthouse（モバイル）**: Accessibility / Best Practices / SEO 100。Performance は計測環境の負荷で大きく変動します（同じ版でも 61〜98）。直近では、比較用の旧版が 86 のときに現行版が 90〜92 でした。
-- **axe-core（WCAG 2.2 AA + best-practice）**: ダーク / ライト × デスクトップ / モバイル、3D 表示時・静的表示時のいずれも違反 0 件
-
-本番のホスティング環境では数値が変わることがあります。
+</details>

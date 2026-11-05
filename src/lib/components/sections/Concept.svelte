@@ -2,10 +2,7 @@
 	import { reveal } from '#lib/actions/reveal.ts';
 </script>
 
-<!-- このサイト自体のコンセプト（一言） -->
-<p
-	class="max-w-[22em] text-[clamp(1.75rem,3.6vw,3rem)] leading-[1.35] font-semibold tracking-tight"
-	use:reveal
->
-	デザインと実装の<span class="text-accent-text">境界</span>を、なくす。
+<!-- このサイト自体のコンセプト（一文） -->
+<p class="max-w-[40em] text-lead leading-relaxed" use:reveal>
+	ファーストビューの花は、左が設計図、右が実物です。設計・デザイン・実装の境界を越えて、柔軟に働いてきたことを表しました。
 </p>

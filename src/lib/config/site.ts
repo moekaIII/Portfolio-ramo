@@ -17,12 +17,12 @@ export const site = {
 	/** 既定の title 接尾辞・description */
 	titleTemplate: (title?: string) =>
 		title ? `${title} — ${author.name}` : ` — ${author.jobTitle}`,
-	description: `フロントエンドエンジニア / UI・UXデザイナー ${author.name}のポートフォリオ。TypeScript・Svelte・React・Figma を軸に、設計・デザイン・実装を横断してきた10年のスキルと経歴、実績をまとめています。`,
+	description: `フロントエンドエンジニア / UI・UXデザイナー ${author.name}のポートフォリオ。Svelte・Vue.js・TypeScript を軸に、開発基盤づくりから公式サイトの演出実装まで、約7年のスキルと経歴、実績をまとめています。`,
 	locale: 'ja_JP',
 	/** static/ 配下の既定 OGP 画像（1200x630） */
 	ogImage: '/og/default.png',
 	social: [
-		{ label: 'GitHub', href: 'https://github.com/' },
+		{ label: 'GitHub', href: 'https://github.com/moekaIII/Portfolio-ramo' },
 		{ label: 'X', href: 'https://x.com/' },
 		{ label: 'LinkedIn', href: 'https://www.linkedin.com/' }
 	]

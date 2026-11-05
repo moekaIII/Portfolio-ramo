@@ -55,6 +55,6 @@
 	<CareerTimeline items={career} />
 </Section>
 
-<Section id="concept" eyebrow="Concept" title="このサイトについて" tone="surface">
+<Section id="concept" eyebrow="Concept" title="サイトコンセプト" tone="surface">
 	<Concept />
 </Section>
