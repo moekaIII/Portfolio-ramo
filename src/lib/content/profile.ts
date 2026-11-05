@@ -36,13 +36,13 @@ export const skills: SkillGroup[] = [
 			{
 				name: 'TypeScript / JavaScript',
 				level: 3,
-				years: 4,
+				years: 5.5,
 				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
 				level: 3,
-				years: 4,
+				years: 5.5,
 				works: ['maas-webapp', 'game-anime-site']
 			},
 			{
@@ -51,8 +51,8 @@ export const skills: SkillGroup[] = [
 				years: 2.5,
 				works: ['dev-platform', 'game-anime-site', 'owned-media']
 			},
-			{ name: 'GSAP・SVG アニメーション', level: 3, years: 2.5, works: ['game-anime-site'] },
-			{ name: 'Vue.js / Pinia', level: 2, years: 1.5, works: ['gov-dashboard', 'maas-webapp'] },
+			{ name: 'GSAP・SVG アニメーション', level: 3, years: 5.5, works: ['game-anime-site'] },
+			{ name: 'Vue.js / Pinia', level: 2, years: 3, works: ['gov-dashboard', 'maas-webapp'] },
 			{ name: 'データ可視化（Chart.js・地図 API）', level: 2, years: 1, works: ['gov-dashboard'] }
 		]
 	},
@@ -94,15 +94,15 @@ export const skills: SkillGroup[] = [
 				years: 4,
 				works: ['maas-webapp', 'owned-media', 'game-anime-site']
 			},
-			{ name: 'Swift / iOS アプリ開発', level: 2, years: 0.5, works: ['ios-app'] },
-			{ name: '技術教材の制作・研修講師', level: 2, years: 0.5, works: ['ios-app'] }
+			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },
+			{ name: '技術教材の制作・研修講師', level: 2, years: 1.5, works: ['ios-app'] }
 		]
 	}
 ];
 
 /** ファーストビューに置く「一目でわかる」要約 */
 export const glance: { term: string; value: string }[] = [
-	{ term: '経験', value: 'Webサイト・アプリ開発 約5年' },
+	{ term: '経験', value: 'iOS・Web 開発 約7年' },
 	{ term: '専門', value: 'フロントエンド開発 × 開発基盤づくり' },
 	{ term: '主要技術', value: 'Svelte / Vue.js / TypeScript / GSAP' },
 	{ term: '働き方', value: '正社員・業務委託ともに相談可 / フルリモート可' }
@@ -119,39 +119,62 @@ export interface CareerItem {
 
 export const career: CareerItem[] = [
 	{
-		period: '2022 — 現在',
-		title: 'フリーランス（フロントエンド / UI・UXデザイン）',
-		org: '独立',
-		summary: 'スタートアップから大手企業まで、設計・デザイン・実装を一貫して支援。',
+		period: '2024.02 — 2026.06',
+		title: 'フロントエンドエンジニア',
+		org: 'フリーランス・個人事業主',
+		summary:
+			'ゲーム・TVアニメの公式サイト制作を担いながら、チームに Svelte の開発基盤を提案・導入。技術選定から運用の仕組み化まで一貫して担当しました。',
 		achievements: [
-			'BtoB SaaS のダッシュボード刷新で LCP を 4.1秒 → 1.3秒に改善',
-			'3ブランド横断のデザインシステムを構築し、UI実装工数を 35% 削減',
-			'EC の購入フロー改善で CVR を 38% 向上'
+			'ゲーム・TVアニメの公式サイト 10件以上を、ピクセルパーフェクト・完全レスポンシブで実装。GSAP などで高度なアニメーション表現を実現',
+			'開発基盤のなかったチームに Svelte を提案・導入。汎用コンポーネントの拡充と手作業の自動化で、導入時の負担を軽減',
+			'Enhanced Image を活用した独自コンポーネントで、大量の画像の軽量化・サイズ指定を自動化',
+			'技術とチームのレギュレーションに合わせて改善し続けられる運用フローを、GitHub で整備'
 		],
-		stack: ['SvelteKit', 'Next.js', 'TypeScript', 'Figma']
+		stack: [
+			'Svelte 5',
+			'SvelteKit',
+			'TypeScript',
+			'GSAP',
+			'Sass',
+			'NILTO',
+			'GitHub Copilot',
+			'ChatGPT',
+			'Codex',
+			'Claude Code'
+		]
 	},
 	{
-		period: '2018 — 2022',
-		title: 'シニアフロントエンドエンジニア / デザインリード',
-		org: 'SaaS スタートアップ',
-		summary: 'プロダクトのフロントエンド基盤とデザインシステムを立ち上げ、5名のチームをリード。',
+		period: '2020.10 — 2023.12',
+		title: 'フロントエンドエンジニア / サブマネージャー',
+		org: 'Web 受託開発会社（約40名）',
+		summary:
+			'行政機関・企業向けの Web アプリケーションと Web サイトを開発。フロントエンド開発に加え、ディレクションやデザインのサポートにも幅広く携わりました。',
 		achievements: [
-			'jQuery から React + TypeScript への段階的移行を設計・完遂',
-			'デザイナーとエンジニアの共通言語としてトークン駆動の UI ライブラリを整備',
-			'採用面接と育成を担当し、チームを 2名 → 5名に拡大'
+			'人員不足のプロジェクトで、サブマネージャーとして実装支援・コードレビューを担いながら、難易度の高い機能を実装',
+			'仕様が固まる前の打ち合わせから参加し、開発コストを踏まえた代替案を提案。手戻りと、ディレクター・エンジニア間の摩擦を軽減',
+			'ディレクター・デザイナー・バックエンドエンジニアと連携し、双方の視点から解決策を導くコミュニケーション力を培った'
 		],
-		stack: ['React', 'TypeScript', 'Storybook', 'Figma']
+		stack: ['Vue.js', 'JavaScript', 'TypeScript', 'Sass', 'Pug', 'GSAP']
 	},
 	{
-		period: '2015 — 2018',
-		title: 'Webデザイナー / マークアップエンジニア',
-		org: 'Web制作会社',
-		summary: 'コーポレートサイトやキャンペーンサイトのデザインと実装を年間20件以上担当。',
+		period: '2019.05 — 2020.09',
+		title: 'iOS エンジニア / 教材制作',
+		org: 'iOS アプリ開発・研修事業',
+		summary: 'iOS アプリの企画・開発と、Swift の学習教材の制作を担当しました。',
 		achievements: [
-			'社内のコーディングガイドラインとアクセシビリティチェックリストを策定',
-			'デザインからマークアップまでを一人で担当する体制を確立'
+			'企画・仕様策定から参加し、UI パーツの配置や操作性を繰り返し検証。日常的に使ってもストレスのないアプリを実装',
+			'Swift の基礎から App Store へのリリースまでを網羅した教材を、操作動画も交えて制作。他社向け研修の受注につながった',
+			'Mac の基本操作からアプリのリリースまでを一貫して指導し、相手の理解度に合わせて伝える力を培った'
 		],
-		stack: ['HTML / CSS', 'JavaScript', 'Photoshop', 'Sketch']
+		stack: [
+			'Swift',
+			'SwiftUI',
+			'UIKit',
+			'GitHub',
+			'Firebase',
+			'App Store Connect',
+			'Adobe Premiere'
+		]
 	}
 ];
 

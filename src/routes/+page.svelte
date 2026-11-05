@@ -62,7 +62,7 @@
 	id="career"
 	eyebrow="Career"
 	title="経歴"
-	lead="Webデザイナーとしてキャリアを始め、実装、チームのリード、独立と、領域を広げてきました。"
+	lead="iOS アプリ開発から始まり、Web の受託開発、フリーランスでの開発基盤づくりへと領域を広げてきました。"
 >
 	<CareerTimeline items={career} />
 </Section>
