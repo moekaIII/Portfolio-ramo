@@ -480,12 +480,16 @@
 	}
 
 	const root = new Group();
-	// ---- DESIGN 側の奥行き: 地平線へ収束していく床の線（奥ほど背景色に溶ける）----
-	const floorMaterial = clip(
-		new LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }),
-		wirePlane
-	);
+	// ---- 奥行き: 地平線へ収束していく床の線（DESIGN / BUILD 共通。奥ほど背景色に溶ける）----
+	// 床の線は DESIGN / BUILD 共通（境界で切らない）。花より奥に描く
+	const floorMaterial = new LineBasicMaterial({
+		vertexColors: true,
+		transparent: true,
+		opacity: 0.9,
+		depthWrite: false
+	});
 	const floor = new LineSegments(track(new BufferGeometry()), floorMaterial);
+	floor.renderOrder = -10;
 	let floorKey = '';
 	function buildFloor(y: number, lineColor: RGB, bg: RGB) {
 		const key = `${y.toFixed(2)}|${lineColor.join()}|${bg.join()}`;

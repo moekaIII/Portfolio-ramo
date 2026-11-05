@@ -7,8 +7,6 @@ period: 2025.04 – 2025.10
 category: development
 tags: [SvelteKit, TypeScript, Web Vitals, D3.js, Storybook, Playwright]
 summary: 表示に4秒以上かかっていた資産ダッシュボードを、情報設計から作り直し、初期表示1.3秒・主要タスク完了時間42%短縮を実現しました。
-thumbnail: fintech-dashboard.png
-thumbnailAlt: 資産推移の折れ線グラフと3つの主要指標カードが並ぶダッシュボード画面のイメージ
 featured: true
 results:
   - label: LCP（モバイル）

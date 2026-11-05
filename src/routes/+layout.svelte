@@ -4,10 +4,11 @@
 	import './layout.css';
 	import { onMount } from 'svelte';
 	import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
-	import favicon from '#lib/assets/favicon.svg';
+	import favicon from '#lib/assets/favicon.png';
 	import Header from '#lib/components/layout/Header.svelte';
 	import SkipLink from '#lib/components/layout/SkipLink.svelte';
 	import SmoothScroll from '#lib/components/layout/SmoothScroll.svelte';
+	import Footer from '#lib/components/layout/Footer.svelte';
 	import { theme } from '#lib/state/theme.svelte.ts';
 	import type { LayoutProps } from './$types';
 
@@ -33,3 +34,4 @@
 <main id="main" tabindex="-1" class="outline-none">
 	{@render children()}
 </main>
+<Footer />

@@ -62,8 +62,6 @@ period: 2025.04 – 2025.10 # または「2025.04 – 継続中」
 category: development # development | ui-design | ux
 tags: [SvelteKit, TypeScript]
 summary: 一覧に出す要約
-thumbnail: my-project.png
-thumbnailAlt: 画像の説明
 featured: true
 results:
   - { label: CVR, value: '+38', unit: '%', note: 計測条件 } # value は文字列で

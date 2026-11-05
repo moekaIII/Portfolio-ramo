@@ -4,7 +4,6 @@
 	import Hero from '#lib/components/hero/Hero.svelte';
 	import Section from '#lib/components/sections/Section.svelte';
 	import Strengths from '#lib/components/sections/Strengths.svelte';
-	import ContactLinks from '#lib/components/sections/ContactLinks.svelte';
 	import Glance from '#lib/components/profile/Glance.svelte';
 	import SkillMatrix from '#lib/components/profile/SkillMatrix.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
@@ -27,6 +26,24 @@
 <Hero />
 
 <Section
+	id="works"
+	eyebrow="Selected Projects"
+	title="実績"
+	lead="多様なプロジェクトにおける設計・開発・課題解決の取り組み。一部抜粋"
+	tone="surface"
+>
+	<div class="border-b border-line">
+		{#each data.works as work, i (work.slug)}
+			<WorkCard {work} index={i} />
+		{/each}
+	</div>
+</Section>
+
+<Section id="strengths" eyebrow="Strengths" title="強み">
+	<Strengths />
+</Section>
+
+<Section
 	id="skills"
 	eyebrow="Skills"
 	title="スキル"
@@ -46,26 +63,4 @@
 	lead="Webデザイナーとしてキャリアを始め、実装、チームのリード、独立と、領域を広げてきました。"
 >
 	<CareerTimeline items={career} />
-</Section>
-
-<Section
-	id="works"
-	eyebrow="Works"
-	title="実績"
-	lead="見た目の刷新だけでなく、事業の数字が動いたところまでを記録しています。"
-	tone="surface"
->
-	<div class="-mt-12 border-b border-line md:-mt-16">
-		{#each data.works as work (work.slug)}
-			<WorkCard {work} />
-		{/each}
-	</div>
-</Section>
-
-<Section id="strengths" eyebrow="Strengths" title="強み">
-	<Strengths />
-</Section>
-
-<Section id="contact" eyebrow="Contact" title="連絡先">
-	<ContactLinks />
 </Section>

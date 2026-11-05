@@ -1,15 +1,13 @@
 ---
-title: マルチブランド対応デザインシステムの構築
-slug: design-system
-client: 大手小売グループ（3ブランド横断）
-role: デザインシステム設計・UIデザイン・コンポーネント実装
+title: オウンドメディア リニューアル
+slug: owned-media
+client: 大手ゲーム会社
+role: フロント実装・他部署連携・headlessCMS
 period: 2024.09 – 2025.03
-category: ui-design
-tags: [Figma, Design Tokens, Web Components, Lit, Style Dictionary, WCAG 2.2]
-summary: ブランドごとにばらばらだったUIを、トークン駆動のデザインシステムで統一。実装工数35%削減とアクセシビリティ違反92%削減を同時に達成しました。
-thumbnail: design-system.png
-thumbnailAlt: ボタン、トグル、入力欄、カラースケール、タイポグラフィなどのUIコンポーネントが並ぶタイル状のイメージ
-featured: true
+category: development
+tags: [Github Copilot, Svelte5, Sveltekit, headless CMS, Figma]
+summary: Wordpressで膨大な記事データを管理していたサイトのサーバーレス化
+featured: false
 results:
   - label: 新規画面のUI実装工数
     value: '-35'

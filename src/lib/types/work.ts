@@ -28,9 +28,6 @@ export interface WorkMeta {
 	tags: string[];
 	category: WorkCategory;
 	summary: string;
-	/** src/lib/assets/works/ 内のファイル名 */
-	thumbnail: string;
-	thumbnailAlt: string;
 	results: WorkResult[];
 	/** トップページの注目実績に表示するか */
 	featured: boolean;

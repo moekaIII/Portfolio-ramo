@@ -62,8 +62,5 @@
 		<nav aria-label="ページ内（モバイル）" class="mt-10 flex-1">
 			<Nav variant="menu" onnavigate={close} />
 		</nav>
-		<a href="mailto:{site.author.email}" class="text-sm text-fg-muted underline underline-offset-4"
-			>{site.author.email}</a
-		>
 	</div>
 </dialog>

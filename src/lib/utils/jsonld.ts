@@ -12,9 +12,8 @@ export function personJsonLd() {
 		'@type': 'Person',
 		'@id': personId,
 		name: site.author.name,
-		alternateName: site.author.nameEn,
+		alternateName: site.author.name,
 		jobTitle: site.author.jobTitle,
-		email: `mailto:${site.author.email}`,
 		url: site.url,
 		address: {
 			'@type': 'PostalAddress',
@@ -41,7 +40,6 @@ export function professionalServiceJsonLd() {
 		description: site.description,
 		url: site.url,
 		image: absoluteUrl(site.ogImage),
-		email: site.author.email,
 		founder: { '@id': personId },
 		areaServed: { '@type': 'Country', name: 'Japan' },
 		address: {

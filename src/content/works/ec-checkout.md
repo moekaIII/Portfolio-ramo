@@ -7,8 +7,6 @@ period: 2025.11 – 継続中
 category: ux
 tags: [UXリサーチ, ユーザビリティテスト, A/Bテスト, GA4, Figma, Next.js]
 summary: 6ステップあった購入フローをリサーチに基づいて4ステップに再設計。CVR 38%向上、カゴ落ち率24%改善につなげました。
-thumbnail: ec-checkout.png
-thumbnailAlt: カート、住所、支払い、完了の4ステップに整理された購入フローの画面遷移イメージ
 featured: true
 results:
   - label: 購入完了率（CVR）

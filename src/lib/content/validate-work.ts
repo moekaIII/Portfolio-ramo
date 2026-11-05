@@ -83,8 +83,6 @@ export function parseWorkMeta(file: string, raw: unknown): WorkMeta {
 		tags: strArray('tags'),
 		category: category as WorkCategory,
 		summary: str('summary'),
-		thumbnail: str('thumbnail'),
-		thumbnailAlt: str('thumbnailAlt'),
 		results,
 		featured: raw.featured === true
 	};

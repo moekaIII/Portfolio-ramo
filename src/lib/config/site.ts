@@ -3,10 +3,8 @@
  * TODO(owner): 仮の値をすべて実際の情報に置き換える。
  */
 const author = {
-	name: '山田 太郎',
-	nameEn: 'Taro Yamada',
-	jobTitle: 'Frontend Engineer / UI・UX Designer',
-	email: 'hello@example.com',
+	name: 'Moeka Ihara',
+	jobTitle: 'front-end Developer / UI・UX Designer',
 	location: { locality: 'Tokyo', country: 'JP' }
 } as const;
 
@@ -14,11 +12,11 @@ export const site = {
 	/** 本番 URL（末尾スラッシュなし）。sitemap / canonical / OGP の絶対 URL に使用 */
 	url: 'https://example.com',
 	/** サイト名（ロゴ・OGP に表示） */
-	name: author.nameEn,
+	name: author.name,
 	author,
 	/** 既定の title 接尾辞・description */
 	titleTemplate: (title?: string) =>
-		title ? `${title} — ${author.nameEn}` : `${author.name} — ${author.jobTitle}`,
+		title ? `${title} — ${author.name}` : ` — ${author.jobTitle}`,
 	description: `フロントエンドエンジニア / UI・UXデザイナー ${author.name}のポートフォリオ。TypeScript・Svelte・React・Figma を軸に、設計・デザイン・実装を横断してきた10年のスキルと経歴、実績をまとめています。`,
 	locale: 'ja_JP',
 	/** static/ 配下の既定 OGP 画像（1200x630） */
@@ -34,8 +32,7 @@ export const site = {
 export const sections = [
 	{ id: 'skills', label: 'スキル', en: 'Skills' },
 	{ id: 'career', label: '経歴', en: 'Career' },
-	{ id: 'works', label: '実績', en: 'Works' },
-	{ id: 'contact', label: '連絡先', en: 'Contact' }
+	{ id: 'works', label: '実績', en: 'Works' }
 ] as const;
 
 export type SectionId = (typeof sections)[number]['id'];
