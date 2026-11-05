@@ -38,10 +38,10 @@
 				done = true;
 				return;
 			}
-			const pause = name[typed - 1] === ' ' ? 160 : 0;
-			timer = window.setTimeout(step, 70 + Math.random() * 90 + pause);
+			const pause = name[typed - 1] === ' ' ? 100 : 0;
+			timer = window.setTimeout(step, 45 + Math.random() * 55 + pause);
 		};
-		timer = window.setTimeout(step, 600);
+		timer = window.setTimeout(step, 400);
 		return () => window.clearTimeout(timer);
 	}
 </script>

@@ -1,23 +1,18 @@
 <!doctype html>
-<html lang="ja" data-theme="dark">
+<html lang="ja" data-theme="light">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="text-scale" content="scale" />
-		<meta name="color-scheme" content="dark light" />
-		<meta name="theme-color" content="#101214" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#fafaf9" />
 		<script>
-			// 描画前にテーマを確定させ、FOUC を防ぐ（ThemeToggle と同じキーを使用）
+			// 描画前にテーマを確定させ、FOUC を防ぐ（ThemeToggle と同じキーを使用）。
+			// 既定はライト。切り替えたテーマは保存して次回も使う
 			(function () {
 				try {
 					var saved = localStorage.getItem('theme');
-					var theme =
-						saved === 'light' || saved === 'dark'
-							? saved
-							: matchMedia('(prefers-color-scheme: light)').matches
-								? 'light'
-								: 'dark';
+					var theme = saved === 'dark' ? 'dark' : 'light';
 					document.documentElement.dataset.theme = theme;
 					document.documentElement.classList.add('js');
 					// ローディング演出は毎回見せる（視差効果を減らす設定のときだけ出さない）

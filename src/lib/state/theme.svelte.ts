@@ -4,11 +4,11 @@ const STORAGE_KEY = 'theme';
 
 /** <html data-theme> と同期するテーマ状態（app.html のインラインスクリプトで初期化済み） */
 class ThemeState {
-	current = $state<Theme>('dark');
+	current = $state<Theme>('light');
 
 	/** クライアントでマウント時に一度呼ぶ */
 	init() {
-		this.current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+		this.current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 	}
 
 	set(theme: Theme) {
