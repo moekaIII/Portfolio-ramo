@@ -32,7 +32,8 @@ export const site = {
 export const sections = [
 	{ id: 'skills', label: 'スキル', en: 'Skills' },
 	{ id: 'career', label: '経歴', en: 'Career' },
-	{ id: 'works', label: '実績', en: 'Works' }
+	{ id: 'works', label: '実績', en: 'Works' },
+	{ id: 'concept', label: 'コンセプト', en: 'Concept' }
 ] as const;
 
 export type SectionId = (typeof sections)[number]['id'];

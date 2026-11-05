@@ -443,41 +443,26 @@
 	flower.add(stem, stemLines);
 	plant.add(flower);
 
-	// ---- 境界線とタグ「DESIGN | BUILD」 ----
+	// ---- 境界線 ----
 	const planeGeometry = track(new PlaneGeometry(1, 1));
 	const boundaryMaterial = new MeshBasicMaterial({ transparent: true, opacity: 0.55 });
+	// 境界線は深度を書き込まない（透明な板が奥の花びらを隠さないように）
+	boundaryMaterial.depthWrite = false;
+	boundaryMaterial.depthTest = false;
 	const boundary = new Mesh(planeGeometry, boundaryMaterial);
-	const tagMaterials = [
-		new MeshBasicMaterial({ transparent: true }),
-		new MeshBasicMaterial({ transparent: true })
-	];
-	// タグと境界線は深度を書き込まない（透明な板が奥の花びらを隠さないように）
-	for (const m of [...tagMaterials, boundaryMaterial]) {
-		m.depthWrite = false;
-		m.depthTest = false;
-	}
-	const tags = tagMaterials.map((m) => {
-		const mesh = new Mesh(planeGeometry, m);
-		mesh.renderOrder = 100;
-		return mesh;
-	});
+	boundary.renderOrder = 100;
 
-	function tagTexture(text: string, color: string, align: 'left' | 'right') {
-		const canvas = Object.assign(document.createElement('canvas'), { width: 512, height: 96 });
-		const ctx = canvas.getContext('2d');
-		if (ctx) {
-			ctx.font = '500 44px "Inter Variable", sans-serif';
-			ctx.letterSpacing = '10px';
-			ctx.fillStyle = color;
-			ctx.textBaseline = 'middle';
-			ctx.textAlign = align;
-			ctx.fillText(text, align === 'left' ? 0 : canvas.width, canvas.height / 2);
-		}
-		const t = new CanvasTexture(canvas);
-		t.colorSpace = SRGBColorSpace;
-		t.anisotropy = 4;
-		return t;
-	}
+	// ---- DESIGN 側の無地の背景 ----
+	// スタジオの背景色（scene.background）は BUILD 側だけに見せる。設計図側は、ページと同じ無地の面で覆う。
+	// 境界と同じ面（カメラを通る）で切るので、境界がどこにあっても画面上でぴったり分かれる
+	const PAPER_Z = -30;
+	const paperMaterial = clip(
+		new MeshBasicMaterial({ depthWrite: false, depthTest: false, toneMapped: false }),
+		wirePlane
+	);
+	const paper = new Mesh(planeGeometry, paperMaterial);
+	paper.position.z = PAPER_Z;
+	paper.renderOrder = -20;
 
 	const root = new Group();
 	// ---- 奥行き: 地平線へ収束していく床の線（DESIGN / BUILD 共通。奥ほど背景色に溶ける）----
@@ -534,7 +519,7 @@
 	}
 	let floorColors: { line: RGB; bg: RGB } = { line: [0.6, 0.6, 0.6], bg: [0.95, 0.95, 0.95] };
 
-	root.add(plant, floor, boundary, ...tags);
+	root.add(paper, plant, floor, boundary);
 
 	// ---- レイアウト: 花は画面の右寄り・やや上。茎は画面の下へ抜ける ----
 	let halfW0 = 6;
@@ -558,8 +543,10 @@
 		else plantBase.set(halfW0 * 0.3, halfH0 * 0.12, 0);
 		plant.position.copy(plantBase);
 		boundary.scale.set(0.012, halfH0 * 2.6, 1);
+		// 奥に置いた面が画面全体を覆う大きさ（余裕を持たせる）
+		const k = (CAMERA_Z - PAPER_Z) / CAMERA_Z;
+		paper.scale.set(halfW0 * 2 * k * 1.2, halfH0 * 2 * k * 1.2, 1);
 		buildFloor(-halfH0 * 0.92, floorColors.line, floorColors.bg);
-		for (const t of tags) t.scale.set(1.6, 0.3, 1);
 		applyBackdrop();
 	}
 
@@ -583,8 +570,6 @@
 	}
 
 	const toColor = (rgb: RGB) => new Color().setRGB(...rgb, SRGBColorSpace);
-	const toCss = ([r, g, b]: RGB) =>
-		`rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)})`;
 	const mix = (a: RGB, b: RGB, k: number): RGB => [
 		a[0] + (b[0] - a[0]) * k,
 		a[1] + (b[1] - a[1]) * k,
@@ -701,11 +686,7 @@
 		buildFloor(-halfH0 * 0.92, floorColors.line, floorColors.bg);
 		lineAccent.color = toColor(cssVarToRgb('--accent-text'));
 		boundaryMaterial.color = muted;
-		const prev = tagMaterials.map((m) => m.map);
-		tagMaterials[0].map = tagTexture('DESIGN', toCss(cssVarToRgb('--fg-muted')), 'right');
-		tagMaterials[1].map = tagTexture('BUILD', toCss(cssVarToRgb('--fg-muted')), 'left');
-		for (const m of tagMaterials) m.needsUpdate = true;
-		for (const t of prev) t?.dispose();
+		paperMaterial.color = toColor(cssVarToRgb('--bg'));
 		invalidate();
 	});
 
@@ -782,9 +763,6 @@
 				wirePlane.setFromNormalAndCoplanarPoint(tmp.negate(), anchor);
 				boundary.position.copy(anchor);
 				boundary.quaternion.copy(camera.quaternion);
-				tags[0].position.set(anchor.x - 0.95, halfH0 * 0.7, 0);
-				tags[1].position.set(anchor.x + 0.95, halfH0 * 0.7, 0);
-				for (const t of tags) t.quaternion.copy(camera.quaternion);
 			}
 
 			// 花: マウスには反応せず、ゆっくり揺れるだけ
@@ -854,7 +832,6 @@
 			p.material.map?.dispose();
 			p.backMaterial.map?.dispose();
 		}
-		for (const m of tagMaterials) m.map?.dispose();
 		const materials: Material[] = [
 			...petals.flatMap((p) => [p.material, p.backMaterial, p.ghostMaterial]),
 			receptacleMaterial,
@@ -867,7 +844,7 @@
 			lineMuted,
 			lineAccent,
 			boundaryMaterial,
-			...tagMaterials
+			paperMaterial
 		];
 		for (const m of materials) m.dispose();
 		glowTexture.dispose();

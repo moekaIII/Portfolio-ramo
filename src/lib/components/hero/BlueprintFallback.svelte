@@ -1,6 +1,6 @@
 <!--
   3D が使えない / reduced-motion 時の静的表示。3D 版と同じ「光が透ける一輪の花」と、
-  継ぎ目のないスタジオ背景を SVG で描く（左は設計図の線、右は実物）。スキル名は #skills にあるため装飾扱い。
+  継ぎ目のないスタジオ背景を SVG で描く（左は無地の上に設計図の線、右はスタジオの背景に実物）。スキル名は #skills にあるため装飾扱い。
 -->
 <svg
 	aria-hidden="true"
@@ -44,13 +44,13 @@
 		</g>
 	</defs>
 
+	<!-- スタジオの背景色は BUILD 側（右）だけ。設計図側（左）はページと同じ無地 -->
 	<rect width="1600" height="900" fill="url(#sf-bg)" />
+	<rect width="1000" height="900" style="fill: var(--bg)" />
 	<g clip-path="url(#sf-left)" class="sf-wire"><use href="#sf-flower" /></g>
 	<g clip-path="url(#sf-right)" class="sf-solid" filter="url(#sf-soft)"><use href="#sf-flower" /></g
 	>
 	<line x1="1000" y1="0" x2="1000" y2="900" stroke="var(--fg-muted)" stroke-opacity=".55" />
-	<text x="980" y="120" text-anchor="end" class="sf-tag">DESIGN</text>
-	<text x="1020" y="120" class="sf-tag">BUILD</text>
 </svg>
 
 <style>
@@ -74,10 +74,5 @@
 		--sf-center: #f0702a;
 		--sf-line: none;
 		--sf-stem: #7a8f66;
-	}
-	.sf-tag {
-		font: 500 20px var(--font-sans);
-		letter-spacing: 0.2em;
-		fill: var(--fg-muted);
 	}
 </style>

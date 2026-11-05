@@ -3,6 +3,7 @@
 	import Seo from '#lib/components/seo/Seo.svelte';
 	import Hero from '#lib/components/hero/Hero.svelte';
 	import Section from '#lib/components/sections/Section.svelte';
+	import Concept from '#lib/components/sections/Concept.svelte';
 	import Strengths from '#lib/components/sections/Strengths.svelte';
 	import Glance from '#lib/components/profile/Glance.svelte';
 	import SkillChart from '#lib/components/profile/SkillChart.svelte';
@@ -64,4 +65,14 @@
 	lead="Webデザイナーとしてキャリアを始め、実装、チームのリード、独立と、領域を広げてきました。"
 >
 	<CareerTimeline items={career} />
+</Section>
+
+<Section
+	id="concept"
+	eyebrow="Concept"
+	title="このサイトについて"
+	lead="大切にしている考え方を、このサイト自体で表現しました。"
+	tone="surface"
+>
+	<Concept />
 </Section>
