@@ -1,137 +1,116 @@
 <script lang="ts">
-	import Plus from '@lucide/svelte/icons/plus';
+	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
+	import X from '@lucide/svelte/icons/x';
 	import { getArticle } from '#lib/content/articles.ts';
+	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
 	import { WORK_CATEGORIES, type WorkMeta } from '#lib/types/work.ts';
-	import { formatSigned } from '#lib/utils/format.ts';
-	import ResultStat from './ResultStat.svelte';
 
-	let { work, index }: { work: WorkMeta; index: number } = $props();
+	let { work, index, total }: { work: WorkMeta; index: number; total: number } = $props();
 
 	const Article = $derived(getArticle(work.slug));
-	const lead = $derived(work.results[0]);
-	const panelId = $derived(`work-panel-${work.slug}`);
-	let open = $state(false);
+	const num = $derived(String(index + 1).padStart(2, '0'));
+	let dialog: HTMLDialogElement | undefined = $state();
+
+	function show() {
+		dialog?.showModal();
+		smoothScroll.lock();
+	}
+	function close() {
+		smoothScroll.unlock();
+		dialog?.close();
+	}
 </script>
 
 <!--
-  テキストだけで見せる実績の 1 行。行全体がクリックでき、詳細（概要・全成果・プロセス）は開閉する。
-  JS 無効時は詳細を開いたまま表示する（.js がないときは折りたたまない）。
+  実績カード（テキストのみ）。番号を上、内容を下に置き、間を余白として見せる。
+  カード全体がボタンになり、ケーススタディ全文はモーダルで開く。
 -->
 <article
 	aria-labelledby="work-{work.slug}"
-	class={['work-row border-t border-line', open && 'is-open']}
+	class="work-card group relative flex h-full flex-col rounded-lg border border-line bg-bg p-7 transition-[border-color,translate] duration-300 ease-out-expo hover:-translate-y-1 hover:border-fg-muted md:p-9"
 >
-	<div class="work-head grid-12 relative gap-y-3 py-6 md:items-baseline md:py-7">
-		<p
-			class="col-span-full flex items-baseline gap-3 font-mono text-xs text-fg-muted md:col-span-2 md:flex-col md:gap-1"
-		>
-			<span class="text-accent-text tabular">{String(index + 1).padStart(2, '0')}</span>
-			<span class="tabular">{work.period}</span>
-		</p>
-
-		<div class="col-span-full md:col-span-6">
-			<p class="eyebrow mb-1.5">{WORK_CATEGORIES[work.category].en}</p>
-			<h3 id="work-{work.slug}" class="text-lg leading-snug font-semibold md:text-xl">
-				{work.title}
-			</h3>
-			<p class="mt-1.5 text-sm text-fg-muted">{work.client} ／ {work.role}</p>
-			<p class="mt-2 font-mono text-xs leading-relaxed text-fg-muted">
-				<span class="sr-only">使用技術: </span>{work.tags.join(' · ')}
-			</p>
-		</div>
-
-		<div class="col-span-3 md:col-span-3">
-			{#if lead}
-				<p class="flex items-baseline gap-2 md:flex-col md:items-end md:gap-1 md:text-right">
-					<span class="flex items-baseline gap-0.5 font-semibold tracking-tight">
-						<span
-							class="text-[clamp(1.6rem,1.2rem+1.2vw,2.25rem)] leading-none text-accent-text tabular"
-							>{formatSigned(lead.value)}</span
-						>
-						{#if lead.unit}<span class="text-sm text-fg-muted">{lead.unit}</span>{/if}
-					</span>
-					<span class="text-xs text-fg-muted">{lead.label}</span>
-				</p>
-			{/if}
-		</div>
-
-		<div class="col-span-1 flex items-center justify-end">
-			<!-- 行全体を覆う透明なボタン（クリック範囲を広く。アクセシブルネームは案件名） -->
-			<button
-				type="button"
-				class="toggle inline-flex size-10 items-center justify-center rounded-pill border border-line-strong text-fg-muted transition-colors after:absolute after:inset-0 after:content-['']"
-				aria-expanded={open}
-				aria-controls={panelId}
-				aria-label="{work.title}の詳細を{open ? '閉じる' : '開く'}"
-				onclick={() => (open = !open)}
+	<div class="flex items-start justify-between font-mono text-xs text-fg-muted">
+		<span>
+			<span class="text-accent-text tabular">{num}</span><span>
+				/ {String(total).padStart(2, '0')}</span
 			>
-				<Plus
-					size={16}
-					aria-hidden="true"
-					class={['transition-transform duration-300 ease-out-expo', open && 'rotate-45']}
-				/>
-			</button>
-		</div>
+		</span>
+		<span class="tabular">{work.period}</span>
 	</div>
 
-	<div id={panelId} class="work-panel grid">
-		<div class="overflow-hidden">
-			<div class="grid-12 gap-y-8 pb-10">
-				<div class="col-span-full md:col-span-10 md:col-start-3">
-					<p class="max-w-[42em]">{work.summary}</p>
-					<dl class="mt-8 grid max-w-3xl grid-cols-3 gap-x-(--grid-gap)">
-						{#each work.results as result (result.label)}
-							<ResultStat {result} compact />
-						{/each}
-					</dl>
-				</div>
-				{#if Article}
-					<div class="prose-site work-prose col-span-full md:col-span-10 md:col-start-3">
-						<Article />
-					</div>
-				{/if}
-			</div>
-		</div>
+	<!-- 余白: 内容は下に寄せる -->
+	<div class="mt-auto pt-16">
+		<p class="eyebrow">{WORK_CATEGORIES[work.category].en}</p>
+		<h3 id="work-{work.slug}" class="mt-3 text-h3 leading-snug font-semibold">{work.title}</h3>
+		<p class="mt-2 text-sm text-fg-muted">{work.client}</p>
+		<p class="mt-6 line-clamp-4 text-[0.9375rem] leading-relaxed">{work.summary}</p>
+	</div>
+
+	<div class="mt-8 flex items-end justify-between gap-6 border-t border-line pt-5">
+		<p class="font-mono text-xs leading-relaxed text-fg-muted">
+			<span class="sr-only">使用技術: </span>{work.tags.join(' · ')}
+		</p>
+		<button
+			type="button"
+			class="shrink-0 rounded-pill border border-line-strong p-2.5 text-fg-muted transition-colors group-hover:border-fg group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
+			aria-haspopup="dialog"
+			aria-label="{work.title}の詳細を見る"
+			onclick={show}
+		>
+			<ArrowUpRight
+				size={16}
+				aria-hidden="true"
+				class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+			/>
+		</button>
 	</div>
 </article>
 
+<dialog
+	bind:this={dialog}
+	aria-labelledby="work-dialog-{work.slug}"
+	data-lenis-prevent
+	class="work-dialog m-auto max-h-[min(88dvh,60rem)] w-[min(92vw,56rem)] overflow-y-auto rounded-lg border border-line bg-bg p-0 text-fg backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+	onclose={() => smoothScroll.unlock()}
+	onclick={(e) => e.target === dialog && close()}
+>
+	<div class="p-7 md:p-12">
+		<div class="flex items-start justify-between gap-6">
+			<div>
+				<p class="font-mono text-xs text-fg-muted">
+					<span class="text-accent-text">{num}</span> · <span class="tabular">{work.period}</span>
+				</p>
+				<p class="eyebrow mt-4">{WORK_CATEGORIES[work.category].en}</p>
+				<h3 id="work-dialog-{work.slug}" class="mt-2 text-h2 font-semibold">{work.title}</h3>
+				<p class="mt-3 text-sm text-fg-muted">{work.client} ／ {work.role}</p>
+			</div>
+			<button
+				type="button"
+				class="inline-flex size-11 shrink-0 items-center justify-center rounded-pill border border-line-strong hover:border-fg"
+				aria-label="閉じる"
+				onclick={close}
+			>
+				<X size={18} aria-hidden="true" />
+			</button>
+		</div>
+		<p class="mt-8 max-w-[42em] text-lead">{work.summary}</p>
+		<p class="mt-6 font-mono text-xs text-fg-muted">{work.tags.join(' · ')}</p>
+		{#if Article}
+			<div class="prose-site mt-10 max-w-none border-t border-line pt-4">
+				<Article />
+			</div>
+		{/if}
+	</div>
+</dialog>
+
 <style>
-	/* 高さ 0 ↔ 自動 を grid-template-rows で滑らかに開閉する */
-	.work-panel {
-		grid-template-rows: 1fr;
-		transition: grid-template-rows var(--dur-slow) var(--ease-out);
+	.work-dialog[open] {
+		animation: dialog-in var(--dur-base) var(--ease-out);
 	}
-	:global(.js) .work-row:not(.is-open) .work-panel {
-		grid-template-rows: 0fr;
-		visibility: hidden;
-		transition:
-			grid-template-rows var(--dur-slow) var(--ease-out),
-			visibility 0s var(--dur-slow);
-	}
-	.work-head {
-		transition: background-color var(--dur-base);
-	}
-	.work-row:hover .work-head {
-		background-color: color-mix(in oklch, var(--fg) 3%, transparent);
-	}
-	.work-row:hover .toggle {
-		border-color: var(--fg);
-		color: var(--fg);
-	}
-	/* 開いたときの本文は、広い画面では 2 段組にして縦に伸びすぎないようにする */
-	@media (min-width: 64rem) {
-		.work-prose {
-			max-width: none;
-			columns: 2;
-			column-gap: var(--grid-gap);
-		}
-		.work-prose :global(h4) {
-			margin-top: 0;
-			break-after: avoid;
-		}
-		.work-prose :global(p),
-		.work-prose :global(li) {
-			break-inside: avoid;
+	@keyframes dialog-in {
+		from {
+			opacity: 0;
+			translate: 0 12px;
 		}
 	}
 </style>

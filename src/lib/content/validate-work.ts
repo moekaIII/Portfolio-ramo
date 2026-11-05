@@ -1,9 +1,4 @@
-import {
-	WORK_CATEGORIES,
-	type WorkCategory,
-	type WorkMeta,
-	type WorkResult
-} from '#lib/types/work.ts';
+import { WORK_CATEGORIES, type WorkCategory, type WorkMeta } from '#lib/types/work.ts';
 
 const PERIOD = /^\d{4}\.\d{2} – (\d{4}\.\d{2}|継続中)$/;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -60,20 +55,6 @@ export function parseWorkMeta(file: string, raw: unknown): WorkMeta {
 			`category "${category}" は ${Object.keys(WORK_CATEGORIES).join(' / ')} のいずれかにしてください`
 		);
 
-	const rawResults = raw.results;
-	if (!Array.isArray(rawResults) || rawResults.length === 0)
-		throw new WorkSchemaError(file, '"results" は1件以上必要です');
-	const results: WorkResult[] = rawResults.map((r, i) => {
-		if (!isObject(r) || typeof r.label !== 'string' || r.value === undefined)
-			throw new WorkSchemaError(file, `results[${i}] には label と value が必要です`);
-		return {
-			label: r.label,
-			value: String(r.value),
-			unit: typeof r.unit === 'string' ? r.unit : undefined,
-			note: typeof r.note === 'string' ? r.note : undefined
-		};
-	});
-
 	return {
 		title: str('title'),
 		slug,
@@ -83,7 +64,6 @@ export function parseWorkMeta(file: string, raw: unknown): WorkMeta {
 		tags: strArray('tags'),
 		category: category as WorkCategory,
 		summary: str('summary'),
-		results,
 		featured: raw.featured === true
 	};
 }

@@ -7,15 +7,6 @@ export const WORK_CATEGORIES = {
 
 export type WorkCategory = keyof typeof WORK_CATEGORIES;
 
-/** 数値成果。value は "+38" や "2.4" のように表示用の文字列で持つ */
-export interface WorkResult {
-	label: string;
-	value: string;
-	unit?: string;
-	/** 計測条件など（例: "導入前3か月との比較"） */
-	note?: string;
-}
-
 /** ケーススタディ frontmatter のスキーマ */
 export interface WorkMeta {
 	title: string;
@@ -28,7 +19,6 @@ export interface WorkMeta {
 	tags: string[];
 	category: WorkCategory;
 	summary: string;
-	results: WorkResult[];
 	/** トップページの注目実績に表示するか */
 	featured: boolean;
 }

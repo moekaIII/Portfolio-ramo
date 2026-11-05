@@ -21,6 +21,8 @@
 
 	body {
 		min-height: 100dvh;
+		/* 横スクロールのカード列を画面端まで流すため、ページ自体は横にはみ出させない */
+		overflow-x: clip;
 		background-color: var(--bg);
 		font-size: var(--text-body);
 		line-height: var(--text-body--line-height);

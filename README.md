@@ -6,12 +6,11 @@
 
 | セクション   | 内容                                                                                                    |
 | ------------ | ------------------------------------------------------------------------------------------------------- |
-| ヒーロー     | 画面いっぱいの 3D（光が透ける一輪の花）と、左下に大きく氏名（アルファベット、Instrument Serif）と肩書き |
+| ヒーロー     | 画面いっぱいの 3D（光が透ける一輪の花）と、左下にターミナル風に入力される氏名（JetBrains Mono）と肩書き |
+| `#works`     | 実績。テキストのみのカードを横スクロールで並べ、カードを押すとケーススタディ全文をモーダルで読む        |
+| `#strengths` | 強み                                                                                                    |
 | `#skills`    | 要点（経験 / 専門 / 主要技術 / 働き方）、領域別のスキル・習熟度・実務経験年数                           |
 | `#career`    | 経歴（スクロールに合わせて進捗線が伸びる）                                                              |
-| `#works`     | 実績。数値成果まで一覧で見え、詳細は開閉して読む                                                        |
-| `#strengths` | 強み                                                                                                    |
-| `#contact`   | メール（コピーボタン付き）と SNS                                                                        |
 
 ## コマンド
 
@@ -29,12 +28,12 @@ pnpm preview    # ビルド結果の確認
 
 ## 差し替えが必要な箇所（仮の値）
 
-| 何を                     | どこで                                              |
-| ------------------------ | --------------------------------------------------- |
-| 氏名・URL・メール・SNS   | `src/lib/config/site.ts`                            |
-| スキル・要点・経歴・強み | `src/lib/content/profile.ts`                        |
-| 実績（ケーススタディ）   | `src/content/works/*.md` と `src/lib/assets/works/` |
-| OGP 画像（1200×630）     | `static/og/default.png`                             |
+| 何を                     | どこで                       |
+| ------------------------ | ---------------------------- |
+| 氏名・URL・メール・SNS   | `src/lib/config/site.ts`     |
+| スキル・要点・経歴・強み | `src/lib/content/profile.ts` |
+| 実績（ケーススタディ）   | `src/content/works/*.md`     |
+| OGP 画像（1200×630）     | `static/og/default.png`      |
 
 ### アクセントカラーの変更
 
@@ -49,8 +48,7 @@ pnpm preview    # ビルド結果の確認
 
 ## 実績の追加
 
-1. `src/lib/assets/works/` に画像を置きます（16:10 推奨、enhanced-img が AVIF / WebP の srcset を生成します）。
-2. `src/content/works/<slug>.md` を作成します。frontmatter はビルド時に検証され、不正な値があるとビルドが失敗します（`src/lib/content/validate-work.ts`）。
+`src/content/works/<slug>.md` を作成します（画像は不要です）。frontmatter はビルド時に検証され、不正な値があるとビルドが失敗します（`src/lib/content/validate-work.ts`）。
 
 ```yaml
 ---
@@ -63,10 +61,10 @@ category: development # development | ui-design | ux
 tags: [SvelteKit, TypeScript]
 summary: 一覧に出す要約
 featured: true
-results:
-  - { label: CVR, value: '+38', unit: '%', note: 計測条件 } # value は文字列で
 ---
 ```
+
+カードには番号・期間・カテゴリ・タイトル・クライアント・要約（4 行まで）・タグが出ます。本文はカードを押したときのモーダルにだけ表示されます。
 
 本文の見出しは `####` を使います（ページ内でセクション h2 → 実績タイトル h3 の下に入るため）。
 

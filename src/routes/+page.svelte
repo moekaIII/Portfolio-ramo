@@ -7,7 +7,7 @@
 	import Glance from '#lib/components/profile/Glance.svelte';
 	import SkillMatrix from '#lib/components/profile/SkillMatrix.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
-	import WorkCard from '#lib/components/works/WorkCard.svelte';
+	import WorksCarousel from '#lib/components/works/WorksCarousel.svelte';
 	import { career, skills } from '#lib/content/profile.ts';
 	import { activeSection } from '#lib/state/active-section.svelte.ts';
 	import { personJsonLd, professionalServiceJsonLd, worksJsonLd } from '#lib/utils/jsonld.ts';
@@ -32,11 +32,7 @@
 	lead="多様なプロジェクトにおける設計・開発・課題解決の取り組み。一部抜粋"
 	tone="surface"
 >
-	<div class="border-b border-line">
-		{#each data.works as work, i (work.slug)}
-			<WorkCard {work} index={i} />
-		{/each}
-	</div>
+	<WorksCarousel works={data.works} />
 </Section>
 
 <Section id="strengths" eyebrow="Strengths" title="強み">
