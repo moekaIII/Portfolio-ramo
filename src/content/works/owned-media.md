@@ -5,7 +5,7 @@ client: 大手ゲーム会社
 role: フロント実装・他部署連携・headlessCMS
 period: 2024.09 – 2025.03
 category: development
-tags: [Github Copilot, Svelte5, Sveltekit, headless CMS, Figma]
+tags: [Github Copilot, ChatGPT, Svelte5, Sveltekit, headless CMS, Figma]
 summary: Wordpressで膨大な記事データを管理していたサイトのサーバーレス化
 featured: false
 order: 4
