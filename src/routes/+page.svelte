@@ -40,7 +40,7 @@
 	id="strengths"
 	eyebrow="Strengths"
 	title="強み"
-	lead="これまでの実績から見えた、チームと事業にもたらせる4つの価値です。"
+	lead="実績から見えた、チームにもたらせる3つの価値です。"
 >
 	<Strengths works={data.works} />
 </Section>

@@ -8,25 +8,22 @@
 	const titles = $derived(Object.fromEntries(works.map((w) => [w.slug, w.title])));
 </script>
 
-<!-- 強み。それぞれに裏付けとなる実績を添える -->
-<ol class="grid gap-x-(--grid-gap) gap-y-14 md:grid-cols-2 md:gap-y-16">
+<!-- 強み。短い説明と、裏付けとなる実績を添える -->
+<ol class="grid gap-x-(--grid-gap) gap-y-10 md:grid-cols-3">
 	{#each strengths as item, i (item.title)}
-		<li class="flex flex-col border-t border-line pt-8" use:reveal={{ delay: (i % 2) * 80 }}>
+		<li class="flex flex-col border-t border-line pt-6" use:reveal={{ delay: i * 80 }}>
 			<p class="font-mono text-xs text-accent-text tabular" aria-hidden="true">
 				{String(i + 1).padStart(2, '0')}
 			</p>
-			<h3 class="mt-5 text-h3 leading-snug font-semibold">{item.title}</h3>
-			<p class="mt-4 max-w-[38em] leading-relaxed text-fg-muted">{item.body}</p>
-			<div class="mt-6">
-				<p class="eyebrow">Proof</p>
-				<ul class="mt-2.5 flex flex-wrap gap-1.5" aria-label="裏付けとなる実績">
-					{#each item.proof.filter((s) => titles[s]) as slug (slug)}
-						<li class="rounded-pill border border-line px-3 py-1 text-xs leading-relaxed text-fg">
-							{titles[slug]}
-						</li>
-					{/each}
-				</ul>
-			</div>
+			<h3 class="mt-3 text-xl leading-snug font-semibold">{item.title}</h3>
+			<p class="mt-3 text-[0.9375rem] leading-relaxed text-fg-muted">{item.body}</p>
+			<ul class="mt-5 flex flex-wrap gap-1.5" aria-label="裏付けとなる実績">
+				{#each item.proof.filter((s) => titles[s]) as slug (slug)}
+					<li class="rounded-pill border border-line px-2.5 py-0.5 text-xs leading-relaxed text-fg">
+						{titles[slug]}
+					</li>
+				{/each}
+			</ul>
 		</li>
 	{/each}
 </ol>
