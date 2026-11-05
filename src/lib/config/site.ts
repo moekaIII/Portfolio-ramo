@@ -10,7 +10,7 @@ const author = {
 
 export const site = {
 	/** 本番 URL（末尾スラッシュなし）。sitemap / canonical / OGP の絶対 URL に使用 */
-	url: 'https://example.com',
+	url: 'https://moeka-ihara.netlify.app/',
 	/** サイト名（ロゴ・OGP に表示） */
 	name: author.name,
 	author,
