@@ -38,17 +38,20 @@
 
 	/* ヒーローのスタジオ背景（createBackdrop）と同じ色味。実績カードのホバーなどに使う */
 	--hero-wash:
-		radial-gradient(110% 80% at 0% 0%, rgb(30 26 46 / 0.85), transparent 65%),
-		radial-gradient(90% 70% at 0% 100%, rgb(22 34 32 / 0.8), transparent 65%),
-		radial-gradient(80% 60% at 100% 0%, rgb(36 26 40 / 0.8), transparent 65%),
-		radial-gradient(90% 70% at 64% 55%, rgb(80 56 52 / 0.75), transparent 70%),
-		linear-gradient(180deg, #17151d, #221d24 42%, #241f22 75%, #2c2527);
+		radial-gradient(110% 80% at 0% 0%, rgb(64 54 98 / 0.8), transparent 65%),
+		radial-gradient(90% 70% at 0% 100%, rgb(44 70 62 / 0.7), transparent 65%),
+		radial-gradient(80% 60% at 100% 0%, rgb(76 52 82 / 0.7), transparent 65%),
+		/* 赤みのあるオレンジをうっすら */
+		radial-gradient(70% 55% at 88% 92%, rgb(156 72 48 / 0.45), transparent 70%),
+		radial-gradient(90% 70% at 64% 55%, rgb(118 80 72 / 0.6), transparent 70%),
+		linear-gradient(180deg, #24212d, #2e2832 42%, #30292d 75%, #382f31);
 	/* 同じ色味の枠線用グラデーション（ラベンダー → ローズ → ピーチ → ミント） */
 	--hero-edge: linear-gradient(
 		135deg,
 		rgb(150 136 204),
-		rgb(204 140 168) 38%,
-		rgb(214 166 136) 66%,
+		rgb(204 140 168) 32%,
+		rgb(226 120 92) 56%,
+		rgb(214 166 136) 74%,
 		rgb(122 176 154)
 	);
 
@@ -91,16 +94,19 @@
 	--error: oklch(0.52 0.19 27); /* 5.8:1 on bg */
 	--header-bg: oklch(0.985 0.002 100 / 0.78);
 	--hero-wash:
-		radial-gradient(110% 80% at 0% 0%, rgb(206 198 224 / 0.7), transparent 65%),
-		radial-gradient(90% 70% at 0% 100%, rgb(208 224 214 / 0.7), transparent 65%),
-		radial-gradient(80% 60% at 100% 0%, rgb(226 212 226 / 0.6), transparent 65%),
-		radial-gradient(90% 70% at 64% 55%, rgb(255 244 232 / 0.95), transparent 70%),
-		linear-gradient(180deg, #dcd8e4, #ece8ec 42%, #efebe8 75%, #f7f3ee);
+		radial-gradient(110% 80% at 0% 0%, rgb(222 214 244 / 0.75), transparent 65%),
+		radial-gradient(90% 70% at 0% 100%, rgb(214 238 224 / 0.75), transparent 65%),
+		radial-gradient(80% 60% at 100% 0%, rgb(244 224 240 / 0.7), transparent 65%),
+		/* 赤みのあるオレンジをうっすら */
+		radial-gradient(70% 55% at 88% 92%, rgb(255 178 150 / 0.45), transparent 70%),
+		radial-gradient(90% 70% at 64% 55%, rgb(255 248 240 / 0.95), transparent 70%),
+		linear-gradient(180deg, #ebe8f2, #f5f2f5 42%, #f7f4f1 75%, #fcf9f5);
 	--hero-edge: linear-gradient(
 		135deg,
 		rgb(164 152 212),
-		rgb(222 162 186) 38%,
-		rgb(236 186 152) 66%,
+		rgb(222 162 186) 32%,
+		rgb(240 146 118) 56%,
+		rgb(236 186 152) 74%,
 		rgb(146 196 172)
 	);
 }

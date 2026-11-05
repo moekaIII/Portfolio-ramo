@@ -32,7 +32,7 @@
 	<p class="font-mono text-xs text-fg-muted tabular">{work.period}</p>
 
 	<!-- 余白のあとに内容。上から積むので、タイトルの位置は全カードで揃う -->
-	<div class="pt-16">
+	<div class="pt-10">
 		<h3 id="work-{work.slug}" class="text-h3 leading-snug font-semibold">{work.title}</h3>
 		<p class="mt-2 text-sm text-fg-muted">{work.client}</p>
 		<p class="mt-6 line-clamp-4 text-[0.9375rem] leading-relaxed">{work.summary}</p>
