@@ -35,7 +35,7 @@
 	<div class="pt-10">
 		<h3 id="work-{work.slug}" class="text-h3 leading-snug font-semibold">{work.title}</h3>
 		<p class="mt-2 text-sm text-fg-muted">{work.client}</p>
-		<p class="mt-6 line-clamp-4 text-[0.9375rem] leading-relaxed">{work.summary}</p>
+		<p class="mt-6 line-clamp-6 text-[0.9375rem] leading-relaxed md:line-clamp-4">{work.summary}</p>
 	</div>
 
 	<div class="mt-auto flex items-end justify-between gap-6 pt-10">
