@@ -20,11 +20,8 @@
 								: 'dark';
 					document.documentElement.dataset.theme = theme;
 					document.documentElement.classList.add('js');
-					// ローディング演出は、同じタブで初めて開いたときだけ（Loader.svelte と同じキー）
-					if (
-						sessionStorage.getItem('intro-seen') ||
-						matchMedia('(prefers-reduced-motion: reduce)').matches
-					)
+					// ローディング演出は毎回見せる（視差効果を減らす設定のときだけ出さない）
+					if (matchMedia('(prefers-reduced-motion: reduce)').matches)
 						document.documentElement.classList.add('no-loader');
 				} catch (e) {}
 			})();

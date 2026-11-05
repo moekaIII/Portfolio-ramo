@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '@fontsource-variable/jetbrains-mono';
+	import '@fontsource/ibm-plex-mono/400.css';
 	import { onMount, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { site } from '#lib/config/site.ts';
@@ -49,20 +50,20 @@
   ターミナルに入力したような氏名。スクリーンリーダーには常に全文を渡し、
   打ち込みのアニメーション部分は装飾として扱う。
 -->
-<div class={['font-mono', !started && 'term-pending']}>
+<div class={['font-terminal', !started && 'term-pending']}>
 	<p class="mb-3 text-sm text-fg-muted" aria-hidden="true">
 		<span class="text-accent-text">~/portfolio</span> <span>$</span> whoami
 	</p>
 	<h1
 		id="hero-heading"
-		class="flex items-baseline text-[clamp(2.4rem,0.9rem+5.4vw,6.75rem)] leading-none font-medium tracking-[-0.04em]"
+		class="flex items-baseline text-[clamp(2.2rem,0.8rem+5vw,6.25rem)] leading-none font-normal tracking-[-0.01em]"
 	>
 		<span class="sr-only">{name}</span>
 		<span aria-hidden="true" class="whitespace-pre">{name.slice(0, typed)}</span>
 		<span
 			aria-hidden="true"
 			class={[
-				'term-caret ml-[0.06em] inline-block h-[0.82em] w-[0.5em] translate-y-[0.08em] bg-accent-text',
+				'term-caret ml-[0.08em] inline-block h-[0.95em] w-[max(2px,0.045em)] translate-y-[0.14em] bg-accent-text',
 				done && 'term-caret--blink'
 			]}
 		></span>

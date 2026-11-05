@@ -1,32 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { INTRO_SEEN_KEY, intro } from '#lib/state/intro.svelte.ts';
+	import { intro } from '#lib/state/intro.svelte.ts';
 	import { smoothScroll } from '#lib/state/smooth-scroll.svelte.ts';
 
 	/** 最低限見せる時間（数字が 0 → 100 まで進む時間） */
 	const MIN_MS = 1300;
 	/** 読み込みが遅くても、これ以上は待たせない */
-	const MAX_MS = 3200;
+	const MAX_MS = 4000;
 
 	let gone = $state(false);
 	let leaving = $state(false);
 	let progress = $state(0);
 
 	onMount(() => {
-		// app.html で「表示しない」と判定済み（2 回目以降 / 視差効果を減らす設定）
+		// app.html で「表示しない」と判定済み（視差効果を減らす設定）
 		if (document.documentElement.classList.contains('no-loader')) {
 			gone = true;
 			intro.finish();
 			return;
 		}
-		try {
-			sessionStorage.setItem(INTRO_SEEN_KEY, '1');
-		} catch {
-			// 保存できなくても演出は続ける
-		}
 		smoothScroll.lock();
 
-		// フォントとページの読み込みが終わったら 100 まで進める（それまでは 90 で待つ）
+		// フォント・ページ・ヒーローの 3D の準備ができたら 100 まで進める（それまでは 90 で待つ）
 		let loaded = false;
 		const ready = Promise.all([
 			document.fonts.ready,
@@ -43,7 +38,8 @@
 			const t = now - start;
 			const timed = Math.min(1, t / MIN_MS);
 			const eased = 1 - Math.pow(1 - timed, 3);
-			const cap = loaded || t > MAX_MS ? 100 : 90;
+			const heroOk = !intro.waitHero || intro.heroReady;
+			const cap = (loaded && heroOk) || t > MAX_MS ? 100 : 90;
 			progress = Math.max(progress, Math.min(cap, Math.round(eased * 100)));
 			if (progress >= 100) {
 				leave();
@@ -71,7 +67,7 @@
 <!--
   サイト流入時のローディング。ターミナル風のビルド表示から、
   ヒーローと同じ「境界」が左から右へ抜けて本編が現れる。
-  JS 無効時・2 回目以降・視差効果を減らす設定では表示しない（layout.css / app.html）。
+  JS 無効時・視差効果を減らす設定では表示しない（app.html）。
 -->
 {#if !gone}
 	<div
@@ -79,7 +75,7 @@
 		aria-hidden="true"
 		onanimationend={(e) => e.animationName.endsWith('loader-wipe') && (gone = true)}
 	>
-		<div class="loader-body font-mono">
+		<div class="loader-body font-terminal">
 			<p class="text-sm text-fg-muted">
 				<span class="text-accent-text">~/portfolio</span> $ design --build
 			</p>

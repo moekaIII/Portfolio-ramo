@@ -1,3 +1,7 @@
+<script lang="ts">
+	let { flower = true }: { flower?: boolean } = $props();
+</script>
+
 <!--
   3D が使えない / reduced-motion 時の静的表示。3D 版と同じ「光が透ける一輪の花」と、
   継ぎ目のないスタジオ背景を SVG で描く（左は無地の上に設計図の線、右はスタジオの背景に実物）。スキル名は #skills にあるため装飾扱い。
@@ -47,13 +51,20 @@
 	<!-- スタジオの背景色は BUILD 側（右）だけ。設計図側（左）はページと同じ無地 -->
 	<rect width="1600" height="900" fill="url(#sf-bg)" />
 	<rect width="1000" height="900" style="fill: var(--bg)" />
-	<g clip-path="url(#sf-left)" class="sf-wire"><use href="#sf-flower" /></g>
-	<g clip-path="url(#sf-right)" class="sf-solid" filter="url(#sf-soft)"><use href="#sf-flower" /></g
-	>
+	<g class={['sf-flowers', flower && 'is-on']}>
+		<g clip-path="url(#sf-left)" class="sf-wire"><use href="#sf-flower" /></g>
+		<g clip-path="url(#sf-right)" class="sf-solid" filter="url(#sf-soft)"
+			><use href="#sf-flower" /></g
+		>
+	</g>
 	<line x1="1000" y1="0" x2="1000" y2="900" stroke="var(--fg-muted)" stroke-opacity=".55" />
 </svg>
 
 <style>
+	/* JS 有効時は、3D が使えないと分かるまで花を描かない（JS 無効時は常に描く） */
+	:global(.js) .sf-flowers:not(.is-on) {
+		display: none;
+	}
 	svg {
 		--sf-bg-center: #faf6ee;
 		--sf-bg-edge: #e2e2ea;

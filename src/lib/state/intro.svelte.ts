@@ -5,6 +5,10 @@
 class IntroState {
 	/** ローディングの表示が終わった（または表示しなかった） */
 	done = $state(false);
+	/** ヒーローの 3D を読み込む（ローディングはその準備ができるまで待つ） */
+	waitHero = false;
+	/** ヒーローの 3D の初回描画が終わった */
+	heroReady = false;
 
 	finish() {
 		this.done = true;
@@ -12,6 +16,3 @@ class IntroState {
 }
 
 export const intro = new IntroState();
-
-/** 同じタブでの 2 回目以降の表示ではローディングを出さない（app.html の判定と同じキー） */
-export const INTRO_SEEN_KEY = 'intro-seen';

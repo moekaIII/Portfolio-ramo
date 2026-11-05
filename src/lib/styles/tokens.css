@@ -137,6 +137,8 @@
 		'Noto Sans CJK JP', 'Yu Gothic UI', 'Yu Gothic', Meiryo, ui-sans-serif, system-ui, sans-serif;
 	--font-mono:
 		'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+	/* ヒーローの氏名とローディング（ターミナルの表示に近い、細めの等幅） */
+	--font-terminal: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 	/* Fluid type scale */
 	--text-display: clamp(2.75rem, 1.4rem + 6.2vw, 7.5rem);

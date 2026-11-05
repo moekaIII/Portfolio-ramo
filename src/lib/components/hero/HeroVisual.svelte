@@ -2,6 +2,7 @@
 	import { onMount, type Component } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { supportsWebGL } from '#lib/three/webgl.ts';
+	import { intro } from '#lib/state/intro.svelte.ts';
 	import BlueprintFallback from './BlueprintFallback.svelte';
 
 	let BlueprintCanvas = $state<Component<{ onready?: () => void }> | null>(null);
@@ -12,38 +13,20 @@
 	const enabled = $derived(webgl && !prefersReducedMotion.current);
 	const live = $derived(enabled && ready);
 
+	let mounted = $state(false);
+
 	onMount(() => {
+		mounted = true;
 		webgl = supportsWebGL();
-		if (!webgl) return;
-
-		// ページの読み込みと初回描画を優先する。three.js の読み込みと初期化は、
-		// 最初の操作（マウス移動・スクロール・タップ・キー入力）か、読み込み完了の 3.5 秒後の早い方で始める。
-		// それまでは同じ構図の静的表示（BlueprintFallback）が見えている
+		if (!webgl || prefersReducedMotion.current) return;
+		// ローディング演出の間に three.js を読み込み、初回描画まで済ませておく
+		intro.waitHero = true;
 		let cancelled = false;
-		let started = false;
-		const load = async () => {
-			if (cancelled || started || prefersReducedMotion.current) return;
-			started = true;
-			const m = await import('./BlueprintCanvas.svelte');
+		import('./BlueprintCanvas.svelte').then((m) => {
 			if (!cancelled) BlueprintCanvas = m.default;
-		};
-		const triggers = ['pointermove', 'pointerdown', 'keydown', 'scroll', 'touchstart'] as const;
-		const onFirstInput = () => {
-			for (const t of triggers) window.removeEventListener(t, onFirstInput);
-			load();
-		};
-		for (const t of triggers) window.addEventListener(t, onFirstInput, { passive: true });
-
-		let timer: number | undefined;
-		const startTimer = () => (timer = window.setTimeout(load, 3500));
-		if (document.readyState === 'complete') startTimer();
-		else window.addEventListener('load', startTimer, { once: true });
-
+		});
 		return () => {
 			cancelled = true;
-			for (const t of triggers) window.removeEventListener(t, onFirstInput);
-			window.removeEventListener('load', startTimer);
-			window.clearTimeout(timer);
 		};
 	});
 
@@ -59,7 +42,8 @@
 		live ? 'opacity-0' : 'opacity-100'
 	]}
 >
-	<BlueprintFallback />
+	<!-- 花は 3D が使えないときだけ静的に描く（3D の読み込み中は背景だけ見せる） -->
+	<BlueprintFallback flower={mounted && !enabled} />
 </div>
 {#if enabled && BlueprintCanvas}
 	<div
@@ -68,6 +52,11 @@
 			ready ? 'opacity-100' : 'opacity-0'
 		]}
 	>
-		<BlueprintCanvas onready={() => (ready = true)} />
+		<BlueprintCanvas
+			onready={() => {
+				ready = true;
+				intro.heroReady = true;
+			}}
+		/>
 	</div>
 {/if}
