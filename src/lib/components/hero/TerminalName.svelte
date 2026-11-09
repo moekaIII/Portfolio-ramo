@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/ibm-plex-mono/400.css';
+	import '@fontsource-variable/oxanium/wght.css';
 	import { onMount, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { site } from '#lib/config/site.ts';
@@ -56,7 +57,7 @@
 	</p>
 	<h1
 		id="hero-heading"
-		class="flex items-baseline text-[clamp(2.2rem,0.8rem+5vw,6.25rem)] leading-none font-normal tracking-[-0.01em]"
+		class="flex items-baseline font-name text-[clamp(2.2rem,0.8rem+5vw,6.25rem)] leading-none font-normal tracking-[-0.01em]"
 	>
 		<span class="sr-only">{name}</span>
 		<span aria-hidden="true" class="whitespace-pre">{name.slice(0, typed)}</span>

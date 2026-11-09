@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 	import plexLatin from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
+	import oxaniumLatin from '@fontsource-variable/oxanium/files/oxanium-latin-wght-normal.woff2?url';
 	import favicon from '#lib/assets/favicon.png';
 	import Header from '#lib/components/layout/Header.svelte';
 	import Loader from '#lib/components/layout/Loader.svelte';
@@ -30,6 +31,7 @@
 	<link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 	<!-- ヒーローの氏名（ターミナル風）とローディングの文字 -->
 	<link rel="preload" href={plexLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+	<link rel="preload" href={oxaniumLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 </svelte:head>
 
 <Loader />

@@ -138,6 +138,7 @@
 	--font-mono:
 		'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 	/* ヒーローの氏名とローディング（ターミナルの表示に近い、細めの等幅） */
+	--font-name: 'Oxanium Variable', 'IBM Plex Mono', ui-monospace, monospace;
 	--font-terminal: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
 	/* Fluid type scale */
