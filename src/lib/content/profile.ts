@@ -10,8 +10,10 @@ export interface Skill {
 	level: SkillLevel;
 	/** 実務経験年数（0.5 年単位） */
 	years: number;
-	/** このスキルを使った実績の slug（src/content/works/<slug>.md）。ツールチップに表示する */
+	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
+	/** 採用で特に見てほしい主軸スキル。スキルセクションの上段に、この数字の順で大きく出す */
+	core?: number;
 }
 
 export interface SkillGroup {
@@ -49,7 +51,8 @@ export const skills: SkillGroup[] = [
 				name: 'TypeScript',
 				level: 3,
 				years: 3,
-				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
+				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp'],
+				core: 3
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
@@ -61,10 +64,23 @@ export const skills: SkillGroup[] = [
 				name: 'Svelte / SvelteKit',
 				level: 3,
 				years: 2.5,
-				works: ['dev-platform', 'game-anime-site', 'owned-media']
+				works: ['dev-platform', 'game-anime-site', 'owned-media'],
+				core: 1
 			},
-			{ name: 'GSAP・SVG アニメーション', level: 3, years: 5.5, works: ['game-anime-site'] },
-			{ name: 'Vue.js / Pinia', level: 2, years: 3, works: ['gov-dashboard', 'maas-webapp'] },
+			{
+				name: 'GSAP・SVG アニメーション',
+				level: 3,
+				years: 5.5,
+				works: ['game-anime-site'],
+				core: 4
+			},
+			{
+				name: 'Vue.js / Pinia',
+				level: 2,
+				years: 3,
+				works: ['gov-dashboard', 'maas-webapp'],
+				core: 2
+			},
 			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
 		]
 	},

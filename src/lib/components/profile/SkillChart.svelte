@@ -1,213 +1,141 @@
 <script lang="ts">
 	import { reveal } from '#lib/actions/reveal.ts';
-	import { LEVEL_LABEL, type SkillGroup } from '#lib/content/profile.ts';
+	import { LEVEL_LABEL, type Skill, type SkillGroup } from '#lib/content/profile.ts';
 	import type { WorkMeta } from '#lib/types/work.ts';
 
 	let { groups, works }: { groups: SkillGroup[]; works: WorkMeta[] } = $props();
 
-	/** 全グループ共通の目盛り（年）。最長のバーが右端に届く */
-	const max = $derived(
-		Math.max(1, Math.ceil(Math.max(...groups.flatMap((g) => g.items.map((s) => s.years)))))
-	);
-	const ticks = $derived(Array.from({ length: max + 1 }, (_, i) => i));
 	const titles = $derived(Object.fromEntries(works.map((w) => [w.slug, w.title])));
-	const titleOf = { get: (slug: string): string | undefined => titles[slug] };
+	const titleOf = (slug: string): string | undefined => titles[slug];
+
+	/** 主軸スキル（core の数字の順） */
+	const core = $derived(
+		groups
+			.flatMap((g) => g.items)
+			.filter((s): s is Skill & { core: number } => s.core !== undefined)
+			.toSorted((a, b) => a.core - b.core)
+	);
+	/** それ以外は分野ごとに、習熟度の高い順（同じなら経験の長い順） */
+	const rest = $derived(
+		groups
+			.map((g) => ({
+				...g,
+				items: g.items
+					.filter((s) => s.core === undefined)
+					.toSorted((a, b) => b.level - a.level || b.years - a.years)
+			}))
+			.filter((g) => g.items.length)
+	);
+
+	const LEVELS = [1, 2, 3] as const;
 	const fmt = (y: number) => (y < 1 ? '1年未満' : `${y}年`);
 </script>
 
 <!--
-  スキルの横棒グラフ。バーの長さ = 実務経験年数（全グループで同じ目盛り）、名前の横に習熟度。
-  値はすべて文字でも出しているので、ツールチップ（関連する実績）は補足。
+  スキル。グラフが表すのは「習熟度（3 段階）」で、経験年数は補足の文字にとどめる
+  （年数の長さ＝得意、と読まれないように）。
+  採用で見てほしい主軸スキルは上段に大きく、それ以外は分野ごとに小さく並べる。
 -->
-<div class="skill-chart" use:reveal style="--max: {max}">
-	{#each groups as group, gi (group.id)}
-		<section aria-labelledby="skill-{group.id}" class={[gi > 0 && 'mt-12']}>
-			<h3
-				id="skill-{group.id}"
-				class="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line pb-3"
-			>
-				<span class="text-lg font-semibold">{group.label}</span>
-				<span class="eyebrow">{group.group}</span>
-			</h3>
-			<ul>
-				{#each group.items.toSorted((a, b) => b.years - a.years) as skill, i (skill.name)}
-					{@const pct = (skill.years / max) * 100}
-					{@const tipId = `skill-tip-${group.id}-${i}`}
-					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-					<li
-						class="skill-row"
-						tabindex="0"
-						aria-describedby={skill.works?.length ? tipId : undefined}
-					>
-						<p class="skill-name">
-							<span class="text-[0.9375rem]">{skill.name}</span>
-							<span class="text-xs text-fg-muted">{LEVEL_LABEL[skill.level]}</span>
-						</p>
-						<div class="skill-track" aria-hidden="true">
-							<span class="skill-bar" style="width: {pct}%; --i: {gi * 6 + i}"></span>
-							{#if skill.works?.length}
-								<span class="skill-tip" style="left: {Math.min(pct, 82)}%">
-									<span class="block font-semibold text-fg tabular">
-										{fmt(skill.years)} · {LEVEL_LABEL[skill.level]}
-									</span>
-									<span class="mt-1.5 block text-fg-muted">関連する実績</span>
-									{#each skill.works as slug (slug)}
-										{#if titleOf.get(slug)}
-											<span class="block text-fg">{titleOf.get(slug)}</span>
-										{/if}
-									{/each}
-								</span>
-							{/if}
-						</div>
-						<span class="skill-value tabular">{fmt(skill.years)}</span>
-						{#if skill.works?.length}
-							<span id={tipId} class="sr-only">
-								関連する実績: {skill.works
-									.map((s) => titleOf.get(s))
-									.filter(Boolean)
-									.join('、')}
-							</span>
-						{/if}
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/each}
+<div class="skill-chart" use:reveal>
+	<h3 class="eyebrow">Core skills — 主軸スキル</h3>
+	<ul class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		{#each core as skill, i (skill.name)}
+			<li class="core-tile flex flex-col rounded-lg border border-line bg-bg p-6" style="--i: {i}">
+				<p class="text-xl leading-snug font-semibold">{skill.name}</p>
+				<div class="meter meter--core mt-5" aria-hidden="true">
+					{#each LEVELS as l (l)}
+						<span class={['meter-seg', l <= skill.level && 'is-on']} style="--j: {l}"></span>
+					{/each}
+				</div>
+				<p class="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+					<span class="font-semibold">{LEVEL_LABEL[skill.level]}</span>
+					<span class="text-fg-muted tabular">実務 {fmt(skill.years)}</span>
+				</p>
+				{#if skill.works?.length}
+					<ul class="mt-auto flex flex-wrap gap-1.5 pt-5" aria-label="このスキルを使った実績">
+						{#each skill.works.filter((s) => titleOf(s)) as slug (slug)}
+							<li
+								class="rounded-pill border border-line px-2.5 py-0.5 text-xs leading-relaxed text-fg-muted"
+							>
+								{titleOf(slug)}
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</li>
+		{/each}
+	</ul>
 
-	<!-- 目盛り（全グループ共通） -->
-	<div class="skill-axis mt-3" aria-hidden="true">
-		<span></span>
-		<div class="relative h-4 font-mono text-[0.6875rem] text-fg-muted">
-			{#each ticks as t (t)}
-				<span class="absolute -translate-x-1/2 tabular" style="left: {(t / max) * 100}%">{t}</span>
-			{/each}
-		</div>
-		<span class="font-mono text-[0.6875rem] text-fg-muted">年</span>
+	<div class="mt-14 grid gap-x-(--grid-gap) gap-y-10 md:grid-cols-3">
+		{#each rest as group (group.id)}
+			<section aria-labelledby="skill-{group.id}">
+				<h3
+					id="skill-{group.id}"
+					class="flex flex-wrap items-baseline gap-x-3 border-b border-line pb-3"
+				>
+					<span class="font-semibold">{group.label}</span>
+					<span class="eyebrow">{group.group}</span>
+				</h3>
+				<ul>
+					{#each group.items as skill (skill.name)}
+						<li class="flex items-center justify-between gap-4 border-b border-line py-3">
+							<div class="min-w-0">
+								<p class="text-[0.9375rem]">{skill.name}</p>
+								<p class="mt-0.5 text-xs text-fg-muted">
+									{`${LEVEL_LABEL[skill.level]} · 実務 ${fmt(skill.years)}`}
+								</p>
+							</div>
+							<div class="meter meter--sm shrink-0" aria-hidden="true">
+								{#each LEVELS as l (l)}
+									<span class={['meter-seg', l <= skill.level && 'is-on']} style="--j: {l}"></span>
+								{/each}
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/each}
 	</div>
 </div>
 <p class="mt-8 text-xs leading-relaxed text-fg-muted">
-	バーの長さは実務経験年数、スキル名の横は習熟度（{LEVEL_LABEL[1]} / {LEVEL_LABEL[2]} /
-	{LEVEL_LABEL[3]}）です。バーにカーソルを合わせる（またはフォーカスする）と、そのスキルを使った実績が表示されます。
+	メーターは習熟度を 3 段階（{LEVEL_LABEL[1]} / {LEVEL_LABEL[2]} / {LEVEL_LABEL[3]}）で示しています。年数は実務での使用期間です。
 </p>
 
 <style>
-	/* 名前 | バー | 値。スマホでは名前を上の行に置く */
-	.skill-row,
-	.skill-axis {
+	/* 3 段階の習熟度メーター。主軸は太くアクセント色、その他は細く控えめに */
+	.meter {
 		display: grid;
-		grid-template-columns: 1fr 4.5rem;
-		column-gap: 1rem;
-		align-items: center;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 4px;
 	}
-	.skill-row {
-		position: relative;
-		padding-block: 0.625rem 0.25rem;
-		border-radius: 0.375rem;
-		outline-offset: 2px;
-		transition: background-color var(--dur-fast) var(--ease-out);
-	}
-	.skill-name {
-		grid-column: 1 / -1;
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		column-gap: 0.75rem;
-	}
-	.skill-axis > span:first-child {
-		display: none;
-	}
-	@media (min-width: 48rem) {
-		.skill-row,
-		.skill-axis {
-			grid-template-columns: minmax(16rem, 27rem) 1fr 4.5rem;
-			column-gap: 1.5rem;
-		}
-		.skill-row {
-			padding-block: 0;
-		}
-		.skill-name {
-			grid-column: auto;
-			justify-content: space-between;
-			padding-block: 0.6875rem;
-		}
-		.skill-axis > span:first-child {
-			display: block;
-		}
-	}
-	.skill-row:hover,
-	.skill-row:focus-visible {
-		background-color: var(--surface-2);
-	}
-
-	/* 1 年ごとの目盛り線（行をまたいで連続して見える） */
-	.skill-track {
-		position: relative;
-		align-self: stretch;
-		min-height: 2rem;
-		display: flex;
-		align-items: center;
-		background-image: linear-gradient(to right, var(--line) 1px, transparent 1px);
-		background-size: calc(100% / var(--max)) 100%;
-		box-shadow: inset -1px 0 0 var(--line);
-	}
-	/* 細いバー。付け根は四角、先端だけ 4px 丸める */
-	.skill-bar {
+	.meter-seg {
 		display: block;
-		height: 0.625rem;
-		border-radius: 0 4px 4px 0;
-		background: var(--chart-bar);
+		height: 100%;
+		border-radius: 2px;
+		background: var(--line);
 		transform-origin: left center;
-		transition: filter var(--dur-fast) var(--ease-out);
 	}
-	.skill-row:hover .skill-bar,
-	.skill-row:focus-visible .skill-bar {
-		filter: brightness(1.12) saturate(1.1);
+	.meter--core {
+		height: 0.5rem;
 	}
-	.skill-value {
-		text-align: right;
-		font-size: 0.875rem;
+	.meter--core .meter-seg.is-on {
+		background: var(--chart-bar);
+	}
+	.meter--sm {
+		width: 4.5rem;
+		height: 0.375rem;
+	}
+	.meter--sm .meter-seg.is-on {
+		background: var(--fg-muted);
 	}
 
-	/* スクロールで画面に入ったら、上から順にバーが伸びる */
+	/* 画面に入ったら、主軸のタイルから順にメーターが伸びる */
 	@media (prefers-reduced-motion: no-preference) {
-		:global(.js) .skill-chart:not([data-revealed]) .skill-bar {
+		.meter-seg {
+			transition: scale 600ms var(--ease-out) calc(var(--i, 0) * 90ms + var(--j) * 120ms + 150ms);
+		}
+		:global(.js) .skill-chart:not([data-revealed]) .meter-seg.is-on {
 			scale: 0 1;
 		}
-		.skill-bar {
-			transition:
-				scale 900ms var(--ease-out) calc(var(--i) * 45ms + 150ms),
-				filter var(--dur-fast) var(--ease-out);
-		}
-	}
-
-	/* ツールチップ: 値が先、関連する実績が後 */
-	.skill-tip {
-		position: absolute;
-		bottom: calc(100% - 0.25rem);
-		z-index: 10;
-		width: max-content;
-		max-width: 18rem;
-		translate: -50% 4px;
-		padding: 0.625rem 0.875rem;
-		border: 1px solid var(--line);
-		border-radius: 0.5rem;
-		background: var(--bg);
-		box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
-		font-size: 0.75rem;
-		line-height: 1.6;
-		pointer-events: none;
-		opacity: 0;
-		visibility: hidden;
-		transition:
-			opacity var(--dur-fast) var(--ease-out),
-			translate var(--dur-fast) var(--ease-out),
-			visibility 0s linear var(--dur-fast);
-	}
-	.skill-row:hover .skill-tip,
-	.skill-row:focus-visible .skill-tip {
-		opacity: 1;
-		visibility: visible;
-		translate: -50% 0;
-		transition-delay: 0s;
 	}
 </style>
