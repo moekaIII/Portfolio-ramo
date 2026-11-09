@@ -20,7 +20,7 @@ export const site = {
 	description: `フロントエンドエンジニア / UI・UXデザイナー ${author.name}のポートフォリオ。Svelte・Vue.js・TypeScript を軸に、開発基盤づくりから公式サイトの演出実装まで、約7年のスキルと経歴、実績をまとめています。`,
 	locale: 'ja_JP',
 	/** static/ 配下の既定 OGP 画像（1200x630） */
-	ogImage: '/og/ogp.png',
+	ogImage: '/og/ogp_20261109.png',
 	social: [
 		{ label: 'GitHub', href: 'https://github.com/moekaIII/Portfolio-ramo' },
 		{ label: 'X', href: 'https://x.com/' },
