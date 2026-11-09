@@ -71,7 +71,7 @@
 	</h1>
 	<p
 		class={[
-			'mt-5 text-sm text-fg-muted transition-opacity duration-500',
+			'term-role mt-5 text-sm text-fg-muted transition-opacity duration-500',
 			done ? 'opacity-100' : 'opacity-0'
 		]}
 	>
@@ -83,6 +83,11 @@
 	/* JS 有効時は、打ち込みが始まるまで全文を一瞬見せない（ちらつき防止） */
 	:global(.js) .term-pending h1 > span[aria-hidden='true']:not(.term-caret) {
 		visibility: hidden;
+	}
+	/* 肩書きも同様に、打ち込みが終わるまで出さない（ローディング直後に一瞬見えて消えるのを防ぐ） */
+	:global(.js) .term-pending .term-role {
+		opacity: 0;
+		transition: none;
 	}
 	.term-caret--blink {
 		animation: term-blink 1.05s steps(1) infinite;

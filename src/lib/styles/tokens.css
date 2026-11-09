@@ -14,6 +14,18 @@
  *     light: accent text on bg  5.5:1 / text on accent fill 14.4:1
  */
 
+/* 実績カードのホバー位置（数値のまま遷移させるため型を登録） */
+@property --mx {
+	syntax: '<percentage>';
+	inherits: true;
+	initial-value: 50%;
+}
+@property --my {
+	syntax: '<percentage>';
+	inherits: true;
+	initial-value: 50%;
+}
+
 :root {
 	/* ===== Brand accent (change here) ===== */
 	--accent-hue: 125;
@@ -45,14 +57,24 @@
 		radial-gradient(70% 55% at 88% 92%, rgb(156 72 48 / 0.45), transparent 70%),
 		radial-gradient(90% 70% at 64% 55%, rgb(118 80 72 / 0.6), transparent 70%),
 		linear-gradient(180deg, #24212d, #2e2832 42%, #30292d 75%, #382f31);
+	/* 実績カードのホバーで、カーソルに合わせて混ざり合う色（ラベンダー・ローズ・赤みのオレンジ・ミント） */
+	--wash-1: rgb(76 62 120 / 0.85);
+	--wash-2: rgb(110 58 92 / 0.75);
+	--wash-3: rgb(160 74 48 / 0.6);
+	--wash-4: rgb(44 84 70 / 0.75);
 	/* 同じ色味の枠線用グラデーション（ラベンダー → ローズ → ピーチ → ミント） */
+	--edge-1: rgb(150 136 204);
+	--edge-2: rgb(204 140 168);
+	--edge-3: rgb(226 120 92);
+	--edge-4: rgb(214 166 136);
+	--edge-5: rgb(122 176 154);
 	--hero-edge: linear-gradient(
 		135deg,
-		rgb(150 136 204),
-		rgb(204 140 168) 32%,
-		rgb(226 120 92) 56%,
-		rgb(214 166 136) 74%,
-		rgb(122 176 154)
+		var(--edge-1),
+		var(--edge-2) 32%,
+		var(--edge-3) 56%,
+		var(--edge-4) 74%,
+		var(--edge-5)
 	);
 
 	--accent: oklch(var(--accent-l-fill) var(--accent-chroma) var(--accent-hue));
@@ -104,13 +126,22 @@
 		radial-gradient(70% 55% at 88% 92%, rgb(255 178 150 / 0.45), transparent 70%),
 		radial-gradient(90% 70% at 64% 55%, rgb(255 248 240 / 0.95), transparent 70%),
 		linear-gradient(180deg, #ebe8f2, #f5f2f5 42%, #f7f4f1 75%, #fcf9f5);
+	--wash-1: rgb(214 204 246 / 0.9);
+	--wash-2: rgb(246 206 228 / 0.85);
+	--wash-3: rgb(255 176 146 / 0.6);
+	--wash-4: rgb(202 236 218 / 0.9);
+	--edge-1: rgb(164 152 212);
+	--edge-2: rgb(222 162 186);
+	--edge-3: rgb(240 146 118);
+	--edge-4: rgb(236 186 152);
+	--edge-5: rgb(146 196 172);
 	--hero-edge: linear-gradient(
 		135deg,
-		rgb(164 152 212),
-		rgb(222 162 186) 32%,
-		rgb(240 146 118) 56%,
-		rgb(236 186 152) 74%,
-		rgb(146 196 172)
+		var(--edge-1),
+		var(--edge-2) 32%,
+		var(--edge-3) 56%,
+		var(--edge-4) 74%,
+		var(--edge-5)
 	);
 }
 
