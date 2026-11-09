@@ -36,7 +36,7 @@
 </Section>
 
 <Section id="strengths" eyebrow="Strengths" title="強み" lead="">
-	<Strengths works={data.works} />
+	<Strengths />
 </Section>
 
 <Section id="skills" eyebrow="Skills" title="スキル" lead="" tone="surface">
