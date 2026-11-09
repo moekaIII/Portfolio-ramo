@@ -70,13 +70,13 @@
 
 	/*
 	  PC: ベン図のように、3 つの円の真ん中が重なる配置。
-	  円の中心どうしの距離 --s を直径の 0.58 倍にして、中央に 3 つが重なる領域をつくる。
+	  円の中心どうしの距離 --s を直径の 0.74 倍にして、中央に 3 つが小さく重なる領域をつくる。
 	  文字は重なりを避けて、それぞれの円の外側寄り（重ならない部分）に置く。
 	*/
 	@media (min-width: 64rem) {
 		.strengths {
-			--d: 28rem;
-			--s: calc(var(--d) * 0.58);
+			--d: 26rem;
+			--s: calc(var(--d) * 0.74);
 			position: relative;
 			display: block;
 			width: calc(var(--d) + var(--s));
@@ -94,25 +94,25 @@
 			top: 0;
 			left: calc(var(--s) / 2);
 			--tx: 50%;
-			--ty: 30%;
+			--ty: 38%;
 		}
 		.strength:nth-child(2) {
 			bottom: 0;
 			left: 0;
-			--tx: 32.7%;
-			--ty: 63%;
+			--tx: 39.6%;
+			--ty: 56%;
 		}
 		.strength:nth-child(3) {
 			bottom: 0;
 			right: 0;
-			--tx: 67.3%;
-			--ty: 63%;
+			--tx: 60.4%;
+			--ty: 56%;
 		}
 		.strength-body {
 			position: absolute;
 			left: var(--tx);
 			top: var(--ty);
-			width: 42%;
+			width: 46%;
 			transform: translate(-50%, -50%);
 		}
 	}
