@@ -31,7 +31,7 @@
 
 <!--
   実績カード（テキストのみ）。期間の下に余白を取り、タイトルの位置は全カードで揃える。
-  タグは下端に寄せる。ホバーでヒーローの背景の色味が浮かび、カーソルに合わせて色が混ざり合う。
+  タグは下端に寄せる。ホバーでヒーローと同じ淡い背景になり、淡いオレンジがカーソルについてくる。
   カード全体がボタンになり、ケーススタディ全文はモーダルで開く。
 -->
 <article
@@ -126,9 +126,8 @@
 
 <style>
 	/*
-	  ホバーでヒーローの色味を重ねる。4 色のにじみをカーソル位置（--mx / --my）から
-	  それぞれ違う向きにずらして置くので、マウスを動かすと色が混ざり合う。
-	  位置は @property で型を登録してあり、遅れてなめらかに追従する。
+	  ホバーでヒーローと同じ淡い背景を敷き、淡いオレンジのにじみをカーソル位置（--mx / --my）に置く。
+	  位置は @property で型を登録してあり、少し遅れてなめらかに追従する。
 	*/
 	.work-card {
 		--mx: 50%;
@@ -143,23 +142,8 @@
 		border-radius: inherit;
 		z-index: -1;
 		background:
-			radial-gradient(42% 58% at var(--mx) var(--my), var(--wash-2), transparent 72%),
-			radial-gradient(
-				50% 62% at calc(100% - var(--mx)) calc(100% - var(--my)),
-				var(--wash-1),
-				transparent 72%
-			),
-			radial-gradient(
-				38% 52% at calc(var(--mx) * 0.6 + 40%) calc(100% - var(--my) * 0.7),
-				var(--wash-3),
-				transparent 72%
-			),
-			radial-gradient(
-				48% 60% at calc(100% - var(--mx) * 0.7) calc(var(--my) * 0.6 + 40%),
-				var(--wash-4),
-				transparent 72%
-			),
-			var(--bg);
+			radial-gradient(45% 60% at var(--mx) var(--my), var(--wash-glow), transparent 75%),
+			var(--hero-wash);
 		opacity: 0;
 		transition: opacity 500ms var(--ease-out);
 	}
