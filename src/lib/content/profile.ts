@@ -12,8 +12,10 @@ export interface Skill {
 	years: number;
 	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
-	/** 採用で特に見てほしい主軸スキル。スキルセクションの上段に、この数字の順で大きく出す */
+	/** 主軸スキル。レーダーチャートの軸に、この数字の順（上から時計回り）で並べる */
 	core?: number;
+	/** レーダーチャートの軸に出す短い名前（省略時は name） */
+	short?: string;
 }
 
 export interface SkillGroup {
@@ -52,34 +54,40 @@ export const skills: SkillGroup[] = [
 				level: 3,
 				years: 3,
 				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp'],
-				core: 3
+				core: 3,
+				short: 'TypeScript'
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
 				level: 3,
 				years: 8,
-				works: ['maas-webapp', 'game-anime-site']
+				works: ['maas-webapp', 'game-anime-site'],
+				core: 5,
+				short: 'HTML / CSS'
 			},
 			{
 				name: 'Svelte / SvelteKit',
 				level: 3,
 				years: 2.5,
 				works: ['dev-platform', 'game-anime-site', 'owned-media'],
-				core: 1
+				core: 1,
+				short: 'Svelte'
 			},
 			{
 				name: 'GSAP・SVG アニメーション',
 				level: 3,
 				years: 5.5,
 				works: ['game-anime-site'],
-				core: 4
+				core: 4,
+				short: 'GSAP・SVG'
 			},
 			{
 				name: 'Vue.js / Pinia',
 				level: 2,
 				years: 3,
 				works: ['gov-dashboard', 'maas-webapp'],
-				core: 2
+				core: 2,
+				short: 'Vue.js'
 			},
 			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
 		]
@@ -99,9 +107,18 @@ export const skills: SkillGroup[] = [
 				name: 'ヘッドレス CMS（microCMS ほか）',
 				level: 3,
 				years: 2.5,
-				works: ['owned-media', 'game-anime-site', 'dev-platform']
+				works: ['owned-media', 'game-anime-site', 'dev-platform'],
+				core: 6,
+				short: 'ヘッドレス CMS'
 			},
-			{ name: '開発基盤の設計・技術選定', level: 3, years: 2, works: ['dev-platform'] },
+			{
+				name: '開発基盤の設計・技術選定',
+				level: 3,
+				years: 2,
+				works: ['dev-platform'],
+				core: 7,
+				short: '開発基盤'
+			},
 			{ name: 'GitHub Actions・運用の自動化', level: 3, years: 2, works: ['dev-platform'] },
 			{
 				name: '生成 AI の活用（Copilot / ChatGPT / Codex）',
@@ -120,7 +137,9 @@ export const skills: SkillGroup[] = [
 				name: 'UI/UX 設計・デザイン（Figma / Adobe XD）',
 				level: 2,
 				years: 4,
-				works: ['game-anime-site']
+				works: ['game-anime-site'],
+				core: 8,
+				short: 'UI/UX'
 			},
 			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },
 			{ name: '技術教材の制作・研修講師', level: 2, years: 1.5, works: ['ios-app'] }
