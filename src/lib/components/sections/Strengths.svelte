@@ -4,7 +4,7 @@
 </script>
 
 <!--
-  強み。3 つの円を上 1・下 2 に少し重ねて置く（スマホでは縦に並べ、少し重ねる）。
+  強み。3 つの円を上 1・下 2 に、真ん中が重なるように置く（スマホでは縦に並べ、少し重ねる）。
   画面に入ると、グラデーションの枠線を描きながら 1 つずつ現れる。
 -->
 <ol class="strengths" use:reveal>
@@ -37,7 +37,7 @@
 				/>
 			</svg>
 			<div class="strength-body">
-				<h3 class="text-lg leading-snug font-semibold md:text-xl">{item.title}</h3>
+				<h3 class="text-lg leading-snug font-semibold">{item.title}</h3>
 				<p class="mt-3 text-sm leading-relaxed text-fg-muted">{item.body}</p>
 			</div>
 		</li>
@@ -68,35 +68,52 @@
 		text-align: center;
 	}
 
-	/* PC: 上に 1 つ、下に 2 つ。隣どうしが少しずつ重なる */
+	/*
+	  PC: ベン図のように、3 つの円の真ん中が重なる配置。
+	  円の中心どうしの距離 --s を直径の 0.58 倍にして、中央に 3 つが重なる領域をつくる。
+	  文字は重なりを避けて、それぞれの円の外側寄り（重ならない部分）に置く。
+	*/
 	@media (min-width: 64rem) {
 		.strengths {
-			--d: 23rem;
-			--ox: 2rem; /* 下の 2 つの横の重なり */
-			--oy: 5rem; /* 上と下の縦の重なり */
+			--d: 28rem;
+			--s: calc(var(--d) * 0.58);
 			position: relative;
 			display: block;
-			width: calc(var(--d) * 2 - var(--ox));
-			height: calc(var(--d) * 2 - var(--oy));
+			width: calc(var(--d) + var(--s));
+			height: calc(var(--d) + var(--s) * 0.866);
 			margin-inline: auto;
 		}
 		.strength {
 			position: absolute;
+			display: block;
 		}
 		.strength + .strength {
 			margin-top: 0;
 		}
 		.strength:nth-child(1) {
 			top: 0;
-			left: calc(50% - var(--d) / 2);
+			left: calc(var(--s) / 2);
+			--tx: 50%;
+			--ty: 30%;
 		}
 		.strength:nth-child(2) {
 			bottom: 0;
 			left: 0;
+			--tx: 32.7%;
+			--ty: 63%;
 		}
 		.strength:nth-child(3) {
 			bottom: 0;
 			right: 0;
+			--tx: 67.3%;
+			--ty: 63%;
+		}
+		.strength-body {
+			position: absolute;
+			left: var(--tx);
+			top: var(--ty);
+			width: 42%;
+			transform: translate(-50%, -50%);
 		}
 	}
 
