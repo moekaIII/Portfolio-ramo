@@ -47,8 +47,20 @@
 
 	/** いまカーソルが乗っている領域。リストの行とチャートの軸が連動してハイライトする */
 	let active: SkillAreaId | null = $state(null);
-	const on = (area: SkillAreaId | undefined) => () => (active = area ?? null);
-	const off = () => (active = null);
+	// マウスはホバーで、タッチ（SP）はタップで active を切り替える
+	const on = (area: SkillAreaId | undefined) => (e: PointerEvent) => {
+		if (e.pointerType === 'mouse') active = area ?? null;
+	};
+	const off = (e: PointerEvent) => {
+		if (e.pointerType === 'mouse') active = null;
+	};
+	/** 直前の操作がマウスか（click には pointerType が付かないブラウザがあるため、pointerdown で覚える） */
+	let mouse = false;
+	const down = (e: PointerEvent) => (mouse = e.pointerType === 'mouse');
+	const tap = (area: SkillAreaId | undefined) => () => {
+		if (mouse || !area) return;
+		active = active === area ? null : area;
+	};
 
 	/**
 	 * 左のリスト: skills の全項目。
@@ -107,12 +119,16 @@
 		<ol class="skill-list" aria-label="主なスキル（得意な順）">
 			{#each top as skill, i (skill.name)}
 				{@const Icon = ICONS[skill.icon ?? 'markup']}
+				<!-- タップでのハイライトは見た目の補助（同じ内容は文字で読める）。キーボード操作は不要 -->
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
 					class="skill-row"
 					class:is-active={active !== null && skill.area === active}
 					style="--i: {i}"
 					onpointerenter={on(skill.area)}
 					onpointerleave={off}
+					onpointerdown={down}
+					onclick={tap(skill.area)}
 				>
 					<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
 					<div class="min-w-0">
@@ -129,7 +145,8 @@
 			{/each}
 		</ol>
 
-		<figure class="radar-wrap">
+		<!-- SP では一番上に -->
+		<figure class="radar-wrap order-first lg:order-none">
 			<div class="radar" aria-hidden="true">
 				<svg viewBox="-50 -50 100 100" focusable="false">
 					<defs>
@@ -188,13 +205,15 @@
 
 				{#each areas as area, i (area.id)}
 					<!-- 見た目だけの連動（チャートごと aria-hidden。同じ内容は下の読み上げ用リストにある） -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 					<span
 						class="radar-label"
 						class:is-active={active === area.id}
 						style={labelStyle(i)}
 						onpointerenter={on(area.id)}
 						onpointerleave={off}
+						onpointerdown={down}
+						onclick={tap(area.id)}
 						>{#each area.label.split('・') as part, k (k)}<span class="block"
 								>{part}{#if k < area.label.split('・').length - 1}・{/if}</span
 							>{/each}</span
@@ -229,12 +248,15 @@
 		<ul class="skill-rest" aria-label="そのほかのスキル">
 			{#each rest as skill, i (skill.name)}
 				{@const Icon = ICONS[skill.icon ?? 'markup']}
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
 					class="skill-chip"
 					class:is-active={active !== null && skill.area === active}
 					style="--i: {TOP + i}"
 					onpointerenter={on(skill.area)}
 					onpointerleave={off}
+					onpointerdown={down}
+					onclick={tap(skill.area)}
 				>
 					<span class="skill-icon is-sm" aria-hidden="true"
 						><Icon size={14} strokeWidth={1.6} /></span
