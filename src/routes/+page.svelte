@@ -42,7 +42,7 @@
 <Section id="skills" eyebrow="Skills" title="スキル" lead="" tone="surface">
 	<!-- <Glance /> -->
 	<div class="mt-14">
-		<SkillChart groups={skills} works={data.works} />
+		<SkillChart groups={skills} />
 	</div>
 </Section>
 

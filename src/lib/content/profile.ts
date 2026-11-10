@@ -16,7 +16,14 @@ export interface Skill {
 	core?: number;
 	/** レーダーチャートの軸に出す短い名前（省略時は name） */
 	short?: string;
+	/** 主軸スキルのリストに出すアイコン */
+	icon?: SkillIcon;
+	/** 主軸スキルのリストに出す担当範囲 */
+	scope?: string;
 }
+
+export type SkillIcon =
+	'svelte' | 'vue' | 'ts' | 'motion' | 'markup' | 'cms' | 'platform' | 'design';
 
 export interface SkillGroup {
 	id: string;
@@ -55,7 +62,9 @@ export const skills: SkillGroup[] = [
 				years: 3,
 				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp'],
 				core: 3,
-				short: 'TypeScript'
+				short: 'TypeScript',
+				icon: 'ts',
+				scope: '型設計・API レスポンスの型付け・既存 JS の移行'
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
@@ -63,7 +72,9 @@ export const skills: SkillGroup[] = [
 				years: 8,
 				works: ['maas-webapp', 'game-anime-site'],
 				core: 5,
-				short: 'HTML / CSS'
+				short: 'HTML / CSS',
+				icon: 'markup',
+				scope: 'ピクセルパーフェクト・完全レスポンシブ・WCAG AA 対応'
 			},
 			{
 				name: 'Svelte / SvelteKit',
@@ -71,7 +82,9 @@ export const skills: SkillGroup[] = [
 				years: 2.5,
 				works: ['dev-platform', 'game-anime-site', 'owned-media'],
 				core: 1,
-				short: 'Svelte'
+				short: 'Svelte',
+				icon: 'svelte',
+				scope: 'チームへの導入提案・共通コンポーネント設計・SSG 構築'
 			},
 			{
 				name: 'GSAP・SVG アニメーション',
@@ -79,7 +92,9 @@ export const skills: SkillGroup[] = [
 				years: 5.5,
 				works: ['game-anime-site'],
 				core: 4,
-				short: 'GSAP・SVG'
+				short: 'GSAP・SVG',
+				icon: 'motion',
+				scope: '演出設計・スクロール連動・SVG アニメーションの実装'
 			},
 			{
 				name: 'Vue.js / Pinia',
@@ -87,7 +102,9 @@ export const skills: SkillGroup[] = [
 				years: 3,
 				works: ['gov-dashboard', 'maas-webapp'],
 				core: 2,
-				short: 'Vue.js'
+				short: 'Vue.js',
+				icon: 'vue',
+				scope: '業務アプリの画面実装・Pinia による状態管理'
 			},
 			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
 		]
@@ -109,7 +126,9 @@ export const skills: SkillGroup[] = [
 				years: 2.5,
 				works: ['owned-media', 'game-anime-site', 'dev-platform'],
 				core: 6,
-				short: 'ヘッドレス CMS'
+				short: 'ヘッドレス CMS',
+				icon: 'cms',
+				scope: 'コンテンツモデル設計・API 連携・入稿フローの整備'
 			},
 			{
 				name: '開発基盤の設計・技術選定',
@@ -117,7 +136,9 @@ export const skills: SkillGroup[] = [
 				years: 2,
 				works: ['dev-platform'],
 				core: 7,
-				short: '開発基盤'
+				short: '開発基盤',
+				icon: 'platform',
+				scope: '技術選定・GitHub Actions による自動化・運用ルールづくり'
 			},
 			{ name: 'GitHub Actions・運用の自動化', level: 3, years: 2, works: ['dev-platform'] },
 			{
@@ -139,7 +160,9 @@ export const skills: SkillGroup[] = [
 				years: 4,
 				works: ['game-anime-site'],
 				core: 8,
-				short: 'UI/UX'
+				short: 'UI/UX',
+				icon: 'design',
+				scope: '画面設計・ワイヤーフレーム・プロトタイプ作成'
 			},
 			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },
 			{ name: '技術教材の制作・研修講師', level: 2, years: 1.5, works: ['ios-app'] }
