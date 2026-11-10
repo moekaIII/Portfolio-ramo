@@ -25,7 +25,7 @@
 					aria-current={current ? 'location' : undefined}
 					class="relative inline-flex h-11 items-center rounded-pill px-4 text-sm text-fg-muted transition-colors hover:text-fg aria-[current=location]:text-fg"
 				>
-					{s.en}
+					{s.label}
 					<span
 						aria-hidden="true"
 						class={[
@@ -47,8 +47,8 @@
 					aria-current={activeSection.current === s.id ? 'location' : undefined}
 					class="flex items-baseline justify-between py-5 aria-[current=location]:text-accent-text"
 				>
-					<span class="text-h3 font-semibold">{s.en}</span>
-					<span class="text-sm text-fg-muted">{s.label}</span>
+					<span class="text-h3 font-semibold">{s.label}</span>
+					<span class="text-sm text-fg-muted">{s.en}</span>
 				</a>
 			</li>
 		{/each}

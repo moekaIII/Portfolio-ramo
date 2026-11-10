@@ -31,7 +31,7 @@ export const site = {
 /** ページ内セクション（ヘッダーのナビゲーションとスクロール位置の判定に使用）。ページの並び順と揃える */
 export const sections = [
 	{ id: 'works', label: '実績', en: 'Works' },
-	{ id: 'strengths', label: '強み', en: 'Strengths' },
+	{ id: 'strengths', label: '強み', en: 'Core Values' },
 	{ id: 'skills', label: 'スキル', en: 'Skills' },
 	{ id: 'career', label: '経歴', en: 'Career' },
 	{ id: 'concept', label: 'コンセプト', en: 'Concept' }
