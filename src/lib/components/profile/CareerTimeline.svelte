@@ -80,7 +80,7 @@
 </script>
 
 <!-- data-process-* はスクロール連動（gsap）のフック。JS なしでも完結した表示になる -->
-<ol bind:this={root} class="relative" data-process>
+<ol bind:this={root} class="career relative" data-process>
 	<span
 		aria-hidden="true"
 		class="absolute top-2 bottom-2 left-[0.6875rem] w-px bg-line md:left-[calc(25%+0.6875rem)]"
@@ -88,7 +88,7 @@
 	<span
 		aria-hidden="true"
 		data-process-line
-		class="absolute top-2 bottom-2 left-[0.6875rem] w-px origin-top bg-accent-text md:left-[calc(25%+0.6875rem)]"
+		class="absolute top-2 bottom-2 left-[0.6875rem] w-px origin-top bg-(--career) md:left-[calc(25%+0.6875rem)]"
 	></span>
 	{#each items as item, i (item.period)}
 		<li
@@ -132,7 +132,7 @@
 				<ul class="mt-5 space-y-2">
 					{#each item.achievements as a (a)}
 						<li
-							class="relative pl-5 text-[0.9375rem] before:absolute before:top-[0.85em] before:left-0 before:h-px before:w-2.5 before:bg-accent-text"
+							class="relative pl-5 text-[0.9375rem] before:absolute before:top-[0.85em] before:left-0 before:h-px before:w-2.5 before:bg-(--career)"
 						>
 							{a}
 						</li>
@@ -154,18 +154,25 @@
 	  経歴のドット。未到達は線の丸、線が届くと静かに塗りつぶされ、
 	  周りに細い輪が製図のように一周して描かれる（強みの丸と同じ描き方）
 	*/
+	/* 線・ドット・箇条書きの印は、強みの縦線やスキルのハイライトと同じ「茎」の緑 */
+	.career {
+		--career: #7f9a68;
+	}
+	:global([data-theme='dark']) .career {
+		--career: #8aa673;
+	}
 	.career-dot {
 		display: block;
 	}
 	.career-dot-core {
 		position: absolute;
 		inset: 0;
-		border: 2px solid var(--accent-text);
+		border: 2px solid var(--career);
 		border-radius: 999px;
 		background: var(--bg);
 	}
 	.career-dot:global(.is-on) .career-dot-core {
-		background: var(--accent-text);
+		background: var(--career);
 	}
 	.career-dot-ring {
 		position: absolute;

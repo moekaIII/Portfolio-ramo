@@ -135,8 +135,10 @@
 		transition-property: border-color, --mx, --my;
 		transition-duration: 500ms, 900ms, 900ms;
 	}
+	/* ホバー時は円を白く塗り、矢印は濃い色に（ダークでも白地に矢印が見えるように） */
 	.button-arrow:hover {
 		background-color: #ffffff;
+		color: #1c1917;
 	}
 	.work-card::before {
 		content: '';
@@ -190,9 +192,6 @@
 	}
 	:global(.work-card:is(:hover, :focus-within)) .work-arrow::before {
 		opacity: 1;
-	}
-	:global(.work-card:is(:hover, :focus-within)) .work-arrow :global(svg:not([width='0'])) {
-		/* stroke: var(--arrow-grad); */
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.work-card {
