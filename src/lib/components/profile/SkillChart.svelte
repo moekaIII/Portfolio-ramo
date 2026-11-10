@@ -43,15 +43,21 @@
 	let resetTimer: ReturnType<typeof setTimeout> | undefined;
 	const cancelReset = () => clearTimeout(resetTimer);
 	$effect(() => cancelReset);
+	/** 既定に戻るときだけ、ハイライトの切り替えをゆっくりにする（ふわっと戻る） */
+	let settling = $state(false);
 	const on = (t: Target) => (e: PointerEvent) => {
 		if (e.pointerType !== 'mouse') return;
 		cancelReset();
+		settling = false;
 		active = t;
 	};
 	const off = (e: PointerEvent) => {
 		if (e.pointerType !== 'mouse') return;
 		cancelReset();
-		resetTimer = setTimeout(() => (active = DEFAULT), RESET_DELAY);
+		resetTimer = setTimeout(() => {
+			settling = true;
+			active = DEFAULT;
+		}, RESET_DELAY);
 	};
 	/** 直前の操作がマウスか（click には pointerType が付かないブラウザがあるため、pointerdown で覚える） */
 	let mouse = false;
@@ -116,7 +122,7 @@
   細い補助線は Hero の設計図、グラデーションの線は実績カード・強みの円と同じトーン。
   スキルとその領域は、カーソルを合わせると互いにハイライトする。
 -->
-<div class="skill-chart" use:reveal>
+<div class="skill-chart" class:is-settling={settling} use:reveal>
 	<div
 		class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]"
 	>
@@ -301,6 +307,10 @@
 	}
 	.radar-grid line {
 		stroke-dasharray: 0.8 0.8;
+		transition:
+			stroke var(--hl-dur) var(--ease-out),
+			stroke-opacity var(--hl-dur) var(--ease-out),
+			stroke-width var(--hl-dur) var(--ease-out);
 	}
 	.radar-shape {
 		fill: url(#radar-fill);
@@ -331,6 +341,11 @@
 		white-space: nowrap;
 		cursor: default;
 		color: var(--fg-muted);
+		/* 下線は常に引いておき、色だけ切り替える（なめらかに出し入れするため） */
+		text-decoration: underline;
+		text-decoration-color: transparent;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.3em;
 	}
 	@media (min-width: 48rem) {
 		.radar-label {
@@ -342,6 +357,13 @@
 	  ハイライト（active）のキーカラーは、Hero の花の茎の色（3D の茎テクスチャ・フォールバック SVG と同じ緑）。
 	  ダークは 3D と同じく少し暗くする
 	*/
+	/* ハイライトの切り替え時間。既定に戻るときは長くして、ふわっと戻す */
+	.skill-chart {
+		--hl-dur: var(--dur-fast);
+	}
+	.skill-chart.is-settling {
+		--hl-dur: 800ms;
+	}
 	.skill-chart {
 		--stem: #8aa673;
 		--stem-tint: color-mix(in oklab, var(--stem) 10%, transparent);
@@ -354,10 +376,7 @@
 	/* 対応するリストの行にカーソルがあるとき */
 	.radar-label.is-active {
 		color: var(--fg);
-		text-decoration: underline;
 		text-decoration-color: var(--stem);
-		text-decoration-thickness: 2px;
-		text-underline-offset: 0.3em;
 	}
 	.radar-grid line.is-active {
 		stroke: var(--stem);
@@ -382,8 +401,8 @@
 		pointer-events: none;
 		opacity: 0;
 		transition:
-			opacity var(--dur-fast) var(--ease-out),
-			translate var(--dur-fast) var(--ease-out);
+			opacity var(--hl-dur) var(--ease-out),
+			translate var(--hl-dur) var(--ease-out);
 	}
 	.radar-level.is-active {
 		opacity: 1;
@@ -446,7 +465,7 @@
 		gap: 1rem;
 		padding: 1rem 1rem;
 		border-bottom: 1px solid var(--line);
-		transition: background-color var(--dur-fast) var(--ease-out);
+		transition: background-color var(--hl-dur) var(--ease-out);
 	}
 	.skill-row.is-active {
 		background: var(--stem-tint);
@@ -468,8 +487,8 @@
 	}
 	.skill-icon {
 		transition:
-			background-color var(--dur-fast) var(--ease-out),
-			color var(--dur-fast) var(--ease-out);
+			background-color var(--hl-dur) var(--ease-out),
+			color var(--hl-dur) var(--ease-out);
 	}
 	.skill-icon::before {
 		content: '';
@@ -503,7 +522,7 @@
 		padding: 0.25rem 0.5rem 0.25rem 0.25rem;
 		border-radius: 1.25rem;
 		line-height: 1.4;
-		transition: background-color var(--dur-fast) var(--ease-out);
+		transition: background-color var(--hl-dur) var(--ease-out);
 	}
 	.skill-chip.is-active {
 		background: var(--stem-tint);
@@ -540,14 +559,17 @@
 			transition-duration: 300ms;
 		}
 		.radar-label {
-			transition: opacity 600ms var(--ease-out) calc(500ms + var(--i) * 60ms);
+			transition:
+				opacity 600ms var(--ease-out) calc(500ms + var(--i) * 60ms),
+				color var(--hl-dur) var(--ease-out),
+				text-decoration-color var(--hl-dur) var(--ease-out);
 		}
 		.skill-row,
 		.skill-chip {
 			transition:
 				opacity 600ms var(--ease-out) calc(var(--i) * 70ms),
 				translate 600ms var(--ease-out) calc(var(--i) * 70ms),
-				background-color var(--dur-fast) var(--ease-out);
+				background-color var(--hl-dur) var(--ease-out);
 		}
 		:global(.js) .skill-chart:not([data-revealed]) .skill-row,
 		:global(.js) .skill-chart:not([data-revealed]) .skill-chip {
