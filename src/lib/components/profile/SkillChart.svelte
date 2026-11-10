@@ -322,11 +322,11 @@
 	*/
 	.skill-chart {
 		--stem: #8aa673;
-		--stem-tint: color-mix(in oklab, var(--stem) 20%, transparent);
+		--stem-tint: color-mix(in oklab, var(--stem) 10%, transparent);
 	}
 	:global([data-theme='light']) .skill-chart {
 		--stem: #93b07a;
-		--stem-tint: color-mix(in oklab, var(--stem) 16%, transparent);
+		--stem-tint: color-mix(in oklab, var(--stem) 8%, transparent);
 	}
 
 	/* 対応するリストの行にカーソルがあるとき */
