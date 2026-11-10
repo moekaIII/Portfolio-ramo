@@ -7,6 +7,7 @@
 	import plexLatin from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
 	import oxaniumLatin from '@fontsource-variable/oxanium/files/oxanium-latin-wght-normal.woff2?url';
 	import favicon from '#lib/assets/favicon.png';
+	import faviconSvg from '#lib/assets/favicon.svg';
 	import Header from '#lib/components/layout/Header.svelte';
 	import Loader from '#lib/components/layout/Loader.svelte';
 	import SkipLink from '#lib/components/layout/SkipLink.svelte';
@@ -26,7 +27,10 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<!-- favicon: DESIGN | BUILD（つぼみの左半分がワイヤーフレーム、右半分が塗り）。SVG 非対応の環境は PNG -->
+	<link rel="icon" href={favicon} sizes="32x32" type="image/png" />
+	<link rel="icon" href={faviconSvg} type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<!-- 欧文フォントは初回描画に間に合わせ、差し替えによるレイアウトシフトを防ぐ -->
 	<link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 	<!-- ヒーローの氏名（ターミナル風）とローディングの文字 -->
