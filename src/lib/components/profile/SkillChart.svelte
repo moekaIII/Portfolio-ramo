@@ -118,7 +118,7 @@
 					<div class="min-w-0">
 						<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
 						{#if skill.scope}
-							<p class="mt-1 text-sm leading-relaxed text-fg-muted">{skill.scope}</p>
+							<p class="mt-1 text-xs leading-relaxed text-fg-muted">{skill.scope}</p>
 						{/if}
 						<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}</span>
 					</div>
@@ -393,7 +393,7 @@
 		}
 		to {
 			opacity: 0;
-			scale: 4;
+			scale: 3;
 		}
 	}
 	@keyframes radar-pop {
@@ -401,16 +401,16 @@
 			scale: 1;
 		}
 		55% {
-			scale: 2.1;
+			scale: 1.5;
 		}
 		100% {
-			scale: 1.6;
+			scale: 1.2;
 		}
 	}
 	.radar-dot.is-active {
 		fill: var(--stem);
 		stroke: var(--stem);
-		scale: 1.6;
+		scale: 1.2;
 	}
 
 	/* 左のリスト。1 行 = アイコン・名前と担当範囲・年数 */
