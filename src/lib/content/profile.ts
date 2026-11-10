@@ -274,10 +274,11 @@ export const glance: { term: string; value: string }[] = [
 export interface CareerItem {
 	period: string;
 	title: string;
-	org: string;
-	summary: string;
-	achievements: string[];
-	stack: string[];
+	/** 所属（学歴など、ないものは省略） */
+	org?: string;
+	summary?: string;
+	achievements?: string[];
+	stack?: string[];
 }
 
 export const career: CareerItem[] = [
@@ -338,6 +339,34 @@ export const career: CareerItem[] = [
 			'App Store Connect',
 			'Adobe Premiere'
 		]
+	},
+	{
+		period: '2019.07',
+		title: '大学（経済学部）退学',
+		summary:
+			'大学と並行して学んでいたプログラミングの道に進むことを決め、インターン先の会社に就職しました。'
+	},
+	{
+		period: '2018.05 — 2018.11',
+		title: 'DIVE INTO CODE 卒業',
+		org: 'プログラミングスクール',
+		summary:
+			'Ruby on Rails の即戦力コースで、Web の基礎から Rails を使用した Web アプリケーションの公開までを学びました。',
+		stack: ['Ruby', 'Ruby on Rails']
+	},
+	{
+		period: '2018.04',
+		title: '大学進学（経済学部）'
+	},
+	{
+		period: '2015.04 — 2018.03',
+		title: '公立高校',
+		summary: '空手道部で心身ともに鍛え、県の準強化選手に抜擢されました。'
+	},
+	{
+		period: '2012.04 — 2015.03',
+		title: '公立中学校',
+		summary: '剣道部に入り、武道の精神を学びました。'
 	}
 ];
 

@@ -83,12 +83,12 @@
 <ol bind:this={root} class="career relative" data-process>
 	<span
 		aria-hidden="true"
-		class="absolute top-2 bottom-2 left-[0.6875rem] w-px bg-line md:left-[calc(25%+0.6875rem)]"
+		class="career-rail absolute top-2 left-[0.6875rem] w-px bg-line md:left-[calc(25%+0.6875rem)]"
 	></span>
 	<span
 		aria-hidden="true"
 		data-process-line
-		class="absolute top-2 bottom-2 left-[0.6875rem] w-px origin-top bg-(--career) md:left-[calc(25%+0.6875rem)]"
+		class="career-rail absolute top-2 left-[0.6875rem] w-px origin-top bg-(--career) md:left-[calc(25%+0.6875rem)]"
 	></span>
 	{#each items as item, i (item.period)}
 		<li
@@ -97,7 +97,9 @@
 		>
 			<div class="md:pr-10 md:text-right">
 				<p class="text-sm font-medium tabular">{item.period}</p>
-				<p class="mt-1 text-sm text-fg-muted">{item.org}</p>
+				{#if item.org}
+					<p class="mt-1 text-sm text-fg-muted">{item.org}</p>
+				{/if}
 			</div>
 			<span
 				aria-hidden="true"
@@ -128,22 +130,28 @@
 			</span>
 			<div class="md:col-span-3 md:pl-16">
 				<h3 class="text-h3 font-semibold">{item.title}</h3>
-				<p class="mt-3 max-w-[40em] text-fg-muted">{item.summary}</p>
-				<ul class="mt-5 space-y-2">
-					{#each item.achievements as a (a)}
-						<li
-							class="relative pl-5 text-[0.9375rem] before:absolute before:top-[0.85em] before:left-0 before:h-px before:w-2.5 before:bg-(--career)"
-						>
-							{a}
-						</li>
-					{/each}
-				</ul>
-				<p class="sr-only">使用技術:</p>
-				<ul class="mt-5 flex flex-wrap gap-2">
-					{#each item.stack as tech (tech)}
-						<li class="rounded-pill bg-surface-2 px-3 py-1.5 text-xs">{tech}</li>
-					{/each}
-				</ul>
+				{#if item.summary}
+					<p class="mt-3 max-w-[40em] text-fg-muted">{item.summary}</p>
+				{/if}
+				{#if item.achievements?.length}
+					<ul class="mt-5 space-y-2">
+						{#each item.achievements as a (a)}
+							<li
+								class="relative pl-5 text-[0.9375rem] before:absolute before:top-[0.85em] before:left-0 before:h-px before:w-2.5 before:bg-(--career)"
+							>
+								{a}
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				{#if item.stack?.length}
+					<p class="sr-only">使用技術:</p>
+					<ul class="mt-5 flex flex-wrap gap-2">
+						{#each item.stack as tech (tech)}
+							<li class="rounded-pill bg-surface-2 px-3 py-1.5 text-xs">{tech}</li>
+						{/each}
+					</ul>
+				{/if}
 			</div>
 		</li>
 	{/each}
@@ -160,6 +168,11 @@
 	}
 	:global([data-theme='dark']) .career {
 		--career: #8aa673;
+	}
+	/* 縦線は最後の経歴より下まで伸ばし、先端をぼかして消す */
+	.career-rail {
+		bottom: -6rem;
+		mask-image: linear-gradient(to bottom, #000 calc(100% - 10rem), transparent);
 	}
 	.career-dot {
 		display: block;
