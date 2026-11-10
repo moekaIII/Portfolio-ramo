@@ -29,7 +29,7 @@
 	id="works"
 	eyebrow="Selected Projects"
 	title="実績"
-	lead="多様なプロジェクトにおける設計・開発・課題解決の取り組み。一部抜粋"
+	lead="携わったプロジェクトの一部を紹介します。"
 	tone="surface"
 >
 	<WorksCarousel works={data.works} />
