@@ -40,12 +40,10 @@
 	);
 	/** 左のリスト: 得意な順（習熟度の高い順、同じなら軸の順） */
 	const ranked = $derived(axes.toSorted((a, b) => b.level - a.level || a.core - b.core));
-	/** そのほかのスキル（名前だけをチップで） */
-	const others = $derived([
-		...new Set(
-			groups.flatMap((g) => g.items.filter((s) => s.core === undefined).map((s) => s.name))
-		)
-	]);
+	/** リストに大きく出すのは上位 5 つまで。残りは下に小さく横並び */
+	const TOP = 5;
+	const top = $derived(ranked.slice(0, TOP));
+	const rest = $derived(ranked.slice(TOP));
 
 	// viewBox は中心が原点の -50〜50。1 単位 = 箱の 1%
 	const R = 40; // 外周（= 習熟度 3）
@@ -89,31 +87,55 @@
   リストの行とチャートの軸は、カーソルを合わせると互いにハイライトする。
 -->
 <div class="skill-chart" use:reveal>
-	<div class="grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]">
-		<ol class="skill-list" aria-label="主軸スキル（得意な順）">
-			{#each ranked as skill, i (skill.name)}
-				{@const Icon = ICONS[skill.icon ?? 'markup']}
-				<li
-					class="skill-row"
-					class:is-active={active === skill.name}
-					style="--i: {i}"
-					onpointerenter={() => (active = skill.name)}
-					onpointerleave={() => (active = null)}
-				>
-					<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
-					<div class="min-w-0">
-						<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
-						{#if skill.scope}
-							<p class="mt-1 text-sm leading-relaxed text-fg-muted">{skill.scope}</p>
-						{/if}
-						<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}</span>
-					</div>
-					<p class="skill-years">
-						<span class="sr-only">経験</span>{fmt(skill.years)}
-					</p>
-				</li>
-			{/each}
-		</ol>
+	<div class="grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
+		<div>
+			<ol class="skill-list" aria-label="主軸スキル（得意な順）">
+				{#each top as skill, i (skill.name)}
+					{@const Icon = ICONS[skill.icon ?? 'markup']}
+					<li
+						class="skill-row"
+						class:is-active={active === skill.name}
+						style="--i: {i}"
+						onpointerenter={() => (active = skill.name)}
+						onpointerleave={() => (active = null)}
+					>
+						<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
+						<div class="min-w-0">
+							<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
+							{#if skill.scope}
+								<p class="mt-1 text-sm leading-relaxed text-fg-muted">{skill.scope}</p>
+							{/if}
+							<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}</span>
+						</div>
+						<p class="skill-years">
+							<span class="sr-only">経験</span>{fmt(skill.years)}
+						</p>
+					</li>
+				{/each}
+			</ol>
+
+			{#if rest.length}
+				<ul class="skill-rest" aria-label="そのほかの主軸スキル">
+					{#each rest as skill, i (skill.name)}
+						{@const Icon = ICONS[skill.icon ?? 'markup']}
+						<li
+							class="skill-chip"
+							class:is-active={active === skill.name}
+							style="--i: {TOP + i}"
+							onpointerenter={() => (active = skill.name)}
+							onpointerleave={() => (active = null)}
+						>
+							<span class="skill-icon is-sm" aria-hidden="true"
+								><Icon size={14} strokeWidth={1.6} /></span
+							>
+							<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
+							<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}、経験</span>
+							<span class="skill-years text-xs">{fmt(skill.years)}</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
 
 		<div class="radar-wrap" aria-hidden="true">
 			<div class="radar">
@@ -181,17 +203,6 @@
 			<p class="mt-6 text-center text-xs text-fg-muted">外側ほど習熟度が高い（3 段階）</p>
 		</div>
 	</div>
-
-	{#if others.length}
-		<div class="mt-16">
-			<p class="eyebrow">Also</p>
-			<ul class="mt-4 flex flex-wrap gap-1.5" aria-label="そのほかのスキル">
-				{#each others as name (name)}
-					<li class="tag-label">{name}</li>
-				{/each}
-			</ul>
-		</div>
-	{/if}
 </div>
 
 <style>
@@ -312,6 +323,29 @@
 			linear-gradient(#000 0 0) padding-box exclude,
 			linear-gradient(#000 0 0) border-box;
 	}
+	/* 6 つ目以降: 小さく横並び */
+	.skill-rest {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.75rem;
+		margin-top: 1.5rem;
+		padding-inline: 0.25rem;
+	}
+	.skill-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0.5rem 0.25rem 0;
+		border-radius: 999px;
+		transition: background-color var(--dur-fast) var(--ease-out);
+	}
+	.skill-chip.is-active {
+		background: color-mix(in oklab, var(--surface-2) 60%, transparent);
+	}
+	.skill-icon.is-sm {
+		width: 1.75rem;
+		height: 1.75rem;
+	}
 	.skill-years {
 		padding-top: 0.125rem;
 		font-family: var(--font-terminal);
@@ -334,16 +368,6 @@
 		color: var(--fg-muted);
 		white-space: nowrap;
 		pointer-events: none;
-	}
-	.tag-label {
-		border: 1px solid var(--line);
-		border-radius: 999px;
-		background: color-mix(in oklab, var(--surface-2) 70%, transparent);
-		padding: 0.25rem 0.625rem;
-		font-size: 0.6875rem;
-		line-height: 1.4;
-		color: var(--fg-muted);
-		white-space: nowrap;
 	}
 
 	/* 画面に入ったら: 補助線 → 形が中心から広がる → 頂点が順に灯る */
@@ -369,13 +393,15 @@
 		.radar-label {
 			transition: opacity 600ms var(--ease-out) calc(500ms + var(--i) * 60ms);
 		}
-		.skill-row {
+		.skill-row,
+		.skill-chip {
 			transition:
 				opacity 600ms var(--ease-out) calc(var(--i) * 70ms),
 				translate 600ms var(--ease-out) calc(var(--i) * 70ms),
 				background-color var(--dur-fast) var(--ease-out);
 		}
-		:global(.js) .skill-chart:not([data-revealed]) .skill-row {
+		:global(.js) .skill-chart:not([data-revealed]) .skill-row,
+		:global(.js) .skill-chart:not([data-revealed]) .skill-chip {
 			opacity: 0;
 			translate: 0 10px;
 		}
