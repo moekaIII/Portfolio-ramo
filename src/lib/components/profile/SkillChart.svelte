@@ -50,15 +50,15 @@
 	const off = () => (active = null);
 
 	/**
-	 * 左のリスト: skills の全項目を得意な順に。
-	 * 習熟度の高い順。同じ習熟度なら core のあるもの（core の順）→ 経験年数の長い順
+	 * 左のリスト: skills の全項目。
+	 * core のあるもの（core の順）を先頭に。残りは習熟度の高い順 → 経験年数の長い順
 	 */
 	const ranked = $derived(
 		groups
 			.flatMap((g) => g.items)
 			.toSorted(
 				(a, b) =>
-					b.level - a.level || (a.core ?? Infinity) - (b.core ?? Infinity) || b.years - a.years
+					(a.core ?? Infinity) - (b.core ?? Infinity) || b.level - a.level || b.years - a.years
 			)
 	);
 	/** 大きく出すのは上位 5 つまで。残りは下に小さく横並び */

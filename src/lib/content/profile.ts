@@ -12,7 +12,7 @@ export interface Skill {
 	years: number;
 	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
-	/** 主軸スキル。リストで同じ習熟度のとき、この数字の順に先頭へ並べる（上位 5 つが大きく出る） */
+	/** 大きく表示するスキル。この数字の順にリストの先頭へ並べる（5 つまで） */
 	core?: number;
 	/** リストの 6 つ目以降に出す短い名前（省略時は name） */
 	short?: string;
@@ -84,6 +84,9 @@ export const skills: SkillGroup[] = [
 		items: [
 			{
 				name: '生成AI（Copilot / ChatGPT / Codex）',
+				core: 2,
+				short: '生成AI',
+				scope: 'コード生成・レビュー補助・ドキュメント作成で開発を効率化',
 				icon: 'ai',
 				area: 'platform',
 				level: 2,
@@ -114,7 +117,6 @@ export const skills: SkillGroup[] = [
 				level: 3,
 				years: 8,
 				works: ['maas-webapp', 'game-anime-site'],
-				core: 5,
 				short: 'HTML / CSS',
 				icon: 'markup',
 				area: 'frontend',
@@ -136,7 +138,6 @@ export const skills: SkillGroup[] = [
 				level: 3,
 				years: 5.5,
 				works: ['game-anime-site'],
-				core: 4,
 				short: 'GSAP・SVG',
 				icon: 'motion',
 				area: 'motion',
@@ -147,7 +148,7 @@ export const skills: SkillGroup[] = [
 				level: 2,
 				years: 3,
 				works: ['gov-dashboard', 'maas-webapp'],
-				core: 2,
+				core: 4,
 				short: 'Vue.js',
 				icon: 'vue',
 				area: 'frontend',
@@ -181,7 +182,6 @@ export const skills: SkillGroup[] = [
 				level: 3,
 				years: 2.5,
 				works: ['owned-media', 'game-anime-site', 'dev-platform'],
-				core: 6,
 				short: 'ヘッドレス CMS',
 				icon: 'cms',
 				area: 'frontend',
@@ -192,7 +192,6 @@ export const skills: SkillGroup[] = [
 				level: 3,
 				years: 2,
 				works: ['dev-platform'],
-				core: 7,
 				short: '開発基盤',
 				icon: 'platform',
 				area: 'platform',
@@ -226,7 +225,7 @@ export const skills: SkillGroup[] = [
 				level: 2,
 				years: 4,
 				works: ['game-anime-site'],
-				core: 8,
+				core: 5,
 				short: 'UI/UX',
 				icon: 'design',
 				area: 'design',
