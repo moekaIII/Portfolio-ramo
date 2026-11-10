@@ -81,9 +81,9 @@ export const AREA_LEVEL_LABEL: Record<SkillArea['score'], string> = {
 export const skillAreas: SkillArea[] = [
 	{ id: 'frontend', label: 'フロントエンド実装', score: 5 },
 	{ id: 'ai', label: '生成AI', score: 4 },
-	{ id: 'platform', label: '開発基盤・自動化', score: 4 },
-	{ id: 'management', label: 'マネジメント', score: 3 },
-	{ id: 'mentoring', label: '育成・教材', score: 3 },
+	{ id: 'platform', label: '開発基盤・仕組み化', score: 5 },
+	{ id: 'management', label: 'マネジメント', score: 4 },
+	{ id: 'mentoring', label: '育成・教材', score: 4 },
 	{ id: 'design', label: 'UI/UX デザイン', score: 4 }
 ];
 
