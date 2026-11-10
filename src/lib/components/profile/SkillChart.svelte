@@ -261,9 +261,11 @@
 					<span class="skill-icon is-sm" aria-hidden="true"
 						><Icon size={14} strokeWidth={1.6} /></span
 					>
-					<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
-					<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}、経験</span>
-					<span class="skill-years text-xs">{fmt(skill.years)}</span>
+					<span class="min-w-0">
+						<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
+						<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}、経験</span>
+						<span class="skill-years ml-1.5 text-xs">{fmt(skill.years)}</span>
+					</span>
 				</li>
 			{/each}
 		</ul>
@@ -483,25 +485,33 @@
 			linear-gradient(#000 0 0) border-box;
 	}
 	/* 6 つ目以降: 小さく横並び */
+	/* 同じ幅の列に並べて、縦のツラ（左端）を揃える。長い名前は列の中で折り返す */
 	.skill-rest {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem 1.75rem;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem 1rem;
 		margin-top: 2rem;
-		padding-inline: 0.25rem;
+	}
+	@media (min-width: 48rem) {
+		.skill-rest {
+			grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+			gap: 0.5rem 1.5rem;
+		}
 	}
 	.skill-chip {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.25rem 0.5rem 0.25rem 0;
-		border-radius: 999px;
+		padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+		border-radius: 1.25rem;
+		line-height: 1.4;
 		transition: background-color var(--dur-fast) var(--ease-out);
 	}
 	.skill-chip.is-active {
 		background: var(--stem-tint);
 	}
 	.skill-icon.is-sm {
+		flex-shrink: 0;
 		width: 1.75rem;
 		height: 1.75rem;
 	}
