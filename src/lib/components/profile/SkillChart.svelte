@@ -19,7 +19,9 @@
 	 * - 領域が active: その軸と、その領域に属するスキルがすべてハイライト
 	 */
 	type Target = { skill: string } | { area: SkillAreaId };
-	let active: Target | null = $state(null);
+	/** 何も操作していないときは「フロントエンド実装」を active にしておく */
+	const DEFAULT: Target = { area: 'frontend' };
+	let active: Target | null = $state(DEFAULT);
 	const areasOf = (s: Skill): SkillAreaId[] => (s.area === undefined ? [] : [s.area].flat());
 	const skillOn = (s: Skill) =>
 		active !== null &&
@@ -40,14 +42,14 @@
 		if (e.pointerType === 'mouse') active = t;
 	};
 	const off = (e: PointerEvent) => {
-		if (e.pointerType === 'mouse') active = null;
+		if (e.pointerType === 'mouse') active = DEFAULT;
 	};
 	/** 直前の操作がマウスか（click には pointerType が付かないブラウザがあるため、pointerdown で覚える） */
 	let mouse = false;
 	const down = (e: PointerEvent) => (mouse = e.pointerType === 'mouse');
 	const tap = (t: Target) => () => {
 		if (mouse) return;
-		active = same(active, t) ? null : t;
+		active = same(active, t) ? DEFAULT : t;
 	};
 
 	/**
