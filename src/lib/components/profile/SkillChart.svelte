@@ -1,21 +1,6 @@
 <script lang="ts">
-	import Bot from '@lucide/svelte/icons/bot';
-	import Braces from '@lucide/svelte/icons/braces';
-	import ChartLine from '@lucide/svelte/icons/chart-line';
-	import GitBranch from '@lucide/svelte/icons/git-branch';
-	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
-	import MessageSquareCode from '@lucide/svelte/icons/message-square-code';
-	import Plug from '@lucide/svelte/icons/plug';
-	import Smartphone from '@lucide/svelte/icons/smartphone';
-	import SquareCode from '@lucide/svelte/icons/square-code';
-	import CodeXml from '@lucide/svelte/icons/code-xml';
-	import Database from '@lucide/svelte/icons/database';
-	import Flame from '@lucide/svelte/icons/flame';
-	import PenTool from '@lucide/svelte/icons/pen-tool';
-	import Sparkles from '@lucide/svelte/icons/sparkles';
-	import Triangle from '@lucide/svelte/icons/triangle';
-	import Workflow from '@lucide/svelte/icons/workflow';
 	import { reveal } from '#lib/actions/reveal.ts';
+	import SkillGlyph from './SkillGlyph.svelte';
 	import {
 		AREA_LEVEL_LABEL,
 		AREA_MAX,
@@ -23,30 +8,10 @@
 		type SkillArea,
 		type SkillAreaId,
 		type Skill,
-		type SkillGroup,
-		type SkillIcon
+		type SkillGroup
 	} from '#lib/content/profile.ts';
 
 	let { groups, areas }: { groups: SkillGroup[]; areas: SkillArea[] } = $props();
-
-	const ICONS = {
-		svelte: Flame,
-		vue: Triangle,
-		ts: Braces,
-		motion: Sparkles,
-		markup: CodeXml,
-		cms: Database,
-		platform: Workflow,
-		design: PenTool,
-		js: SquareCode,
-		ai: Bot,
-		chart: ChartLine,
-		api: Plug,
-		ci: GitBranch,
-		mobile: Smartphone,
-		teach: GraduationCap,
-		review: MessageSquareCode
-	} satisfies Record<SkillIcon, unknown>;
 
 	/**
 	 * いま active なもの。スキル（行）か、領域（チャートの軸）のどちらか。
@@ -146,7 +111,6 @@
 	>
 		<ol class="skill-list" aria-label="主なスキル（得意な順）">
 			{#each top as skill, i (skill.name)}
-				{@const Icon = ICONS[skill.icon ?? 'markup']}
 				<!-- タップでのハイライトは見た目の補助（同じ内容は文字で読める）。キーボード操作は不要 -->
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
@@ -158,7 +122,9 @@
 					onpointerdown={down}
 					onclick={tap({ skill: skill.name })}
 				>
-					<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
+					<span class="skill-icon" aria-hidden="true"
+						><SkillGlyph icon={skill.icon ?? 'cms'} size={18} /></span
+					>
 					<div class="min-w-0">
 						<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
 						{#if skill.scope}
@@ -269,7 +235,6 @@
 	{#if rest.length}
 		<ul class="skill-rest" aria-label="そのほかのスキル">
 			{#each rest as skill, i (skill.name)}
-				{@const Icon = ICONS[skill.icon ?? 'markup']}
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
 					class="skill-chip"
@@ -281,7 +246,7 @@
 					onclick={tap({ skill: skill.name })}
 				>
 					<span class="skill-icon is-sm" aria-hidden="true"
-						><Icon size={14} strokeWidth={1.6} /></span
+						><SkillGlyph icon={skill.icon ?? 'cms'} size={14} /></span
 					>
 					<span class="min-w-0">
 						<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
