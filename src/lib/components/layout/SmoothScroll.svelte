@@ -9,6 +9,8 @@
 		if (prefersReducedMotion.current) return;
 		const lenis = new Lenis({ autoRaf: true, lerp: 0.12, stopInertiaOnNavigate: true });
 		smoothScroll.lenis = lenis;
+		// ローディング中など、生成前に lock されていたら止めた状態で始める
+		if (smoothScroll.locked) lenis.stop();
 		return () => {
 			lenis.destroy();
 			smoothScroll.lenis = null;

@@ -117,6 +117,14 @@
 	:global(.js:not(.no-loader)) .site-loader {
 		display: flex;
 	}
+	/*
+	  ローディング中はスクロールさせない。JS の読み込み前から効くよう CSS で止める
+	  （退場の演出が始まったら解除。JS 側の lock は Lenis のホイール操作を止める）
+	*/
+	:global(html.js:not(.no-loader):has(.site-loader:not(.site-loader--leave))) {
+		overflow: hidden;
+		overscroll-behavior: none;
+	}
 	.loader-body {
 		width: min(100%, 34rem);
 		animation: loader-in var(--dur-slow) var(--ease-out) both;
