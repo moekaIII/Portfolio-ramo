@@ -344,7 +344,7 @@ export const career: CareerItem[] = [
 	},
 	{
 		period: '2019.07',
-		title: '大学（経済学部）退学',
+		title: '大学退学',
 		compact: true,
 		summary:
 			'大学と並行して学んでいたプログラミングの道に進むことを決め、インターン先の会社に就職しました。'
