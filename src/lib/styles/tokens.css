@@ -173,9 +173,9 @@
 	--text-h1: clamp(2.25rem, 1.5rem + 3.6vw, 5rem);
 	--text-h1--line-height: 1.08;
 	--text-h1--letter-spacing: -0.035em;
-	--text-h2: clamp(1.875rem, 1.35rem + 2.2vw, 3.5rem);
-	--text-h2--line-height: 1.15;
-	--text-h2--letter-spacing: -0.03em;
+	--text-h2: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+	--text-h2--line-height: 1.25;
+	--text-h2--letter-spacing: -0.02em;
 	--text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
 	--text-h3--line-height: 1.4;
 	--text-h3--letter-spacing: -0.015em;
