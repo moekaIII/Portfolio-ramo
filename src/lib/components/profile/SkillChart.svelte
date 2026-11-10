@@ -38,11 +38,20 @@
 	const same = (a: Target | null, b: Target) => JSON.stringify(a) === JSON.stringify(b);
 
 	// マウスはホバーで、タッチ（SP）はタップで active を切り替える
+	/** ホバーが外れてから既定（フロントエンド実装）に戻すまでの待ち時間。項目間の移動でちらつかないように */
+	const RESET_DELAY = 500;
+	let resetTimer: ReturnType<typeof setTimeout> | undefined;
+	const cancelReset = () => clearTimeout(resetTimer);
+	$effect(() => cancelReset);
 	const on = (t: Target) => (e: PointerEvent) => {
-		if (e.pointerType === 'mouse') active = t;
+		if (e.pointerType !== 'mouse') return;
+		cancelReset();
+		active = t;
 	};
 	const off = (e: PointerEvent) => {
-		if (e.pointerType === 'mouse') active = DEFAULT;
+		if (e.pointerType !== 'mouse') return;
+		cancelReset();
+		resetTimer = setTimeout(() => (active = DEFAULT), RESET_DELAY);
 	};
 	/** 直前の操作がマウスか（click には pointerType が付かないブラウザがあるため、pointerdown で覚える） */
 	let mouse = false;
