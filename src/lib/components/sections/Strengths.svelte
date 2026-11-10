@@ -4,97 +4,146 @@
 </script>
 
 <!--
-  強み。3 つを縦に並べる（PC は 見出し｜本文 の 2 列、スマホは縦積み）。
-  画面に入ると、上の罫線（Hero・実績カードと同じグラデーション）が左から引かれ、1 つずつ現れる。
+  強み。3 つを縦に並べ、ページの中央に寄せる。各ブロックは 見出し → 詳細文 で、左横に大きな線の丸を置く。
+  丸は行の高さより少し大きく、上下の丸どうしが少し重なる。
+  画面に入ると、上の丸から順に線が一周して完成し、続けて文字が浮かぶ。
 -->
 <ol class="strengths" use:reveal>
 	{#each strengths as item, i (item.title)}
 		<li class="strength" style="--i: {i}">
-			<span class="strength-rule" aria-hidden="true"></span>
-			<h3 class="strength-title text-h3 leading-snug font-semibold">{item.title}</h3>
-			<p class="strength-body text-[0.9375rem] leading-relaxed text-fg-muted md:text-base">
-				{item.body}
-			</p>
+			<svg class="strength-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+				<defs>
+					<linearGradient id="strength-ring-{i}" x1="0" y1="0" x2="1" y2="1">
+						<stop offset="0" style="stop-color: var(--edge-1)" />
+						<stop offset="0.35" style="stop-color: var(--edge-2)" />
+						<stop offset="0.6" style="stop-color: var(--edge-3)" />
+						<stop offset="0.8" style="stop-color: var(--edge-4)" />
+						<stop offset="1" style="stop-color: var(--edge-5)" />
+					</linearGradient>
+				</defs>
+				<!-- 12 時の位置から時計回りに描く -->
+				<circle
+					cx="50"
+					cy="50"
+					r="49"
+					pathLength="100"
+					stroke="url(#strength-ring-{i})"
+					transform="rotate(-90 50 50)"
+				/>
+			</svg>
+			<div class="strength-content">
+				<h3 class="strength-title text-h3 leading-snug font-semibold">{item.title}</h3>
+				<p
+					class="strength-body mt-3 max-w-[40rem] text-[0.9375rem] leading-relaxed text-fg-muted md:text-base"
+				>
+					{item.body}
+				</p>
+			</div>
 		</li>
 	{/each}
 </ol>
 
 <style>
-	.strength {
-		position: relative;
+	/*
+	  --d: 丸の直径 / --overlap: 上下の丸の重なり。
+	  行の高さを「直径 − 重なり」にして、丸を行からはみ出させることで重ねる
+	  （本文が長くて行が高くなったときは、重ならずに並ぶ）
+	*/
+	.strengths {
+		--d: 4.5rem;
+		--overlap: 0rem;
+		--gap: 1.25rem;
 		display: grid;
-		gap: 0.75rem;
-		padding-block: 2rem 2.25rem;
-	}
-	.strength:last-child {
-		border-bottom: 1px solid var(--line);
+		gap: 2.5rem;
+		max-width: 52rem;
+		margin-inline: auto;
 	}
 	@media (min-width: 48rem) {
-		.strength {
-			grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
-			gap: 3rem;
-			align-items: baseline;
-			padding-block: 2.5rem 2.75rem;
+		.strengths {
+			--d: 10rem;
+			--overlap: 2rem;
+			--gap: 2.5rem;
+			gap: 0;
 		}
 	}
-	@media (min-width: 64rem) {
+	.strength {
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-height: calc(var(--d) - var(--overlap));
+		padding-left: calc(var(--d) + var(--gap));
+	}
+	@media (max-width: 47.99rem) {
+		/* スマホ: 丸は見出しの横に小さく */
 		.strength {
-			grid-template-columns: minmax(0, 22rem) minmax(0, 40rem);
+			align-items: flex-start;
+			min-height: 0;
 		}
 	}
 
-	/* 上の罫線: 薄い線の上に、グラデーションの線を左から引く */
-	.strength-rule {
+	/* 線の丸 */
+	.strength-ring {
 		position: absolute;
-		inset-inline: 0;
+		left: 0;
 		top: 0;
-		height: 1px;
-		background: var(--line);
+		width: var(--d);
+		height: var(--d);
+		overflow: visible;
+		pointer-events: none;
 	}
-	.strength-rule::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		/* Hero と同じ色を、線の向き（左→右）に沿って並べる */
-		background: linear-gradient(
-			90deg,
-			var(--edge-1),
-			var(--edge-2) 32%,
-			var(--edge-3) 56%,
-			var(--edge-4) 74%,
-			var(--edge-5)
-		);
-		transform-origin: left center;
+	@media (min-width: 48rem) {
+		/* 行の中央に丸の中心を合わせ、はみ出した分が上下の丸と重なる */
+		.strength-ring {
+			top: 50%;
+			translate: 0 -50%;
+		}
+	}
+	.strength-ring circle {
+		fill: none;
+		/* viewBox 100 に対する太さ（直径 10rem で約 1.4px、スマホ 4.5rem で約 1.1px） */
+		stroke-width: 1.5;
+		stroke-linecap: round;
+		stroke-dasharray: 100;
+		stroke-dashoffset: 0;
+	}
+	@media (min-width: 48rem) {
+		.strength-ring circle {
+			stroke-width: 0.9;
+		}
 	}
 
-	/* 共通の reveal（全体のフェード）は使わず、行ごとの演出にする */
+	/* 共通の reveal（全体のフェード）は使わず、丸ごとの演出にする */
 	:global(.js) .strengths:global([data-reveal]) {
 		opacity: 1;
 		translate: none;
 	}
+	/*
+	  上の丸から順に: 線が一周して丸が完成 → 見出し → 詳細文。
+	  JS 無効時・視差効果を減らす設定のときは最初から完成した状態で表示する。
+	*/
 	@media (prefers-reduced-motion: no-preference) {
 		.strength {
-			--delay: calc(var(--i) * 260ms);
+			--delay: calc(var(--i) * 550ms);
 		}
-		.strength-rule::after {
-			transition: scale 1100ms var(--ease-out) var(--delay);
+		.strength-ring circle {
+			transition: stroke-dashoffset 900ms var(--ease-in-out) var(--delay);
 		}
 		.strength-title,
 		.strength-body {
 			transition:
-				opacity 700ms var(--ease-out) calc(var(--delay) + 200ms),
-				translate 700ms var(--ease-out) calc(var(--delay) + 200ms);
+				opacity 700ms var(--ease-out) calc(var(--delay) + 450ms),
+				translate 700ms var(--ease-out) calc(var(--delay) + 450ms);
 		}
 		.strength-body {
-			transition-delay: calc(var(--delay) + 320ms);
+			transition-delay: calc(var(--delay) + 580ms);
 		}
-		:global(.js) .strengths:not([data-revealed]) .strength-rule::after {
-			scale: 0 1;
+		:global(.js) .strengths:not([data-revealed]) .strength-ring circle {
+			stroke-dashoffset: 100;
 		}
 		:global(.js) .strengths:not([data-revealed]) .strength-title,
 		:global(.js) .strengths:not([data-revealed]) .strength-body {
 			opacity: 0;
-			translate: 0 12px;
+			translate: 0 10px;
 		}
 	}
 </style>
