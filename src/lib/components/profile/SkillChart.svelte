@@ -4,6 +4,7 @@
 	import ChartLine from '@lucide/svelte/icons/chart-line';
 	import GitBranch from '@lucide/svelte/icons/git-branch';
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+	import MessageSquareCode from '@lucide/svelte/icons/message-square-code';
 	import Plug from '@lucide/svelte/icons/plug';
 	import Smartphone from '@lucide/svelte/icons/smartphone';
 	import SquareCode from '@lucide/svelte/icons/square-code';
@@ -43,7 +44,8 @@
 		api: Plug,
 		ci: GitBranch,
 		mobile: Smartphone,
-		teach: GraduationCap
+		teach: GraduationCap,
+		review: MessageSquareCode
 	} satisfies Record<SkillIcon, unknown>;
 
 	/**
@@ -85,18 +87,21 @@
 
 	/**
 	 * 左のリスト: skills の全項目。
-	 * core のあるもの（core の順）を先頭に。残りは習熟度の高い順 → 経験年数の長い順
+	 * core のあるもの（core の順）を先頭に。残りは order の順 → 習熟度 → 経験年数の順
 	 */
 	const ranked = $derived(
 		groups
 			.flatMap((g) => g.items)
 			.toSorted(
 				(a, b) =>
-					(a.core ?? Infinity) - (b.core ?? Infinity) || b.level - a.level || b.years - a.years
+					(a.core ?? Infinity) - (b.core ?? Infinity) ||
+					(a.order ?? Infinity) - (b.order ?? Infinity) ||
+					b.level - a.level ||
+					b.years - a.years
 			)
 	);
-	/** 大きく出すのは上位 5 つまで。残りは下に小さく横並び */
-	const TOP = 5;
+	/** 大きく出すのは core のある 6 つまで。残りは下に小さく横並び（order の順） */
+	const TOP = 6;
 	const top = $derived(ranked.slice(0, TOP));
 	const rest = $derived(ranked.slice(TOP));
 

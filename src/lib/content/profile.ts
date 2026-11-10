@@ -12,9 +12,11 @@ export interface Skill {
 	years: number;
 	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
-	/** 大きく表示するスキル。この数字の順にリストの先頭へ並べる（5 つまで） */
+	/** 大きく表示するスキル。この数字の順にリストの先頭へ並べる（6 つまで） */
 	core?: number;
-	/** リストの 6 つ目以降に出す短い名前（省略時は name） */
+	/** 小さく表示するスキルの並び順（core のないもの） */
+	order?: number;
+	/** 小さく表示するときの短い名前（省略時は name） */
 	short?: string;
 	/** 属する領域（レーダーチャートの軸）。リストとチャートのハイライト連動に使う */
 	area?: SkillAreaId | SkillAreaId[];
@@ -39,7 +41,8 @@ export type SkillIcon =
 	| 'api'
 	| 'ci'
 	| 'mobile'
-	| 'teach';
+	| 'teach'
+	| 'review';
 
 export interface SkillGroup {
 	id: string;
@@ -104,6 +107,7 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: 'JavaScript',
+				order: 1,
 				icon: 'js',
 				area: 'frontend',
 				level: 3,
@@ -123,6 +127,7 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
+				order: 5,
 				level: 3,
 				years: 8,
 				works: ['maas-webapp', 'game-anime-site'],
@@ -144,10 +149,11 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: 'GSAP・SVG アニメーション',
+				order: 4,
 				level: 3,
 				years: 5.5,
 				works: ['game-anime-site'],
-				short: 'GSAP・SVG',
+				short: 'GSAP・SVG アニメーション',
 				icon: 'motion',
 				area: 'motion',
 				scope: '演出設計・スクロール連動・SVG アニメーションの実装'
@@ -165,6 +171,8 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: 'データ可視化（Chart.js・地図 API）',
+				order: 3,
+				short: 'データ可視化',
 				level: 3,
 				years: 1,
 				works: ['gov-dashboard'],
@@ -180,6 +188,7 @@ export const skills: SkillGroup[] = [
 		items: [
 			{
 				name: '外部 API との連携',
+				order: 2,
 				icon: 'api',
 				area: 'frontend',
 				level: 2,
@@ -187,40 +196,24 @@ export const skills: SkillGroup[] = [
 				works: ['maas-webapp', 'gov-dashboard']
 			},
 			{
-				name: 'ヘッドレス CMS（microCMS ほか）',
-				level: 3,
-				years: 2.5,
-				works: ['owned-media', 'game-anime-site', 'dev-platform'],
-				short: 'ヘッドレス CMS',
+				name: 'Headless CMS',
+				core: 6,
+				scope: 'microCMS / Kuroco / NILTO の設計・フロント繋ぎ込み',
 				icon: 'cms',
 				area: 'frontend',
-				scope: 'コンテンツモデル設計・API 連携・入稿フローの整備'
-			},
-			{
-				name: '開発基盤の設計・技術選定',
 				level: 3,
-				years: 2,
-				works: ['dev-platform'],
-				short: '開発基盤',
-				icon: 'platform',
-				area: 'platform',
-				scope: '技術選定・GitHub Actions による自動化・運用ルールづくり'
+				years: 2.5,
+				works: ['owned-media', 'game-anime-site', 'dev-platform']
 			},
 			{
 				name: 'GitHub Actions・運用の自動化',
+				order: 6,
+				short: 'GitHub Actions',
 				level: 3,
 				years: 2,
 				works: ['dev-platform'],
 				icon: 'ci',
 				area: 'platform'
-			},
-			{
-				name: '生成 AI の活用（Copilot / ChatGPT / Codex）',
-				icon: 'ai',
-				area: ['platform', 'frontend'],
-				level: 2,
-				years: 2,
-				works: ['dev-platform', 'game-anime-site', 'owned-media']
 			}
 		]
 	},
@@ -242,6 +235,7 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: 'Swift / iOS アプリ開発',
+				order: 7,
 				level: 2,
 				years: 1.5,
 				works: ['ios-app'],
@@ -250,11 +244,21 @@ export const skills: SkillGroup[] = [
 			},
 			{
 				name: '技術教材の制作・研修講師',
+				order: 8,
 				level: 2,
 				years: 1.5,
 				works: ['ios-app'],
 				icon: 'teach',
 				area: 'mentoring'
+			},
+			{
+				name: 'コードレビュー',
+				order: 9,
+				icon: 'review',
+				area: 'management',
+				level: 3,
+				years: 3,
+				works: ['gov-dashboard', 'maas-webapp']
 			}
 		]
 	}
