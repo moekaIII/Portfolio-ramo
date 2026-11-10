@@ -265,11 +265,11 @@
 	/* ラベルが外にはみ出せるよう、チャートの周りに余白を取る */
 	/* 軸の名前が外にはみ出せるよう、チャートの周りに余白を取る（名前は「・」で 2 行に折る） */
 	.radar-wrap {
-		padding: 2.25rem 4.75rem;
+		padding: 1.75rem 4.75rem;
 	}
 	@media (min-width: 48rem) {
 		.radar-wrap {
-			padding: 2.75rem 5.5rem;
+			padding: 2.25rem 5.5rem;
 		}
 	}
 	.radar {
