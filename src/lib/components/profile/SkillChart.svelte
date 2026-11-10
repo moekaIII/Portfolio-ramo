@@ -156,8 +156,13 @@
 							<line x1="0" y1="0" x2={x} y2={y} class:is-active={active === area.id} />
 						{/each}
 					</g>
+				</svg>
 
-					<!-- 領域ごとのバランス -->
+				<!--
+				  領域ごとのバランス。表示時に中心から広がるよう、別の層にして HTML 要素ごと拡大する
+				  （SVG 内の transform-origin はブラウザで基準がずれるため）
+				-->
+				<svg class="radar-layer" viewBox="-50 -50 100 100" focusable="false">
 					<polygon class="radar-shape" points={shape} />
 					{#each areas as area, i (area.id)}
 						{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
@@ -258,7 +263,10 @@
 		stroke: url(#radar-stroke);
 		stroke-width: 0.45;
 		stroke-linejoin: round;
-		transform-box: view-box;
+	}
+	.radar-layer {
+		position: absolute;
+		inset: 0;
 		transform-origin: 50% 50%;
 	}
 	.radar-dot {
@@ -286,20 +294,36 @@
 		}
 	}
 
+	/*
+	  ハイライト（active）のキーカラーは、Hero の花の茎の色（3D の茎テクスチャ・フォールバック SVG と同じ緑）。
+	  ダークは 3D と同じく少し暗くする
+	*/
+	.skill-chart {
+		--stem: #647554;
+		--stem-tint: color-mix(in oklab, var(--stem) 22%, transparent);
+	}
+	:global([data-theme='light']) .skill-chart {
+		--stem: #7a8f66;
+		--stem-tint: color-mix(in oklab, var(--stem) 14%, transparent);
+	}
+
 	/* 対応するリストの行にカーソルがあるとき */
 	.radar-label.is-active {
 		color: var(--fg);
 		text-decoration: underline;
-		text-decoration-color: var(--edge-3);
+		text-decoration-color: var(--stem);
+		text-decoration-thickness: 2px;
 		text-underline-offset: 0.3em;
 	}
 	.radar-grid line.is-active {
-		stroke: url(#radar-stroke);
+		stroke: var(--stem);
 		stroke-opacity: 1;
-		stroke-width: 0.35;
+		stroke-width: 0.4;
 		stroke-dasharray: none;
 	}
 	.radar-dot.is-active {
+		fill: var(--stem);
+		stroke: var(--stem);
 		scale: 1.6;
 	}
 
@@ -317,7 +341,7 @@
 		transition: background-color var(--dur-fast) var(--ease-out);
 	}
 	.skill-row.is-active {
-		background: color-mix(in oklab, var(--surface-2) 60%, transparent);
+		background: var(--stem-tint);
 	}
 	/* アイコンの円。強み・実績と同じグラデーションの縁 */
 	.skill-icon {
@@ -357,7 +381,7 @@
 		transition: background-color var(--dur-fast) var(--ease-out);
 	}
 	.skill-chip.is-active {
-		background: color-mix(in oklab, var(--surface-2) 60%, transparent);
+		background: var(--stem-tint);
 	}
 	.skill-icon.is-sm {
 		width: 1.75rem;
@@ -377,7 +401,7 @@
 		.radar-grid {
 			transition: opacity 700ms var(--ease-out);
 		}
-		.radar-shape {
+		.radar-layer {
 			transition:
 				scale 1100ms var(--ease-out) 300ms,
 				opacity 600ms var(--ease-out) 300ms;
@@ -407,7 +431,7 @@
 		:global(.js) .skill-chart:not([data-revealed]) .radar-grid {
 			opacity: 0;
 		}
-		:global(.js) .skill-chart:not([data-revealed]) .radar-shape {
+		:global(.js) .skill-chart:not([data-revealed]) .radar-layer {
 			scale: 0;
 			opacity: 0;
 		}
