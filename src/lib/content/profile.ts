@@ -70,10 +70,10 @@ export const AREA_MAX = 5;
 /** 領域のスコアの説明（チャートの active 時に、点の横に出す） */
 export const AREA_LEVEL_LABEL: Record<SkillArea['score'], string> = {
 	5: '専門・指導',
-	4: '高度な実務',
-	3: '自走可能',
-	2: '補助が必要',
-	1: '学習中'
+	4: '自走可能',
+	3: '補助が必要',
+	2: '学習中',
+	1: '触れた程度'
 };
 
 export const skillAreas: SkillArea[] = [
