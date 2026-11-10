@@ -115,7 +115,7 @@
   スキルとその領域は、カーソルを合わせると互いにハイライトする。
 -->
 <div class="skill-chart" use:reveal>
-	<div class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
+	<div class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)]">
 		<ol class="skill-list" aria-label="主なスキル（得意な順）">
 			{#each top as skill, i (skill.name)}
 				{@const Icon = ICONS[skill.icon ?? 'markup']}
