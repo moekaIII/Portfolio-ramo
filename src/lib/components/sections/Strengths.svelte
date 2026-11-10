@@ -54,14 +54,14 @@
 		--overlap: 0rem;
 		--gap: 1.25rem;
 		display: grid;
-		gap: 2.5rem;
+		gap: 3.5rem;
 		max-width: 52rem;
 		margin-inline: auto;
 	}
 	@media (min-width: 48rem) {
 		.strengths {
-			--d: 10rem;
-			--overlap: 2rem;
+			--d: 11rem;
+			--overlap: 1.5rem;
 			--gap: 2.5rem;
 			gap: 0;
 		}
@@ -100,7 +100,7 @@
 	}
 	.strength-ring circle {
 		fill: none;
-		/* viewBox 100 に対する太さ（直径 10rem で約 1.4px、スマホ 4.5rem で約 1.1px） */
+		/* viewBox 100 に対する太さ（直径 11rem で約 1.4px、スマホ 4.5rem で約 1.1px） */
 		stroke-width: 1.5;
 		stroke-linecap: round;
 		stroke-dasharray: 100;
@@ -108,7 +108,7 @@
 	}
 	@media (min-width: 48rem) {
 		.strength-ring circle {
-			stroke-width: 0.9;
+			stroke-width: 0.8;
 		}
 	}
 
