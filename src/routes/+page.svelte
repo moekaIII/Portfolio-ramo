@@ -35,7 +35,7 @@
 	<WorksCarousel works={data.works} />
 </Section>
 
-<Section id="strengths" eyebrow="Strengths" title="強み" lead="">
+<Section id="strengths" eyebrow="Core Values" title="強み" lead="">
 	<Strengths />
 </Section>
 
