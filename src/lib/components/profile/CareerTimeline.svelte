@@ -5,16 +5,6 @@
 
 	let { items }: { items: CareerItem[] } = $props();
 
-	/** ドットが点くときに散る粒の色（Hero の花と同じ色味） */
-	const SPARKS = [
-		'var(--edge-1)',
-		'var(--edge-2)',
-		'var(--edge-3)',
-		'var(--accent-text)',
-		'var(--edge-5)',
-		'var(--edge-2)'
-	];
-
 	let root: HTMLOListElement | undefined = $state();
 
 	/**
@@ -100,7 +90,7 @@
 		data-process-line
 		class="absolute top-2 bottom-2 left-[0.6875rem] w-px origin-top bg-accent-text md:left-[calc(25%+0.6875rem)]"
 	></span>
-	{#each items as item (item.period)}
+	{#each items as item, i (item.period)}
 		<li
 			class="relative grid gap-y-3 pb-16 pl-12 last:pb-0 md:grid-cols-4 md:pl-0"
 			data-process-step
@@ -114,11 +104,26 @@
 				data-process-dot
 				class="career-dot absolute top-1.5 left-1.5 size-3 md:left-[calc(25%+0.375rem)]"
 			>
-				<span class="career-dot-ring"></span>
-				{#each SPARKS as c, k (k)}
-					<span class="career-dot-spark" style="--a: {k * (360 / SPARKS.length) + 15}deg; --c: {c}"
-					></span>
-				{/each}
+				<!-- 線が届くと、Hero・強みの丸と同じグラデーションの細い輪が 12 時から一周して描かれる -->
+				<svg class="career-dot-ring" viewBox="0 0 32 32" focusable="false">
+					<defs>
+						<linearGradient id="career-ring-{i}" x1="0" y1="0" x2="1" y2="1">
+							<stop offset="0" style="stop-color: var(--edge-1)" />
+							<stop offset="0.35" style="stop-color: var(--edge-2)" />
+							<stop offset="0.6" style="stop-color: var(--edge-3)" />
+							<stop offset="0.8" style="stop-color: var(--edge-4)" />
+							<stop offset="1" style="stop-color: var(--edge-5)" />
+						</linearGradient>
+					</defs>
+					<circle
+						cx="16"
+						cy="16"
+						r="15"
+						pathLength="100"
+						stroke="url(#career-ring-{i})"
+						transform="rotate(-90 16 16)"
+					/>
+				</svg>
 				<span class="career-dot-core"></span>
 			</span>
 			<div class="md:col-span-3 md:pl-16">
@@ -145,90 +150,56 @@
 </ol>
 
 <style>
-	/* 経歴のドット。未到達は線の丸、線が届くと塗りつぶされて弾む */
+	/*
+	  経歴のドット。未到達は線の丸、線が届くと静かに塗りつぶされ、
+	  周りに細い輪が製図のように一周して描かれる（強みの丸と同じ描き方）
+	*/
 	.career-dot {
 		display: block;
 	}
-	.career-dot > span {
+	.career-dot-core {
 		position: absolute;
 		inset: 0;
-		border-radius: 999px;
-	}
-	.career-dot-core {
 		border: 2px solid var(--accent-text);
+		border-radius: 999px;
 		background: var(--bg);
-		transition: background-color 200ms var(--ease-out);
 	}
 	.career-dot:global(.is-on) .career-dot-core {
 		background: var(--accent-text);
-		scale: 1.25;
 	}
 	.career-dot-ring {
-		border: 1.5px solid var(--accent-text);
-		opacity: 0;
-	}
-	/* 小さな粒。中心から外へ散って消える */
-	.career-dot-spark {
-		inset: auto !important;
+		position: absolute;
 		left: 50%;
 		top: 50%;
-		width: 4px;
-		height: 4px;
-		margin: -2px 0 0 -2px;
-		background: var(--c);
-		opacity: 0;
+		width: 2rem;
+		max-width: none;
+		height: 2rem;
+		translate: -50% -50%;
+		overflow: visible;
+		pointer-events: none;
+	}
+	.career-dot-ring circle {
+		fill: none;
+		stroke-width: 1;
+		stroke-linecap: round;
+		stroke-dasharray: 100;
+		stroke-dashoffset: 100;
+	}
+	.career-dot:global(.is-on) .career-dot-ring circle {
+		stroke-dashoffset: 0;
 	}
 
 	@media (prefers-reduced-motion: no-preference) {
-		/* ぷにっと縮んでから、ぽんっと弾んで落ち着く */
+		.career-dot-core {
+			transition:
+				background-color 400ms var(--ease-out),
+				scale 400ms var(--ease-out);
+		}
 		.career-dot:global(.is-on) .career-dot-core {
-			animation: career-pop 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+			scale: 1.15;
 		}
-		.career-dot:global(.is-on) .career-dot-ring {
-			animation: career-ring 900ms var(--ease-out) 80ms both;
-		}
-		.career-dot:global(.is-on) .career-dot-spark {
-			animation: career-spark 800ms var(--ease-out) 60ms both;
-		}
-	}
-	@keyframes career-pop {
-		0% {
-			scale: 1;
-		}
-		20% {
-			scale: 0.7;
-		}
-		55% {
-			scale: 1.6;
-		}
-		75% {
-			scale: 1.1;
-		}
-		100% {
-			scale: 1.25;
-		}
-	}
-	@keyframes career-ring {
-		0% {
-			opacity: 0.7;
-			scale: 1;
-		}
-		100% {
-			opacity: 0;
-			scale: 3.2;
-		}
-	}
-	@keyframes career-spark {
-		0% {
-			opacity: 0;
-			transform: rotate(var(--a)) translateX(0) scale(0.4);
-		}
-		25% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-			transform: rotate(var(--a)) translateX(1.4rem) scale(1);
+		.career-dot-ring circle {
+			transition: stroke-dashoffset 900ms var(--ease-in-out) 120ms;
 		}
 	}
 </style>

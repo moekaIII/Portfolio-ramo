@@ -23,7 +23,7 @@
 					href="#{s.id}"
 					onclick={(e) => go(e, s.id)}
 					aria-current={current ? 'location' : undefined}
-					class="relative inline-flex h-11 items-center rounded-pill px-4 text-sm text-fg-muted transition-colors hover:text-fg aria-[current=location]:text-fg"
+					class="relative inline-flex h-11 items-center rounded-pill px-4 text-sm font-medium text-fg-muted transition-colors hover:text-fg aria-[current=location]:text-fg"
 				>
 					{s.label}
 					<span
