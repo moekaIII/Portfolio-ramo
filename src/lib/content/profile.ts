@@ -12,10 +12,12 @@ export interface Skill {
 	years: number;
 	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
-	/** 主軸スキル。レーダーチャートの軸に、この数字の順（上から時計回り）で並べる */
+	/** 主軸スキル。左のリストに出す（同じ習熟度のときは、この数字の順） */
 	core?: number;
-	/** レーダーチャートの軸に出す短い名前（省略時は name） */
+	/** リストの 6 つ目以降に出す短い名前（省略時は name） */
 	short?: string;
+	/** 属する領域（レーダーチャートの軸）。リストとチャートのハイライト連動に使う */
+	area?: SkillAreaId;
 	/** 主軸スキルのリストに出すアイコン */
 	icon?: SkillIcon;
 	/** 主軸スキルのリストに出す担当範囲 */
@@ -37,6 +39,28 @@ export const LEVEL_LABEL: Record<SkillLevel, string> = {
 	2: '実務で自走',
 	3: 'リード・設計可能'
 };
+
+export type SkillAreaId =
+	'frontend' | 'motion' | 'platform' | 'management' | 'mentoring' | 'design';
+
+/** 領域ごとのバランス（レーダーチャートの軸。上から時計回りにこの順で並ぶ） */
+export interface SkillArea {
+	id: SkillAreaId;
+	label: string;
+	/** 1〜5。外側ほど得意 */
+	score: 1 | 2 | 3 | 4 | 5;
+}
+
+export const AREA_MAX = 5;
+
+export const skillAreas: SkillArea[] = [
+	{ id: 'frontend', label: 'フロントエンド実装', score: 5 },
+	{ id: 'motion', label: '演出・アニメーション', score: 4 },
+	{ id: 'platform', label: '開発基盤・自動化', score: 4 },
+	{ id: 'management', label: 'マネジメント', score: 3 },
+	{ id: 'mentoring', label: '育成・教材', score: 3 },
+	{ id: 'design', label: 'UI/UX デザイン', score: 3 }
+];
 
 export const skills: SkillGroup[] = [
 	{
@@ -64,6 +88,7 @@ export const skills: SkillGroup[] = [
 				core: 3,
 				short: 'TypeScript',
 				icon: 'ts',
+				area: 'frontend',
 				scope: '型設計・API レスポンスの型付け・既存 JS の移行'
 			},
 			{
@@ -74,6 +99,7 @@ export const skills: SkillGroup[] = [
 				core: 5,
 				short: 'HTML / CSS',
 				icon: 'markup',
+				area: 'frontend',
 				scope: 'ピクセルパーフェクト・完全レスポンシブ・WCAG AA 対応'
 			},
 			{
@@ -84,6 +110,7 @@ export const skills: SkillGroup[] = [
 				core: 1,
 				short: 'Svelte',
 				icon: 'svelte',
+				area: 'frontend',
 				scope: 'チームへの導入提案・共通コンポーネント設計・SSG 構築'
 			},
 			{
@@ -94,6 +121,7 @@ export const skills: SkillGroup[] = [
 				core: 4,
 				short: 'GSAP・SVG',
 				icon: 'motion',
+				area: 'motion',
 				scope: '演出設計・スクロール連動・SVG アニメーションの実装'
 			},
 			{
@@ -104,6 +132,7 @@ export const skills: SkillGroup[] = [
 				core: 2,
 				short: 'Vue.js',
 				icon: 'vue',
+				area: 'frontend',
 				scope: '業務アプリの画面実装・Pinia による状態管理'
 			},
 			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
@@ -128,6 +157,7 @@ export const skills: SkillGroup[] = [
 				core: 6,
 				short: 'ヘッドレス CMS',
 				icon: 'cms',
+				area: 'frontend',
 				scope: 'コンテンツモデル設計・API 連携・入稿フローの整備'
 			},
 			{
@@ -138,6 +168,7 @@ export const skills: SkillGroup[] = [
 				core: 7,
 				short: '開発基盤',
 				icon: 'platform',
+				area: 'platform',
 				scope: '技術選定・GitHub Actions による自動化・運用ルールづくり'
 			},
 			{ name: 'GitHub Actions・運用の自動化', level: 3, years: 2, works: ['dev-platform'] },
@@ -162,6 +193,7 @@ export const skills: SkillGroup[] = [
 				core: 8,
 				short: 'UI/UX',
 				icon: 'design',
+				area: 'design',
 				scope: '画面設計・ワイヤーフレーム・プロトタイプ作成'
 			},
 			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },

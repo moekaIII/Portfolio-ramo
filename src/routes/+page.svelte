@@ -8,7 +8,7 @@
 	import SkillChart from '#lib/components/profile/SkillChart.svelte';
 	import CareerTimeline from '#lib/components/profile/CareerTimeline.svelte';
 	import WorksCarousel from '#lib/components/works/WorksCarousel.svelte';
-	import { career, skills } from '#lib/content/profile.ts';
+	import { career, skillAreas, skills } from '#lib/content/profile.ts';
 	import { activeSection } from '#lib/state/active-section.svelte.ts';
 	import { personJsonLd, professionalServiceJsonLd, worksJsonLd } from '#lib/utils/jsonld.ts';
 	import type { PageProps } from './$types';
@@ -42,7 +42,7 @@
 <Section id="skills" eyebrow="Skills" title="スキル" lead="" tone="surface">
 	<!-- <Glance /> -->
 	<div class="mt-14">
-		<SkillChart groups={skills} />
+		<SkillChart groups={skills} areas={skillAreas} />
 	</div>
 </Section>
 

@@ -9,13 +9,16 @@
 	import Workflow from '@lucide/svelte/icons/workflow';
 	import { reveal } from '#lib/actions/reveal.ts';
 	import {
+		AREA_MAX,
 		LEVEL_LABEL,
 		type Skill,
+		type SkillArea,
+		type SkillAreaId,
 		type SkillGroup,
 		type SkillIcon
 	} from '#lib/content/profile.ts';
 
-	let { groups }: { groups: SkillGroup[] } = $props();
+	let { groups, areas }: { groups: SkillGroup[]; areas: SkillArea[] } = $props();
 
 	const ICONS = {
 		svelte: Flame,
@@ -28,45 +31,38 @@
 		design: PenTool
 	} satisfies Record<SkillIcon, unknown>;
 
-	/** リストとチャートで、いまカーソルが乗っている主軸スキル */
-	let active: string | null = $state(null);
+	/** いまカーソルが乗っている領域。リストの行とチャートの軸が連動してハイライトする */
+	let active: SkillAreaId | null = $state(null);
+	const on = (area: SkillAreaId | undefined) => () => (active = area ?? null);
+	const off = () => (active = null);
 
-	/** レーダーの軸 = 主軸スキル（core の順に、上から時計回り） */
-	const axes = $derived(
+	/** 左のリスト: 主軸スキルを得意な順に（習熟度の高い順、同じなら core の順） */
+	const ranked = $derived(
 		groups
 			.flatMap((g) => g.items)
 			.filter((s): s is Skill & { core: number } => s.core !== undefined)
-			.toSorted((a, b) => a.core - b.core)
+			.toSorted((a, b) => b.level - a.level || a.core - b.core)
 	);
-	/** 左のリスト: 得意な順（習熟度の高い順、同じなら軸の順） */
-	const ranked = $derived(axes.toSorted((a, b) => b.level - a.level || a.core - b.core));
-	/** リストに大きく出すのは上位 5 つまで。残りは下に小さく横並び */
+	/** 大きく出すのは上位 5 つまで。残りは下に小さく横並び */
 	const TOP = 5;
 	const top = $derived(ranked.slice(0, TOP));
 	const rest = $derived(ranked.slice(TOP));
 
-	// viewBox は中心が原点の -50〜50。1 単位 = 箱の 1%
-	const R = 40; // 外周（= 習熟度 3）
+	// レーダー: 軸 = 領域（上から時計回り）。viewBox は中心が原点の -50〜50
+	const R = 40; // 外周（= AREA_MAX）
 	const LABEL_R = 46;
-	const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+	const angle = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / areas.length;
 	const pt = (i: number, r: number) => [r * Math.cos(angle(i)), r * Math.sin(angle(i))] as const;
-	const ring = (r: number) =>
-		axes
+	const poly = (radius: (i: number) => number) =>
+		areas
 			.map((_, i) =>
-				pt(i, r)
+				pt(i, radius(i))
 					.map((v) => v.toFixed(2))
 					.join(',')
 			)
 			.join(' ');
-	const shape = $derived(
-		axes
-			.map((s, i) =>
-				pt(i, (R * s.level) / 3)
-					.map((v) => v.toFixed(2))
-					.join(',')
-			)
-			.join(' ')
-	);
+	const rings = Array.from({ length: AREA_MAX }, (_, k) => k + 1);
+	const shape = $derived(poly((i) => (R * areas[i].score) / AREA_MAX));
 
 	/** ラベルの置き方（円の外側へ寄せる） */
 	function labelStyle(i: number) {
@@ -75,70 +71,47 @@
 		const s = Math.sin(angle(i));
 		const tx = Math.abs(c) < 0.3 ? '-50%' : c > 0 ? '0%' : '-100%';
 		const ty = Math.abs(s) < 0.3 ? '-50%' : s > 0 ? '0%' : '-100%';
-		return `left: ${50 + x}%; top: ${50 + y}%; translate: ${tx} ${ty}; --i: ${i}`;
+		const align = Math.abs(c) < 0.3 ? 'center' : c > 0 ? 'left' : 'right';
+		return `left: ${50 + x}%; top: ${50 + y}%; translate: ${tx} ${ty}; text-align: ${align}; --i: ${i}`;
 	}
 	const fmt = (y: number) => (y < 1 ? '1年未満' : `${y}年`);
 </script>
 
 <!--
-  スキル。左に得意な順のリスト（アイコン・名前・担当範囲・経験年数）、右にレーダーチャート。
-  レーダーは外側ほど習熟度が高い（3 段階）。細い補助線は Hero の設計図、
-  グラデーションの線は実績カード・強みの円と同じトーン。
-  リストの行とチャートの軸は、カーソルを合わせると互いにハイライトする。
+  スキル。左に詳細なスキルを得意な順に（アイコン・名前・担当範囲・経験年数）、
+  右に大きな領域ごとのバランスをレーダーチャートで。
+  細い補助線は Hero の設計図、グラデーションの線は実績カード・強みの円と同じトーン。
+  スキルとその領域は、カーソルを合わせると互いにハイライトする。
 -->
 <div class="skill-chart" use:reveal>
-	<div class="grid items-center gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
-		<div>
-			<ol class="skill-list" aria-label="主軸スキル（得意な順）">
-				{#each top as skill, i (skill.name)}
-					{@const Icon = ICONS[skill.icon ?? 'markup']}
-					<li
-						class="skill-row"
-						class:is-active={active === skill.name}
-						style="--i: {i}"
-						onpointerenter={() => (active = skill.name)}
-						onpointerleave={() => (active = null)}
-					>
-						<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
-						<div class="min-w-0">
-							<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
-							{#if skill.scope}
-								<p class="mt-1 text-sm leading-relaxed text-fg-muted">{skill.scope}</p>
-							{/if}
-							<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}</span>
-						</div>
-						<p class="skill-years">
-							<span class="sr-only">経験</span>{fmt(skill.years)}
-						</p>
-					</li>
-				{/each}
-			</ol>
+	<div class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
+		<ol class="skill-list" aria-label="主なスキル（得意な順）">
+			{#each top as skill, i (skill.name)}
+				{@const Icon = ICONS[skill.icon ?? 'markup']}
+				<li
+					class="skill-row"
+					class:is-active={active !== null && skill.area === active}
+					style="--i: {i}"
+					onpointerenter={on(skill.area)}
+					onpointerleave={off}
+				>
+					<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
+					<div class="min-w-0">
+						<h3 class="text-base leading-snug font-semibold">{skill.name}</h3>
+						{#if skill.scope}
+							<p class="mt-1 text-sm leading-relaxed text-fg-muted">{skill.scope}</p>
+						{/if}
+						<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}</span>
+					</div>
+					<p class="skill-years">
+						<span class="sr-only">経験</span>{fmt(skill.years)}
+					</p>
+				</li>
+			{/each}
+		</ol>
 
-			{#if rest.length}
-				<ul class="skill-rest" aria-label="そのほかの主軸スキル">
-					{#each rest as skill, i (skill.name)}
-						{@const Icon = ICONS[skill.icon ?? 'markup']}
-						<li
-							class="skill-chip"
-							class:is-active={active === skill.name}
-							style="--i: {TOP + i}"
-							onpointerenter={() => (active = skill.name)}
-							onpointerleave={() => (active = null)}
-						>
-							<span class="skill-icon is-sm" aria-hidden="true"
-								><Icon size={14} strokeWidth={1.6} /></span
-							>
-							<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
-							<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}、経験</span>
-							<span class="skill-years text-xs">{fmt(skill.years)}</span>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</div>
-
-		<div class="radar-wrap" aria-hidden="true">
-			<div class="radar">
+		<figure class="radar-wrap">
+			<div class="radar" aria-hidden="true">
 				<svg viewBox="-50 -50 100 100" focusable="false">
 					<defs>
 						<linearGradient id="radar-stroke" x1="0" y1="0" x2="1" y2="1">
@@ -155,24 +128,24 @@
 						</radialGradient>
 					</defs>
 
-					<!-- 設計図の補助線: 3 段階の輪と、中心からの軸 -->
+					<!-- 設計図の補助線: 段階ごとの輪と、中心からの軸 -->
 					<g class="radar-grid">
-						{#each [1, 2, 3] as l (l)}
-							<polygon points={ring((R * l) / 3)} />
+						{#each rings as l (l)}
+							<polygon points={poly(() => (R * l) / AREA_MAX)} />
 						{/each}
-						{#each axes as skill, i (skill.name)}
+						{#each areas as area, i (area.id)}
 							{@const [x, y] = pt(i, R)}
-							<line x1="0" y1="0" x2={x} y2={y} class:is-active={active === skill.name} />
+							<line x1="0" y1="0" x2={x} y2={y} class:is-active={active === area.id} />
 						{/each}
 					</g>
 
-					<!-- 習熟度の形 -->
+					<!-- 領域ごとのバランス -->
 					<polygon class="radar-shape" points={shape} />
-					{#each axes as skill, i (skill.name)}
-						{@const [x, y] = pt(i, (R * skill.level) / 3)}
+					{#each areas as area, i (area.id)}
+						{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
 						<circle
 							class="radar-dot"
-							class:is-active={active === skill.name}
+							class:is-active={active === area.id}
 							cx={x}
 							cy={y}
 							r="1.1"
@@ -181,38 +154,64 @@
 					{/each}
 				</svg>
 
-				{#each axes as skill, i (skill.name)}
-					<!-- 見た目だけの連動（チャートごと aria-hidden。同じ内容は左のリストにある） -->
+				{#each areas as area, i (area.id)}
+					<!-- 見た目だけの連動（チャートごと aria-hidden。同じ内容は下の読み上げ用リストにある） -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<span
 						class="radar-label"
-						class:is-active={active === skill.name}
+						class:is-active={active === area.id}
 						style={labelStyle(i)}
-						onpointerenter={() => (active = skill.name)}
-						onpointerleave={() => (active = null)}>{skill.short ?? skill.name}</span
-					>
-				{/each}
-
-				<!-- 輪の目盛り（上の軸に沿って、内側から 基礎 → 実務で自走 → リード・設計可能） -->
-				{#each [1, 2, 3] as l (l)}
-					<span class="radar-scale" style="left: calc(50% + 0.5rem); top: {50 - (R * l) / 3}%"
-						>{LEVEL_LABEL[l as 1 | 2 | 3]}</span
+						onpointerenter={on(area.id)}
+						onpointerleave={off}
+						>{#each area.label.split('・') as part, k (k)}<span class="block"
+								>{part}{#if k < area.label.split('・').length - 1}・{/if}</span
+							>{/each}</span
 					>
 				{/each}
 			</div>
-			<p class="mt-6 text-center text-xs text-fg-muted">外側ほど習熟度が高い（3 段階）</p>
-		</div>
+			<figcaption class="mt-6 text-center text-xs text-fg-muted">
+				外側ほど得意
+				<ul class="sr-only">
+					{#each areas as area (area.id)}
+						<li>{area.label}: {AREA_MAX} 段階中 {area.score}</li>
+					{/each}
+				</ul>
+			</figcaption>
+		</figure>
 	</div>
+
+	{#if rest.length}
+		<ul class="skill-rest" aria-label="そのほかのスキル">
+			{#each rest as skill, i (skill.name)}
+				{@const Icon = ICONS[skill.icon ?? 'markup']}
+				<li
+					class="skill-chip"
+					class:is-active={active !== null && skill.area === active}
+					style="--i: {TOP + i}"
+					onpointerenter={on(skill.area)}
+					onpointerleave={off}
+				>
+					<span class="skill-icon is-sm" aria-hidden="true"
+						><Icon size={14} strokeWidth={1.6} /></span
+					>
+					<span class="text-sm font-semibold">{skill.short ?? skill.name}</span>
+					<span class="sr-only">習熟度: {LEVEL_LABEL[skill.level]}、経験</span>
+					<span class="skill-years text-xs">{fmt(skill.years)}</span>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style>
 	/* ラベルが外にはみ出せるよう、チャートの周りに余白を取る */
+	/* 軸の名前が外にはみ出せるよう、チャートの周りに余白を取る（名前は「・」で 2 行に折る） */
 	.radar-wrap {
-		padding: 1.75rem 4rem;
+		padding: 2.25rem 4.75rem;
 	}
 	@media (min-width: 48rem) {
 		.radar-wrap {
-			padding: 2.25rem 4.5rem;
+			padding: 2.75rem 5.5rem;
 		}
 	}
 	.radar {
@@ -328,7 +327,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem 1.75rem;
-		margin-top: 1.5rem;
+		margin-top: 2rem;
 		padding-inline: 0.25rem;
 	}
 	.skill-chip {
@@ -355,21 +354,6 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	/* 輪の目盛り。上の軸の右に小さく */
-	.radar-scale {
-		position: absolute;
-		translate: 0 -115%;
-		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
-		background: color-mix(in oklab, var(--bg) 85%, transparent);
-		font-family: var(--font-terminal);
-		font-size: 0.625rem;
-		line-height: 1;
-		color: var(--fg-muted);
-		white-space: nowrap;
-		pointer-events: none;
-	}
-
 	/* 画面に入ったら: 補助線 → 形が中心から広がる → 頂点が順に灯る */
 	@media (prefers-reduced-motion: no-preference) {
 		.radar-grid {
@@ -386,9 +370,6 @@
 		:global(.js) .skill-chart:global([data-revealed]) .radar-dot {
 			transition-delay: 0s;
 			transition-duration: 300ms;
-		}
-		.radar-scale {
-			transition: opacity 600ms var(--ease-out) 300ms;
 		}
 		.radar-label {
 			transition: opacity 600ms var(--ease-out) calc(500ms + var(--i) * 60ms);
@@ -415,7 +396,6 @@
 		:global(.js) .skill-chart:not([data-revealed]) .radar-dot {
 			scale: 0;
 		}
-		:global(.js) .skill-chart:not([data-revealed]) .radar-scale,
 		:global(.js) .skill-chart:not([data-revealed]) .radar-label {
 			opacity: 0;
 		}
