@@ -67,6 +67,15 @@ export interface SkillArea {
 
 export const AREA_MAX = 5;
 
+/** 領域のスコアの説明（チャートの active 時に、点の横に出す） */
+export const AREA_LEVEL_LABEL: Record<SkillArea['score'], string> = {
+	5: '専門・指導',
+	4: '高度な実務',
+	3: '自走可能',
+	2: '補助が必要',
+	1: '学習中'
+};
+
 export const skillAreas: SkillArea[] = [
 	{ id: 'frontend', label: 'フロントエンド実装', score: 5 },
 	{ id: 'motion', label: '演出・アニメーション', score: 4 },

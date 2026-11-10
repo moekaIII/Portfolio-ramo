@@ -16,6 +16,7 @@
 	import Workflow from '@lucide/svelte/icons/workflow';
 	import { reveal } from '#lib/actions/reveal.ts';
 	import {
+		AREA_LEVEL_LABEL,
 		AREA_MAX,
 		LEVEL_LABEL,
 		type SkillArea,
@@ -199,12 +200,25 @@
 							>{/each}</span
 					>
 				{/each}
+
+				<!-- active の点の右横に、スコアの説明 -->
+				{#each areas as area, i (area.id)}
+					{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
+					<span
+						class="radar-level"
+						class:is-active={active === area.id}
+						style="left: {50 + x}%; top: {50 + y}%"
+						>Lv.{area.score} {AREA_LEVEL_LABEL[area.score]}</span
+					>
+				{/each}
 			</div>
-			<figcaption class="mt-6 text-center text-xs text-fg-muted">
-				外側ほど得意
-				<ul class="sr-only">
+			<figcaption class="sr-only">
+				領域ごとのバランス
+				<ul>
 					{#each areas as area (area.id)}
-						<li>{area.label}: {AREA_MAX} 段階中 {area.score}</li>
+						<li>
+							{area.label}: {AREA_MAX} 段階中 {area.score}（{AREA_LEVEL_LABEL[area.score]}）
+						</li>
 					{/each}
 				</ul>
 			</figcaption>
@@ -329,6 +343,31 @@
 		stroke-width: 0.4;
 		stroke-dasharray: none;
 	}
+	/* active の点の右横に出す、スコアの説明 */
+	.radar-level {
+		position: absolute;
+		z-index: 2;
+		translate: 0.875rem -50%;
+		padding: 0.25rem 0.5rem;
+		border: 1px solid color-mix(in oklab, var(--stem) 55%, transparent);
+		border-radius: 999px;
+		background: var(--bg);
+		font-family: var(--font-terminal);
+		font-size: 0.6875rem;
+		line-height: 1.2;
+		color: var(--fg);
+		white-space: nowrap;
+		pointer-events: none;
+		opacity: 0;
+		transition:
+			opacity var(--dur-fast) var(--ease-out),
+			translate var(--dur-fast) var(--ease-out);
+	}
+	.radar-level.is-active {
+		opacity: 1;
+		translate: 1.125rem -50%;
+	}
+
 	/* active の頂点: 波紋が繰り返し広がり、点は少し弾んで大きくなる */
 	.radar-pulse {
 		fill: none;
