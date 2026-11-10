@@ -97,9 +97,9 @@ export const skills: SkillGroup[] = [
 				name: '生成AI（Copilot / ChatGPT / Codex）',
 				core: 2,
 				short: '生成AI',
-				scope: 'コード生成・レビュー補助・ドキュメント作成で開発を効率化',
+				scope: '設計・コード生成・レビュー補助・ドキュメント作成に使用',
 				icon: 'ai',
-				area: ['ai', 'frontend', 'platform'],
+				area: ['ai'],
 				level: 2,
 				years: 4,
 				works: ['game-anime-site', 'dev-platform', 'owned-media']
@@ -122,7 +122,7 @@ export const skills: SkillGroup[] = [
 				short: 'TypeScript',
 				icon: 'ts',
 				area: 'frontend',
-				scope: '型設計・API レスポンスの型付け・既存 JS の移行'
+				scope: '型設計・既存 JS の移行'
 			},
 			{
 				name: 'HTML / CSS・アクセシビリティ',
@@ -133,7 +133,7 @@ export const skills: SkillGroup[] = [
 				short: 'HTML / CSS',
 				icon: 'markup',
 				area: 'frontend',
-				scope: 'ピクセルパーフェクト・完全レスポンシブ・WCAG AA 対応'
+				scope: 'ピクセルパーフェクト・完全レスポンシブ・アクセシビリティ強化'
 			},
 			{
 				name: 'Svelte / SvelteKit',
@@ -144,7 +144,7 @@ export const skills: SkillGroup[] = [
 				short: 'Svelte',
 				icon: 'svelte',
 				area: 'frontend',
-				scope: 'チームへの導入提案・共通コンポーネント設計・SSG 構築'
+				scope: 'チームの開発基盤 / Webサイト / Webアプリケーションの実装'
 			},
 			{
 				name: 'GSAP・SVG アニメーション',
@@ -155,7 +155,7 @@ export const skills: SkillGroup[] = [
 				short: 'GSAP・SVG アニメーション',
 				icon: 'motion',
 				area: 'frontend',
-				scope: '演出設計・スクロール連動・SVG アニメーションの実装'
+				scope: '演出設計・スクロール連動・高度なSVG アニメーションの実装'
 			},
 			{
 				name: 'Vue.js / Pinia',
@@ -166,12 +166,12 @@ export const skills: SkillGroup[] = [
 				short: 'Vue.js',
 				icon: 'vue',
 				area: 'frontend',
-				scope: '業務アプリの画面実装・Pinia による状態管理'
+				scope: 'Webアプリケーションの画面実装・Pinia による状態管理'
 			},
 			{
 				name: 'データ可視化（Chart.js・地図 API）',
 				order: 3,
-				short: 'データ可視化',
+				short: 'データ可視化（Chart.js・地図 API）',
 				level: 3,
 				years: 1,
 				works: ['gov-dashboard'],
@@ -230,7 +230,7 @@ export const skills: SkillGroup[] = [
 				short: 'UI/UX',
 				icon: 'design',
 				area: 'design',
-				scope: '画面設計・ワイヤーフレーム・プロトタイプ作成'
+				scope: '画面設計・ワイヤーフレーム・プロトタイプ・画面デザイン作成'
 			},
 			{
 				name: 'Swift / iOS アプリ開発',
@@ -282,7 +282,7 @@ export interface CareerItem {
 
 export const career: CareerItem[] = [
 	{
-		period: '2024.02 — 2026.06',
+		period: '2024.01 — 現在',
 		title: 'フロントエンドエンジニア',
 		org: 'フリーランス・個人事業主',
 		summary:
@@ -320,7 +320,7 @@ export const career: CareerItem[] = [
 		stack: ['Vue.js', 'JavaScript', 'TypeScript', 'Sass', 'Pug', 'GSAP']
 	},
 	{
-		period: '2019.05 — 2020.09',
+		period: '2019.08 — 2020.09',
 		title: 'iOS エンジニア / 教材制作',
 		org: 'iOS アプリ開発・研修事業',
 		summary: 'iOS アプリの企画・開発と、Swift の学習教材の制作を担当しました。',
