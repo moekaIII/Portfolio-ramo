@@ -17,7 +17,7 @@ export interface Skill {
 	/** リストの 6 つ目以降に出す短い名前（省略時は name） */
 	short?: string;
 	/** 属する領域（レーダーチャートの軸）。リストとチャートのハイライト連動に使う */
-	area?: SkillAreaId;
+	area?: SkillAreaId | SkillAreaId[];
 	/** 主軸スキルのリストに出すアイコン */
 	icon?: SkillIcon;
 	/** 主軸スキルのリストに出す担当範囲 */
@@ -82,7 +82,7 @@ export const skillAreas: SkillArea[] = [
 	{ id: 'platform', label: '開発基盤・自動化', score: 4 },
 	{ id: 'management', label: 'マネジメント', score: 3 },
 	{ id: 'mentoring', label: '育成・教材', score: 3 },
-	{ id: 'design', label: 'UI/UX デザイン', score: 3 }
+	{ id: 'design', label: 'UI/UX デザイン', score: 4 }
 ];
 
 export const skills: SkillGroup[] = [
@@ -97,7 +97,7 @@ export const skills: SkillGroup[] = [
 				short: '生成AI',
 				scope: 'コード生成・レビュー補助・ドキュメント作成で開発を効率化',
 				icon: 'ai',
-				area: 'platform',
+				area: ['platform', 'frontend'],
 				level: 2,
 				years: 4,
 				works: ['game-anime-site', 'dev-platform', 'owned-media']
@@ -217,7 +217,7 @@ export const skills: SkillGroup[] = [
 			{
 				name: '生成 AI の活用（Copilot / ChatGPT / Codex）',
 				icon: 'ai',
-				area: 'platform',
+				area: ['platform', 'frontend'],
 				level: 2,
 				years: 2,
 				works: ['dev-platform', 'game-anime-site', 'owned-media']

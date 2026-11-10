@@ -21,6 +21,7 @@
 		LEVEL_LABEL,
 		type SkillArea,
 		type SkillAreaId,
+		type Skill,
 		type SkillGroup,
 		type SkillIcon
 	} from '#lib/content/profile.ts';
@@ -45,11 +46,31 @@
 		teach: GraduationCap
 	} satisfies Record<SkillIcon, unknown>;
 
-	/** いまカーソルが乗っている領域。リストの行とチャートの軸が連動してハイライトする */
-	let active: SkillAreaId | null = $state(null);
+	/**
+	 * いま active なもの。スキル（行）か、領域（チャートの軸）のどちらか。
+	 * - スキルが active: その行と、属する領域の軸（複数可）がハイライト
+	 * - 領域が active: その軸と、その領域に属するスキルがすべてハイライト
+	 */
+	type Target = { skill: string } | { area: SkillAreaId };
+	let active: Target | null = $state(null);
+	const areasOf = (s: Skill): SkillAreaId[] => (s.area === undefined ? [] : [s.area].flat());
+	const skillOn = (s: Skill) =>
+		active !== null &&
+		('skill' in active ? active.skill === s.name : areasOf(s).includes(active.area));
+	/** active なスキルが属する領域（領域が active ならその 1 つ） */
+	const activeAreas = $derived.by((): SkillAreaId[] => {
+		if (active === null) return [];
+		if ('area' in active) return [active.area];
+		const name = active.skill;
+		const skill = ranked.find((s) => s.name === name);
+		return skill ? areasOf(skill) : [];
+	});
+	const areaOn = (id: SkillAreaId) => activeAreas.includes(id);
+	const same = (a: Target | null, b: Target) => JSON.stringify(a) === JSON.stringify(b);
+
 	// マウスはホバーで、タッチ（SP）はタップで active を切り替える
-	const on = (area: SkillAreaId | undefined) => (e: PointerEvent) => {
-		if (e.pointerType === 'mouse') active = area ?? null;
+	const on = (t: Target) => (e: PointerEvent) => {
+		if (e.pointerType === 'mouse') active = t;
 	};
 	const off = (e: PointerEvent) => {
 		if (e.pointerType === 'mouse') active = null;
@@ -57,9 +78,9 @@
 	/** 直前の操作がマウスか（click には pointerType が付かないブラウザがあるため、pointerdown で覚える） */
 	let mouse = false;
 	const down = (e: PointerEvent) => (mouse = e.pointerType === 'mouse');
-	const tap = (area: SkillAreaId | undefined) => () => {
-		if (mouse || !area) return;
-		active = active === area ? null : area;
+	const tap = (t: Target) => () => {
+		if (mouse) return;
+		active = same(active, t) ? null : t;
 	};
 
 	/**
@@ -123,12 +144,12 @@
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
 					class="skill-row"
-					class:is-active={active !== null && skill.area === active}
+					class:is-active={skillOn(skill)}
 					style="--i: {i}"
-					onpointerenter={on(skill.area)}
+					onpointerenter={on({ skill: skill.name })}
 					onpointerleave={off}
 					onpointerdown={down}
-					onclick={tap(skill.area)}
+					onclick={tap({ skill: skill.name })}
 				>
 					<span class="skill-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.6} /></span>
 					<div class="min-w-0">
@@ -171,7 +192,7 @@
 						{/each}
 						{#each areas as area, i (area.id)}
 							{@const [x, y] = pt(i, R)}
-							<line x1="0" y1="0" x2={x} y2={y} class:is-active={active === area.id} />
+							<line x1="0" y1="0" x2={x} y2={y} class:is-active={areaOn(area.id)} />
 						{/each}
 					</g>
 				</svg>
@@ -185,16 +206,10 @@
 					{#each areas as area, i (area.id)}
 						{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
 						<!-- active 時に頂点から広がる波紋 -->
-						<circle
-							class="radar-pulse"
-							class:is-active={active === area.id}
-							cx={x}
-							cy={y}
-							r="1.1"
-						/>
+						<circle class="radar-pulse" class:is-active={areaOn(area.id)} cx={x} cy={y} r="1.1" />
 						<circle
 							class="radar-dot"
-							class:is-active={active === area.id}
+							class:is-active={areaOn(area.id)}
 							cx={x}
 							cy={y}
 							r="1.1"
@@ -208,12 +223,12 @@
 					<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 					<span
 						class="radar-label"
-						class:is-active={active === area.id}
+						class:is-active={areaOn(area.id)}
 						style={labelStyle(i)}
-						onpointerenter={on(area.id)}
+						onpointerenter={on({ area: area.id })}
 						onpointerleave={off}
 						onpointerdown={down}
-						onclick={tap(area.id)}
+						onclick={tap({ area: area.id })}
 						>{#each area.label.split('・') as part, k (k)}<span class="block"
 								>{part}{#if k < area.label.split('・').length - 1}・{/if}</span
 							>{/each}</span
@@ -225,7 +240,7 @@
 					{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
 					<span
 						class="radar-level"
-						class:is-active={active === area.id}
+						class:is-active={areaOn(area.id)}
 						style="left: {50 + x}%; top: {50 + y}%"
 						>Lv.{area.score} {AREA_LEVEL_LABEL[area.score]}</span
 					>
@@ -251,12 +266,12 @@
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<li
 					class="skill-chip"
-					class:is-active={active !== null && skill.area === active}
+					class:is-active={skillOn(skill)}
 					style="--i: {TOP + i}"
-					onpointerenter={on(skill.area)}
+					onpointerenter={on({ skill: skill.name })}
 					onpointerleave={off}
 					onpointerdown={down}
-					onclick={tap(skill.area)}
+					onclick={tap({ skill: skill.name })}
 				>
 					<span class="skill-icon is-sm" aria-hidden="true"
 						><Icon size={14} strokeWidth={1.6} /></span
