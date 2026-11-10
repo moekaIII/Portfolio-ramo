@@ -141,7 +141,9 @@
   スキルとその領域は、カーソルを合わせると互いにハイライトする。
 -->
 <div class="skill-chart" use:reveal>
-	<div class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)]">
+	<div
+		class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,42rem)]"
+	>
 		<ol class="skill-list" aria-label="主なスキル（得意な順）">
 			{#each top as skill, i (skill.name)}
 				{@const Icon = ICONS[skill.icon ?? 'markup']}
@@ -211,13 +213,13 @@
 					{#each areas as area, i (area.id)}
 						{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
 						<!-- active 時に頂点から広がる波紋 -->
-						<circle class="radar-pulse" class:is-active={areaOn(area.id)} cx={x} cy={y} r="1.1" />
+						<circle class="radar-pulse" class:is-active={areaOn(area.id)} cx={x} cy={y} r="0.9" />
 						<circle
 							class="radar-dot"
 							class:is-active={areaOn(area.id)}
 							cx={x}
 							cy={y}
-							r="1.1"
+							r="0.9"
 							style="--i: {i}"
 						/>
 					{/each}
@@ -437,24 +439,24 @@
 		}
 		to {
 			opacity: 0;
-			scale: 3;
+			scale: 2.6;
 		}
 	}
 	@keyframes radar-pop {
 		0% {
 			scale: 1;
 		}
-		55% {
-			scale: 1.5;
+		50% {
+			scale: 1.3;
 		}
 		100% {
-			scale: 1.2;
+			scale: 1;
 		}
 	}
 	.radar-dot.is-active {
 		fill: var(--stem);
 		stroke: var(--stem);
-		scale: 1.2;
+		scale: 1;
 	}
 
 	/* 左のリスト。1 行 = アイコン・名前と担当範囲・年数 */
