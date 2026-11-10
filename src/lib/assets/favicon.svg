@@ -11,18 +11,18 @@
     <clipPath id="right"><rect x="32" width="32" height="64"/></clipPath>
     <clipPath id="inside"><use href="#bud"/></clipPath>
   </defs>
-  <rect width="64" height="64" rx="15" fill="#121316"/>
+  <rect width="64" height="64" rx="15" fill="#f6f4ef"/>
   <!-- 茎 -->
-  <path d="M31 51C30 55 28 58 24.5 60.5" fill="none" stroke="#8aa673" stroke-width="3" stroke-linecap="round"/>
+  <path d="M31 51C30 55 28 58 24.5 60.5" fill="none" stroke="#7f9a68" stroke-width="3" stroke-linecap="round"/>
   <!-- BUILD: 塗り -->
   <use href="#bud" fill="url(#petal)" clip-path="url(#right)"/>
   <!-- DESIGN: ワイヤーフレーム -->
-  <g clip-path="url(#left)" fill="none" stroke="#c8f04a" stroke-linejoin="round" stroke-linecap="round">
+  <g clip-path="url(#left)" fill="none" stroke="#5f7d2a" stroke-linejoin="round" stroke-linecap="round">
     <use href="#bud" stroke-width="2.6"/>
     <g clip-path="url(#inside)" stroke-width="1.6">
       <path d="M32 7L21 21L32 27L13 33L26 40L32 27M21 21L13 33M26 40L32 52M26 40L15 46M26 40L32 41"/>
     </g>
   </g>
   <!-- 境界線 -->
-  <path d="M32 4v57" stroke="#f4f4f5" stroke-opacity="0.85" stroke-width="1.8"/>
+  <path d="M32 4v57" stroke="#2a2b30" stroke-opacity="0.7" stroke-width="1.8"/>
 </svg>
