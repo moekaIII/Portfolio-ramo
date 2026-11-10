@@ -1,14 +1,126 @@
 <script lang="ts">
 	import { reveal } from '#lib/actions/reveal.ts';
 	import { strengths } from '#lib/content/profile.ts';
+
+	let list: HTMLOListElement | undefined = $state();
+	/** 丸の中心を貫く縦線の位置（最初の丸の上端 〜 最後の丸の下端 を、さらに上下へはみ出させる）。レイアウトに合わせて測る */
+	let stem = $state<{ top: number; height: number; left: number } | null>(null);
+
+	$effect(() => {
+		const el = list;
+		if (!el) return;
+		const measure = () => {
+			const rings = el.querySelectorAll<SVGElement>('.strength-ring');
+			if (rings.length === 0) return;
+			const box = el.getBoundingClientRect();
+			const first = rings[0].getBoundingClientRect();
+			const last = rings[rings.length - 1].getBoundingClientRect();
+			stem = {
+				top: first.top - box.top,
+				height: last.bottom - first.top,
+				left: first.left - box.left + first.width / 2
+			};
+		};
+		measure();
+		const ro = new ResizeObserver(measure);
+		ro.observe(el);
+		return () => ro.disconnect();
+	});
 </script>
 
 <!--
   強み。3 つを縦に並べ、ページの中央に寄せる。各ブロックは 見出し → 詳細文 で、左横に大きな線の丸を置く。
   丸は行の高さより少し大きく、上下の丸どうしが少し重なる。
   画面に入ると、上の丸から順に線が一周して完成し、続けて文字が浮かぶ。
+  最後に、すべての丸の中心を貫く緑の線（Hero の花の茎の色）が上から下へ通る。
 -->
-<ol class="strengths" use:reveal>
+<ol class="strengths" use:reveal bind:this={list} style="--n: {strengths.length}">
+	{#if stem}
+		<li
+			class="strength-stem"
+			role="presentation"
+			aria-hidden="true"
+			style="top: {stem.top}px; height: {stem.height}px; left: {stem.left}px"
+		>
+			<!-- 墨のかすれ: ノイズで輪郭をにじませ、縦に長い筋で濃淡をつける。下はグラデーションで消える -->
+			<svg width="100%" height="100%" focusable="false">
+				<defs>
+					<filter id="stem-ink" x="-60%" y="0" width="220%" height="100%">
+						<!-- 輪郭のにじみ -->
+						<feTurbulence
+							type="fractalNoise"
+							baseFrequency="0.55 0.035"
+							numOctaves="3"
+							seed="4"
+							result="edge"
+						/>
+						<feDisplacementMap
+							in="SourceGraphic"
+							in2="edge"
+							scale="5"
+							xChannelSelector="R"
+							yChannelSelector="G"
+							result="rough"
+						/>
+						<!-- かすれ（縦に長い細かな筋の抜け） -->
+						<feTurbulence
+							type="fractalNoise"
+							baseFrequency="1.4 0.01"
+							numOctaves="2"
+							seed="9"
+							result="streak"
+						/>
+						<feColorMatrix
+							in="streak"
+							type="matrix"
+							values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 2.05"
+							result="dry"
+						/>
+						<!-- 墨だまりの濃淡（ゆるやかなムラ） -->
+						<feTurbulence
+							type="fractalNoise"
+							baseFrequency="0.08 0.006"
+							numOctaves="2"
+							seed="2"
+							result="pool"
+						/>
+						<feColorMatrix
+							in="pool"
+							type="matrix"
+							values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.45"
+							result="density"
+						/>
+						<feComposite in="rough" in2="dry" operator="in" result="brushed" />
+						<feComposite in="brushed" in2="density" operator="in" />
+					</filter>
+					<linearGradient id="stem-color" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" style="stop-color: var(--stem-top)" />
+						<stop offset="0.5" style="stop-color: var(--stem)" />
+						<stop offset="1" style="stop-color: var(--stem-bottom)" />
+					</linearGradient>
+					<linearGradient id="stem-fade" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" stop-color="#fff" />
+						<stop offset="0.55" stop-color="#fff" />
+						<stop offset="1" stop-color="#fff" stop-opacity="0" />
+					</linearGradient>
+					<mask id="stem-mask" maskContentUnits="objectBoundingBox">
+						<rect width="1" height="1" fill="url(#stem-fade)" />
+					</mask>
+				</defs>
+				<g mask="url(#stem-mask)">
+					<rect
+						x="34%"
+						y="0"
+						width="32%"
+						height="100%"
+						rx="3"
+						fill="url(#stem-color)"
+						filter="url(#stem-ink)"
+					/>
+				</g>
+			</svg>
+		</li>
+	{/if}
 	{#each strengths as item, i (item.title)}
 		<li class="strength" style="--i: {i}">
 			<svg class="strength-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
@@ -34,7 +146,7 @@
 			<div class="strength-content">
 				<h3 class="strength-title text-h3 leading-snug font-semibold">{item.title}</h3>
 				<p
-					class="strength-body mt-3 max-w-[40rem] text-[0.9375rem] leading-relaxed text-fg-muted md:text-base"
+					class="strength-body mt-3 max-w-160 text-[0.9375rem] leading-relaxed text-fg-muted md:text-base"
 				>
 					{item.body}
 				</p>
@@ -65,6 +177,9 @@
 			--gap: 2.5rem;
 			gap: 0;
 		}
+	}
+	.strengths {
+		position: relative;
 	}
 	.strength {
 		position: relative;
@@ -112,6 +227,35 @@
 		}
 	}
 
+	/*
+	  丸の中心を貫く緑の線（Hero の花の茎の色）。墨で引いたような、にじみとかすれのある線。
+	  上下の丸の枠から --over だけはみ出させ、下はグラデーションで消える。
+	*/
+	.strength-stem {
+		--over: 2.5rem;
+		--stem: #7f9a68;
+		--stem-top: #a0965f;
+		--stem-bottom: #5c7c6a;
+		position: absolute;
+		width: 20px;
+		margin-top: calc(var(--over) * -1);
+		padding-bottom: calc(var(--over) * 2);
+		box-sizing: content-box;
+		translate: -50% 0;
+		pointer-events: none;
+	}
+	.strength-stem svg {
+		position: absolute;
+		inset: 0;
+		display: block;
+		overflow: visible;
+	}
+	:global([data-theme='dark']) .strength-stem {
+		--stem: #8aa673;
+		--stem-top: #b0a46a;
+		--stem-bottom: #6f9282;
+	}
+
 	/* 共通の reveal（全体のフェード）は使わず、丸ごとの演出にする */
 	:global(.js) .strengths:global([data-reveal]) {
 		opacity: 1;
@@ -136,6 +280,17 @@
 		}
 		.strength-body {
 			transition-delay: calc(var(--delay) + 580ms);
+		}
+		/*
+		  3 つ目の丸が描き終わったあとに、上から下へ。下に向かうほどゆっくり（強い ease-out）。
+		  拡大ではなく切り抜きで見せるので、墨の質感は伸びない
+		*/
+		.strength-stem {
+			clip-path: inset(0 -50% 0 -50%);
+			transition: clip-path 2200ms cubic-bezier(0.2, 0.7, 0.1, 1) calc(var(--n) * 550ms + 400ms);
+		}
+		:global(.js) .strengths:not([data-revealed]) .strength-stem {
+			clip-path: inset(0 -50% 100% -50%);
 		}
 		:global(.js) .strengths:not([data-revealed]) .strength-ring circle {
 			stroke-dashoffset: 100;
