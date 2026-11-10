@@ -109,7 +109,7 @@
 -->
 <div class="skill-chart" use:reveal>
 	<div
-		class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,42rem)]"
+		class="grid items-center gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]"
 	>
 		<ol class="skill-list" aria-label="主なスキル（得意な順）">
 			{#each top as skill, i (skill.name)}
