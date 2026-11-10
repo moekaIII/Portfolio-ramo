@@ -24,7 +24,7 @@
 >
 	<Container>
 		<SectionHeading id="{id}-heading" {eyebrow} {title} {lead} />
-		<div class="mt-16">
+		<div class="mt-10">
 			{@render children()}
 		</div>
 	</Container>

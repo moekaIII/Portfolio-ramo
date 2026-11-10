@@ -27,19 +27,19 @@
 <div class={['grid-12 gap-y-6', className]}>
 	<div class="col-span-full md:col-span-8">
 		{#if eyebrow}
-			<p class="eyebrow mb-5 flex items-center gap-3">
+			<p class="eyebrow mb-3 flex items-center gap-3">
 				<span aria-hidden="true" class="h-px w-8 bg-accent-text"></span>{eyebrow}
 			</p>
 		{/if}
 		<svelte:element
 			this={`h${level}`}
 			{id}
-			class={[size === 'h1' ? 'text-h1' : 'text-h2', 'font-semibold']}
+			class={[size === 'h1' ? 'text-h1' : 'text-h2', 'font-semibold text-fg-muted']}
 		>
 			{title}
 		</svelte:element>
 		{#if lead}
-			<p class="mt-6 max-w-[40em] text-lead text-fg-muted">{lead}</p>
+			<p class="mt-4 max-w-[40em] text-lead text-fg-muted">{lead}</p>
 		{/if}
 	</div>
 	{#if actions}

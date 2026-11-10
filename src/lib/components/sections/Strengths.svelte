@@ -128,6 +128,8 @@
 			--overlap: 1.5rem;
 			--gap: 2.5rem;
 			gap: 0;
+			/* 上へはみ出す丸と緑の線が、セクションタイトルに近づきすぎないように */
+			padding-top: 3rem;
 		}
 	}
 	.strengths {
