@@ -12,7 +12,7 @@ export interface Skill {
 	years: number;
 	/** このスキルを使った実績の slug（src/content/works/<slug>.md） */
 	works?: string[];
-	/** 主軸スキル。左のリストに出す（同じ習熟度のときは、この数字の順） */
+	/** 主軸スキル。リストで同じ習熟度のとき、この数字の順に先頭へ並べる（上位 5 つが大きく出る） */
 	core?: number;
 	/** リストの 6 つ目以降に出す短い名前（省略時は name） */
 	short?: string;
@@ -25,7 +25,21 @@ export interface Skill {
 }
 
 export type SkillIcon =
-	'svelte' | 'vue' | 'ts' | 'motion' | 'markup' | 'cms' | 'platform' | 'design';
+	| 'svelte'
+	| 'vue'
+	| 'ts'
+	| 'js'
+	| 'motion'
+	| 'markup'
+	| 'cms'
+	| 'platform'
+	| 'design'
+	| 'ai'
+	| 'chart'
+	| 'api'
+	| 'ci'
+	| 'mobile'
+	| 'teach';
 
 export interface SkillGroup {
 	id: string;
@@ -70,12 +84,16 @@ export const skills: SkillGroup[] = [
 		items: [
 			{
 				name: '生成AI（Copilot / ChatGPT / Codex）',
+				icon: 'ai',
+				area: 'platform',
 				level: 2,
 				years: 4,
 				works: ['game-anime-site', 'dev-platform', 'owned-media']
 			},
 			{
 				name: 'JavaScript',
+				icon: 'js',
+				area: 'frontend',
 				level: 3,
 				years: 7,
 				works: ['game-anime-site', 'gov-dashboard', 'maas-webapp']
@@ -135,7 +153,14 @@ export const skills: SkillGroup[] = [
 				area: 'frontend',
 				scope: '業務アプリの画面実装・Pinia による状態管理'
 			},
-			{ name: 'データ可視化（Chart.js・地図 API）', level: 3, years: 1, works: ['gov-dashboard'] }
+			{
+				name: 'データ可視化（Chart.js・地図 API）',
+				level: 3,
+				years: 1,
+				works: ['gov-dashboard'],
+				icon: 'chart',
+				area: 'frontend'
+			}
 		]
 	},
 	{
@@ -145,6 +170,8 @@ export const skills: SkillGroup[] = [
 		items: [
 			{
 				name: '外部 API との連携',
+				icon: 'api',
+				area: 'frontend',
 				level: 2,
 				years: 3,
 				works: ['maas-webapp', 'gov-dashboard']
@@ -171,9 +198,18 @@ export const skills: SkillGroup[] = [
 				area: 'platform',
 				scope: '技術選定・GitHub Actions による自動化・運用ルールづくり'
 			},
-			{ name: 'GitHub Actions・運用の自動化', level: 3, years: 2, works: ['dev-platform'] },
+			{
+				name: 'GitHub Actions・運用の自動化',
+				level: 3,
+				years: 2,
+				works: ['dev-platform'],
+				icon: 'ci',
+				area: 'platform'
+			},
 			{
 				name: '生成 AI の活用（Copilot / ChatGPT / Codex）',
+				icon: 'ai',
+				area: 'platform',
 				level: 2,
 				years: 2,
 				works: ['dev-platform', 'game-anime-site', 'owned-media']
@@ -196,8 +232,22 @@ export const skills: SkillGroup[] = [
 				area: 'design',
 				scope: '画面設計・ワイヤーフレーム・プロトタイプ作成'
 			},
-			{ name: 'Swift / iOS アプリ開発', level: 2, years: 1.5, works: ['ios-app'] },
-			{ name: '技術教材の制作・研修講師', level: 2, years: 1.5, works: ['ios-app'] }
+			{
+				name: 'Swift / iOS アプリ開発',
+				level: 2,
+				years: 1.5,
+				works: ['ios-app'],
+				icon: 'mobile',
+				area: 'frontend'
+			},
+			{
+				name: '技術教材の制作・研修講師',
+				level: 2,
+				years: 1.5,
+				works: ['ios-app'],
+				icon: 'teach',
+				area: 'mentoring'
+			}
 		]
 	}
 ];

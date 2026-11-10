@@ -1,5 +1,12 @@
 <script lang="ts">
+	import Bot from '@lucide/svelte/icons/bot';
 	import Braces from '@lucide/svelte/icons/braces';
+	import ChartLine from '@lucide/svelte/icons/chart-line';
+	import GitBranch from '@lucide/svelte/icons/git-branch';
+	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+	import Plug from '@lucide/svelte/icons/plug';
+	import Smartphone from '@lucide/svelte/icons/smartphone';
+	import SquareCode from '@lucide/svelte/icons/square-code';
 	import CodeXml from '@lucide/svelte/icons/code-xml';
 	import Database from '@lucide/svelte/icons/database';
 	import Flame from '@lucide/svelte/icons/flame';
@@ -11,7 +18,6 @@
 	import {
 		AREA_MAX,
 		LEVEL_LABEL,
-		type Skill,
 		type SkillArea,
 		type SkillAreaId,
 		type SkillGroup,
@@ -28,7 +34,14 @@
 		markup: CodeXml,
 		cms: Database,
 		platform: Workflow,
-		design: PenTool
+		design: PenTool,
+		js: SquareCode,
+		ai: Bot,
+		chart: ChartLine,
+		api: Plug,
+		ci: GitBranch,
+		mobile: Smartphone,
+		teach: GraduationCap
 	} satisfies Record<SkillIcon, unknown>;
 
 	/** いまカーソルが乗っている領域。リストの行とチャートの軸が連動してハイライトする */
@@ -36,12 +49,17 @@
 	const on = (area: SkillAreaId | undefined) => () => (active = area ?? null);
 	const off = () => (active = null);
 
-	/** 左のリスト: 主軸スキルを得意な順に（習熟度の高い順、同じなら core の順） */
+	/**
+	 * 左のリスト: skills の全項目を得意な順に。
+	 * 習熟度の高い順。同じ習熟度なら core のあるもの（core の順）→ 経験年数の長い順
+	 */
 	const ranked = $derived(
 		groups
 			.flatMap((g) => g.items)
-			.filter((s): s is Skill & { core: number } => s.core !== undefined)
-			.toSorted((a, b) => b.level - a.level || a.core - b.core)
+			.toSorted(
+				(a, b) =>
+					b.level - a.level || (a.core ?? Infinity) - (b.core ?? Infinity) || b.years - a.years
+			)
 	);
 	/** 大きく出すのは上位 5 つまで。残りは下に小さく横並び */
 	const TOP = 5;
