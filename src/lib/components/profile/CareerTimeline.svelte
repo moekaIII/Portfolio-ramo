@@ -5,6 +5,16 @@
 
 	let { items }: { items: CareerItem[] } = $props();
 
+	/** ドットが点くときに散る粒の色（Hero の花と同じ色味） */
+	const SPARKS = [
+		'var(--edge-1)',
+		'var(--edge-2)',
+		'var(--edge-3)',
+		'var(--accent-text)',
+		'var(--edge-5)',
+		'var(--edge-2)'
+	];
+
 	let root: HTMLOListElement | undefined = $state();
 
 	/**
@@ -54,17 +64,13 @@
 									}
 								}
 							);
+						// 線が届いたらドットをぽんっと弾ませ、輪と小さな粒を散らす（演出は CSS）
 						const dot = step.querySelector('[data-process-dot]');
 						if (dot)
-							gsap.to(dot, {
-								backgroundColor: 'var(--accent-text)',
-								scale: 1.25,
-								duration: 0.3,
-								scrollTrigger: {
-									trigger: step,
-									start: 'top 65%',
-									toggleActions: 'play none none reverse'
-								}
+							ScrollTrigger.create({
+								trigger: step,
+								start: 'top 65%',
+								toggleClass: { targets: dot, className: 'is-on' }
 							});
 					}
 				}, el);
@@ -106,8 +112,15 @@
 			<span
 				aria-hidden="true"
 				data-process-dot
-				class="absolute top-1.5 left-1.5 size-3 rounded-pill border-2 border-accent-text bg-bg md:left-[calc(25%+0.375rem)]"
-			></span>
+				class="career-dot absolute top-1.5 left-1.5 size-3 md:left-[calc(25%+0.375rem)]"
+			>
+				<span class="career-dot-ring"></span>
+				{#each SPARKS as c, k (k)}
+					<span class="career-dot-spark" style="--a: {k * (360 / SPARKS.length) + 15}deg; --c: {c}"
+					></span>
+				{/each}
+				<span class="career-dot-core"></span>
+			</span>
 			<div class="md:col-span-3 md:pl-16">
 				<h3 class="text-h3 font-semibold">{item.title}</h3>
 				<p class="mt-3 max-w-[40em] text-fg-muted">{item.summary}</p>
@@ -130,3 +143,92 @@
 		</li>
 	{/each}
 </ol>
+
+<style>
+	/* 経歴のドット。未到達は線の丸、線が届くと塗りつぶされて弾む */
+	.career-dot {
+		display: block;
+	}
+	.career-dot > span {
+		position: absolute;
+		inset: 0;
+		border-radius: 999px;
+	}
+	.career-dot-core {
+		border: 2px solid var(--accent-text);
+		background: var(--bg);
+		transition: background-color 200ms var(--ease-out);
+	}
+	.career-dot:global(.is-on) .career-dot-core {
+		background: var(--accent-text);
+		scale: 1.25;
+	}
+	.career-dot-ring {
+		border: 1.5px solid var(--accent-text);
+		opacity: 0;
+	}
+	/* 小さな粒。中心から外へ散って消える */
+	.career-dot-spark {
+		inset: auto !important;
+		left: 50%;
+		top: 50%;
+		width: 4px;
+		height: 4px;
+		margin: -2px 0 0 -2px;
+		background: var(--c);
+		opacity: 0;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		/* ぷにっと縮んでから、ぽんっと弾んで落ち着く */
+		.career-dot:global(.is-on) .career-dot-core {
+			animation: career-pop 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+		}
+		.career-dot:global(.is-on) .career-dot-ring {
+			animation: career-ring 900ms var(--ease-out) 80ms both;
+		}
+		.career-dot:global(.is-on) .career-dot-spark {
+			animation: career-spark 800ms var(--ease-out) 60ms both;
+		}
+	}
+	@keyframes career-pop {
+		0% {
+			scale: 1;
+		}
+		20% {
+			scale: 0.7;
+		}
+		55% {
+			scale: 1.6;
+		}
+		75% {
+			scale: 1.1;
+		}
+		100% {
+			scale: 1.25;
+		}
+	}
+	@keyframes career-ring {
+		0% {
+			opacity: 0.7;
+			scale: 1;
+		}
+		100% {
+			opacity: 0;
+			scale: 3.2;
+		}
+	}
+	@keyframes career-spark {
+		0% {
+			opacity: 0;
+			transform: rotate(var(--a)) translateX(0) scale(0.4);
+		}
+		25% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+			transform: rotate(var(--a)) translateX(1.4rem) scale(1);
+		}
+	}
+</style>
