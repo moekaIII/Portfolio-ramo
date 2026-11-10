@@ -166,6 +166,14 @@
 					<polygon class="radar-shape" points={shape} />
 					{#each areas as area, i (area.id)}
 						{@const [x, y] = pt(i, (R * area.score) / AREA_MAX)}
+						<!-- active 時に頂点から広がる波紋 -->
+						<circle
+							class="radar-pulse"
+							class:is-active={active === area.id}
+							cx={x}
+							cy={y}
+							r="1.1"
+						/>
 						<circle
 							class="radar-dot"
 							class:is-active={active === area.id}
@@ -299,12 +307,12 @@
 	  ダークは 3D と同じく少し暗くする
 	*/
 	.skill-chart {
-		--stem: #647554;
-		--stem-tint: color-mix(in oklab, var(--stem) 22%, transparent);
+		--stem: #8aa673;
+		--stem-tint: color-mix(in oklab, var(--stem) 20%, transparent);
 	}
 	:global([data-theme='light']) .skill-chart {
-		--stem: #7a8f66;
-		--stem-tint: color-mix(in oklab, var(--stem) 14%, transparent);
+		--stem: #93b07a;
+		--stem-tint: color-mix(in oklab, var(--stem) 16%, transparent);
 	}
 
 	/* 対応するリストの行にカーソルがあるとき */
@@ -320,6 +328,45 @@
 		stroke-opacity: 1;
 		stroke-width: 0.4;
 		stroke-dasharray: none;
+	}
+	/* active の頂点: 波紋が繰り返し広がり、点は少し弾んで大きくなる */
+	.radar-pulse {
+		fill: none;
+		stroke: var(--stem);
+		stroke-width: 0.5;
+		opacity: 0;
+		transform-box: fill-box;
+		transform-origin: center;
+		pointer-events: none;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.radar-pulse.is-active {
+			animation: radar-pulse 1400ms var(--ease-out) infinite;
+		}
+		.radar-dot.is-active {
+			animation: radar-pop 450ms var(--ease-out);
+		}
+	}
+	@keyframes radar-pulse {
+		from {
+			opacity: 0.9;
+			scale: 1;
+		}
+		to {
+			opacity: 0;
+			scale: 4;
+		}
+	}
+	@keyframes radar-pop {
+		0% {
+			scale: 1;
+		}
+		55% {
+			scale: 2.1;
+		}
+		100% {
+			scale: 1.6;
+		}
 	}
 	.radar-dot.is-active {
 		fill: var(--stem);
@@ -352,6 +399,16 @@
 		height: 2.5rem;
 		border-radius: 999px;
 		color: var(--fg);
+	}
+	/* active 時はアイコンの背景を白に（ダークでも白。アイコンの線は濃い色にして読めるように） */
+	.is-active .skill-icon {
+		background: #ffffff;
+		color: #1c1917;
+	}
+	.skill-icon {
+		transition:
+			background-color var(--dur-fast) var(--ease-out),
+			color var(--dur-fast) var(--ease-out);
 	}
 	.skill-icon::before {
 		content: '';
