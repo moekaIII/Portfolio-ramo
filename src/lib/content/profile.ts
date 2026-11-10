@@ -276,6 +276,8 @@ export interface CareerItem {
 	title: string;
 	/** 所属（学歴など、ないものは省略） */
 	org?: string;
+	/** 学歴など、小さくコンパクトに見せる項目 */
+	compact?: boolean;
 	summary?: string;
 	achievements?: string[];
 	stack?: string[];
@@ -343,12 +345,14 @@ export const career: CareerItem[] = [
 	{
 		period: '2019.07',
 		title: '大学（経済学部）退学',
+		compact: true,
 		summary:
 			'大学と並行して学んでいたプログラミングの道に進むことを決め、インターン先の会社に就職しました。'
 	},
 	{
 		period: '2018.05 — 2018.11',
 		title: 'DIVE INTO CODE 卒業',
+		compact: true,
 		org: 'プログラミングスクール',
 		summary:
 			'Ruby on Rails の即戦力コースで、Web の基礎から Rails を使用した Web アプリケーションの公開までを学びました。',
@@ -356,16 +360,19 @@ export const career: CareerItem[] = [
 	},
 	{
 		period: '2018.04',
-		title: '大学進学（経済学部）'
+		title: '大学進学（経済学部）',
+		compact: true
 	},
 	{
 		period: '2015.04 — 2018.03',
 		title: '公立高校',
+		compact: true,
 		summary: '空手道部で心身ともに鍛え、県の準強化選手に抜擢されました。'
 	},
 	{
 		period: '2012.04 — 2015.03',
 		title: '公立中学校',
+		compact: true,
 		summary: '剣道部に入り、武道の精神を学びました。'
 	}
 ];

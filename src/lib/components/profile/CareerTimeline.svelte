@@ -92,7 +92,10 @@
 	></span>
 	{#each items as item, i (item.period)}
 		<li
-			class="relative grid gap-y-3 pb-16 pl-12 last:pb-0 md:grid-cols-4 md:pl-0"
+			class={[
+				'relative grid gap-y-3 pl-12 last:pb-0 md:grid-cols-4 md:pl-0',
+				item.compact ? 'gap-y-1 pb-10' : 'pb-16'
+			]}
 			data-process-step
 		>
 			<div class="md:pr-10 md:text-right">
@@ -129,9 +132,18 @@
 				<span class="career-dot-core"></span>
 			</span>
 			<div class="md:col-span-3 md:pl-16">
-				<h3 class="text-h3 font-semibold">{item.title}</h3>
+				<h3 class={['font-semibold', item.compact ? 'text-base leading-snug' : 'text-h3']}>
+					{item.title}
+				</h3>
 				{#if item.summary}
-					<p class="mt-3 max-w-[40em] text-fg-muted">{item.summary}</p>
+					<p
+						class={[
+							'max-w-[44em] text-fg-muted',
+							item.compact ? 'mt-1.5 text-sm leading-relaxed' : 'mt-3'
+						]}
+					>
+						{item.summary}
+					</p>
 				{/if}
 				{#if item.achievements?.length}
 					<ul class="mt-5 space-y-2">
@@ -146,7 +158,7 @@
 				{/if}
 				{#if item.stack?.length}
 					<p class="sr-only">使用技術:</p>
-					<ul class="mt-5 flex flex-wrap gap-2">
+					<ul class={['flex flex-wrap gap-2', item.compact ? 'mt-3' : 'mt-5']}>
 						{#each item.stack as tech (tech)}
 							<li class="rounded-pill bg-surface-2 px-3 py-1.5 text-xs">{tech}</li>
 						{/each}

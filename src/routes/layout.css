@@ -42,8 +42,23 @@
 		word-break: auto-phrase;
 	}
 
-	p {
+	p,
+	li,
+	dd,
+	figcaption {
 		text-wrap: pretty;
+	}
+	/*
+	  本文も文節（単語のまとまり）の切れ目で改行する。
+	  行の短いスマホでは右端のガタつきが大きくなるため、タブレット幅以上だけ
+	*/
+	@media (min-width: 48rem) {
+		p,
+		li,
+		dd,
+		figcaption {
+			word-break: auto-phrase;
+		}
 	}
 
 	::selection {
