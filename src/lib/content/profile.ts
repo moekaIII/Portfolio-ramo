@@ -57,8 +57,7 @@ export const LEVEL_LABEL: Record<SkillLevel, string> = {
 	3: 'リード・設計可能'
 };
 
-export type SkillAreaId =
-	'frontend' | 'motion' | 'platform' | 'management' | 'mentoring' | 'design';
+export type SkillAreaId = 'frontend' | 'ai' | 'platform' | 'management' | 'mentoring' | 'design';
 
 /** 領域ごとのバランス（レーダーチャートの軸。上から時計回りにこの順で並ぶ） */
 export interface SkillArea {
@@ -81,7 +80,7 @@ export const AREA_LEVEL_LABEL: Record<SkillArea['score'], string> = {
 
 export const skillAreas: SkillArea[] = [
 	{ id: 'frontend', label: 'フロントエンド実装', score: 5 },
-	{ id: 'motion', label: '演出・アニメーション', score: 4 },
+	{ id: 'ai', label: '生成AI', score: 4 },
 	{ id: 'platform', label: '開発基盤・自動化', score: 4 },
 	{ id: 'management', label: 'マネジメント', score: 3 },
 	{ id: 'mentoring', label: '育成・教材', score: 3 },
@@ -100,7 +99,7 @@ export const skills: SkillGroup[] = [
 				short: '生成AI',
 				scope: 'コード生成・レビュー補助・ドキュメント作成で開発を効率化',
 				icon: 'ai',
-				area: ['platform', 'frontend'],
+				area: ['ai', 'frontend', 'platform'],
 				level: 2,
 				years: 4,
 				works: ['game-anime-site', 'dev-platform', 'owned-media']
@@ -155,7 +154,7 @@ export const skills: SkillGroup[] = [
 				works: ['game-anime-site'],
 				short: 'GSAP・SVG アニメーション',
 				icon: 'motion',
-				area: 'motion',
+				area: 'frontend',
 				scope: '演出設計・スクロール連動・SVG アニメーションの実装'
 			},
 			{
