@@ -42,57 +42,9 @@
 			aria-hidden="true"
 			style="top: {stem.top}px; height: {stem.height}px; left: {stem.left}px"
 		>
-			<!-- 墨のかすれ: ノイズで輪郭をにじませ、縦に長い筋で濃淡をつける。下はグラデーションで消える -->
+			<!-- 茎の色のグラデーション。下に向かって消える -->
 			<svg width="100%" height="100%" focusable="false">
 				<defs>
-					<filter id="stem-ink" x="-60%" y="0" width="220%" height="100%">
-						<!-- 輪郭のにじみ -->
-						<feTurbulence
-							type="fractalNoise"
-							baseFrequency="0.55 0.035"
-							numOctaves="3"
-							seed="4"
-							result="edge"
-						/>
-						<feDisplacementMap
-							in="SourceGraphic"
-							in2="edge"
-							scale="5"
-							xChannelSelector="R"
-							yChannelSelector="G"
-							result="rough"
-						/>
-						<!-- かすれ（縦に長い細かな筋の抜け） -->
-						<feTurbulence
-							type="fractalNoise"
-							baseFrequency="1.4 0.01"
-							numOctaves="2"
-							seed="9"
-							result="streak"
-						/>
-						<feColorMatrix
-							in="streak"
-							type="matrix"
-							values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 2.05"
-							result="dry"
-						/>
-						<!-- 墨だまりの濃淡（ゆるやかなムラ） -->
-						<feTurbulence
-							type="fractalNoise"
-							baseFrequency="0.08 0.006"
-							numOctaves="2"
-							seed="2"
-							result="pool"
-						/>
-						<feColorMatrix
-							in="pool"
-							type="matrix"
-							values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.45"
-							result="density"
-						/>
-						<feComposite in="rough" in2="dry" operator="in" result="brushed" />
-						<feComposite in="brushed" in2="density" operator="in" />
-					</filter>
 					<linearGradient id="stem-color" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0" style="stop-color: var(--stem-top)" />
 						<stop offset="0.5" style="stop-color: var(--stem)" />
@@ -109,13 +61,13 @@
 				</defs>
 				<g mask="url(#stem-mask)">
 					<rect
-						x="34%"
+						x="50%"
 						y="0"
-						width="32%"
+						width="3"
 						height="100%"
-						rx="3"
+						rx="1.5"
+						transform="translate(-1.5 0)"
 						fill="url(#stem-color)"
-						filter="url(#stem-ink)"
 					/>
 				</g>
 			</svg>
@@ -228,7 +180,7 @@
 	}
 
 	/*
-	  丸の中心を貫く緑の線（Hero の花の茎の色）。墨で引いたような、にじみとかすれのある線。
+	  丸の中心を貫く緑の線（Hero の花の茎の色）。
 	  上下の丸の枠から --over だけはみ出させ、下はグラデーションで消える。
 	*/
 	.strength-stem {
@@ -283,7 +235,7 @@
 		}
 		/*
 		  3 つ目の丸が描き終わったあとに、上から下へ。下に向かうほどゆっくり（強い ease-out）。
-		  拡大ではなく切り抜きで見せるので、墨の質感は伸びない
+		  拡大ではなく切り抜きで見せる（下端のグラデーションが伸びない）
 		*/
 		.strength-stem {
 			clip-path: inset(0 -50% 0 -50%);
