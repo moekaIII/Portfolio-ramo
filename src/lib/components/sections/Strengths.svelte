@@ -186,17 +186,24 @@
 	  上下の丸の枠から --over だけはみ出させ、下はグラデーションで消える。
 	*/
 	.strength-stem {
+		/* 上へのはみ出し / 下へのはみ出し（下は長めに伸ばして、ゆっくり消える） */
 		--over: 2.5rem;
+		--over-bottom: 5rem;
 		--stem: #7f9a68;
 		--stem-top: #a0965f;
 		--stem-bottom: #5c7c6a;
 		position: absolute;
 		width: 20px;
 		margin-top: calc(var(--over) * -1);
-		padding-bottom: calc(var(--over) * 2);
+		padding-bottom: calc(var(--over) + var(--over-bottom));
 		box-sizing: content-box;
 		translate: -50% 0;
 		pointer-events: none;
+	}
+	@media (min-width: 48rem) {
+		.strength-stem {
+			--over-bottom: 10rem;
+		}
 	}
 	.strength-stem svg {
 		position: absolute;
