@@ -188,7 +188,7 @@
 	.strength-stem {
 		/* 上へのはみ出し / 下へのはみ出し（下は長めに伸ばして、ゆっくり消える） */
 		--over: 2.5rem;
-		--over-bottom: 5rem;
+		--over-bottom: 3rem;
 		--stem: #7f9a68;
 		--stem-top: #a0965f;
 		--stem-bottom: #5c7c6a;
@@ -202,7 +202,7 @@
 	}
 	@media (min-width: 48rem) {
 		.strength-stem {
-			--over-bottom: 10rem;
+			--over-bottom: 5rem;
 		}
 	}
 	.strength-stem svg {

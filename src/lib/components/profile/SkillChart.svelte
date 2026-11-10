@@ -435,7 +435,7 @@
 		grid-template-columns: auto minmax(0, 1fr) auto;
 		align-items: start;
 		gap: 1rem;
-		padding: 1rem 0.25rem;
+		padding: 1rem 1rem;
 		border-bottom: 1px solid var(--line);
 		transition: background-color var(--dur-fast) var(--ease-out);
 	}
