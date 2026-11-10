@@ -56,14 +56,14 @@
 		</ul>
 		<button
 			type="button"
-			class="shrink-0 cursor-pointer rounded-pill text-fg-muted group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
+			class="button-arrow shrink-0 cursor-pointer rounded-pill text-fg-muted group-hover:text-fg after:absolute after:inset-0 after:rounded-lg after:content-['']"
 			aria-haspopup="dialog"
 			aria-label="{work.title}の詳細を見る"
 			onclick={show}
 		>
 			<!-- 拡大は内側の円だけに掛ける（ボタン自体を変形すると、カード全体のクリック範囲が縮むため） -->
 			<span
-				class="work-arrow relative block rounded-pill border border-line-strong p-2.5 transition-[border-color,scale] duration-300 ease-out-expo group-focus-within:border-transparent group-hover:scale-125 group-hover:border-transparent"
+				class="work-arrow relative block rounded-pill border border-line-strong p-2.5 transition-[border-color,scale] duration-300 ease-out-expo group-focus-within:border-transparent group-hover:scale-125"
 			>
 				<svg width="0" height="0" class="absolute" aria-hidden="true" focusable="false">
 					<linearGradient id="work-arrow-{work.slug}" x1="0" y1="1" x2="1" y2="0">
@@ -135,6 +135,9 @@
 		transition-property: border-color, --mx, --my;
 		transition-duration: 500ms, 900ms, 900ms;
 	}
+	.button-arrow:hover {
+		background-color: #ffffff;
+	}
 	.work-card::before {
 		content: '';
 		position: absolute;
@@ -142,14 +145,14 @@
 		border-radius: inherit;
 		z-index: -1;
 		background:
-			radial-gradient(45% 60% at var(--mx) var(--my), var(--wash-glow), transparent 75%),
+			radial-gradient(100% 100% at var(--mx) var(--my), var(--wash-glow), transparent 100%),
 			var(--hero-wash);
 		opacity: 0;
 		transition: opacity 500ms var(--ease-out);
 	}
 	.work-card:hover::before,
 	.work-card:focus-within::before {
-		opacity: 1;
+		opacity: 0.5; /* 淡く重ねる */
 	}
 	/* 枠線もグラデーションに（1px の縁だけを残すマスク） */
 	.work-card::after {
@@ -177,18 +180,19 @@
 		inset: -1px;
 		border: 1px solid transparent;
 		border-radius: inherit;
-		background: var(--hero-edge) border-box;
-		mask:
+		/* background: var(--hero-edge) border-box; */
+		/* background-color: white; */
+		/* mask:
 			linear-gradient(#000 0 0) padding-box exclude,
-			linear-gradient(#000 0 0) border-box;
-		opacity: 0;
-		transition: opacity 300ms var(--ease-out);
+			linear-gradient(#000 0 0) border-box; */
+		/* opacity: 0; */
+		/* transition: opacity 300ms var(--ease-out); */
 	}
 	:global(.work-card:is(:hover, :focus-within)) .work-arrow::before {
 		opacity: 1;
 	}
 	:global(.work-card:is(:hover, :focus-within)) .work-arrow :global(svg:not([width='0'])) {
-		stroke: var(--arrow-grad);
+		/* stroke: var(--arrow-grad); */
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.work-card {
