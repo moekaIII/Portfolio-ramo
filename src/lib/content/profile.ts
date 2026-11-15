@@ -360,12 +360,12 @@ export const career: CareerItem[] = [
 	},
 	{
 		period: '2018.04',
-		title: '大学進学（経済学部）',
+		title: '成城大学入学（経済学部）',
 		compact: true
 	},
 	{
 		period: '2015.04 — 2018.03',
-		title: '公立高校',
+		title: '茨城県立 牛久栄進高等学校',
 		compact: true,
 		summary: '空手道部で心身ともに鍛え、県の準強化選手に抜擢されました。'
 	},
